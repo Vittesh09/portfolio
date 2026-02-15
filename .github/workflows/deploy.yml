@@ -51,6 +51,6 @@ jobs:
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
           script: |
-            rm -rf /public_html/*
-            cp -R ~/deploy_tmp/out/* /public_html/
+            rm -rf /home/${{ secrets.HOSTINGER_USER }}/public_html/*
+            cp -R ~/deploy_tmp/out/* /home/${{ secrets.HOSTINGER_USER }}/public_html/
             rm -rf ~/deploy_tmp
