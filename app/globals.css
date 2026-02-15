@@ -143,6 +143,7 @@ html.cursor-ready body {
 /* About */
 .about-page {
   min-height: 100dvh;
+  height: 100dvh;
   background: #edf1f2;
   color: #111;
   overflow-y: auto;
@@ -852,12 +853,6 @@ html.cursor-ready body {
 @media (max-width: 640px) {
   .home-page .layout { grid-template-columns: 1fr; }
   .home-page h1 { font-size: 30px; }
-  .home-page .sticker-v {
-    top: -20px;
-    left: -24px;
-    width: 56px;
-    height: 56px;
-  }
   .home-page .page { padding-left: 16px; padding-right: 16px; }
   .home-page .menu {
     position: fixed;
@@ -871,10 +866,9 @@ html.cursor-ready body {
     height: 52px;
     padding: 0;
     border-radius: 26px;
-    background: rgba(255, 255, 255, 0.28);
-    border: 1px solid rgba(255, 255, 255, 0.45);
-    box-shadow: 0 12px 30px rgba(0,0,0,0.18);
-    backdrop-filter: blur(12px);
+    background: #edf1f2;
+    border: 1px solid rgba(17, 17, 17, 0.18);
+    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
   }
   .home-page .menu-button span {
     left: 14px;
@@ -884,6 +878,9 @@ html.cursor-ready body {
   .home-page .menu-button span:nth-child(1) { top: 18px; }
   .home-page .menu-button span:nth-child(2) { top: 25px; }
   .home-page .menu-button span:nth-child(3) { top: 32px; }
+  .home-page .image-wrap img {
+    object-position: center 20%;
+  }
   .home-page .menu-panel {
     position: fixed;
     left: 16px;
@@ -892,7 +889,7 @@ html.cursor-ready body {
     top: auto;
     transform: translateY(16px);
     border-radius: 16px;
-    padding: 24px 24px;
+    padding: 18px 20px;
     gap: 16px;
     z-index: 40;
   }
