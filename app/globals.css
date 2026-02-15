@@ -576,8 +576,8 @@ html.cursor-ready body {
 .home-page .menu { position: relative; }
 
 .home-page .menu-button {
-  width: 18px;
-  height: 12px;
+  width: 24px;
+  height: 18px;
   position: relative;
   cursor: pointer;
   user-select: none;
@@ -586,7 +586,10 @@ html.cursor-ready body {
   justify-content: space-between;
   background: transparent;
   border: 0;
-  padding: 0;
+  padding: 6px;
+  border-radius: 8px;
+  z-index: 41;
+  touch-action: manipulation;
 }
 
 .home-page .menu-button:focus-visible {
@@ -635,6 +638,7 @@ html.cursor-ready body {
   padding: 12px 16px;
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+  z-index: 40;
 }
 
 .home-page .menu-panel.show {
@@ -856,12 +860,13 @@ html.cursor-ready body {
     top: auto;
     transform: translateY(16px);
     border-radius: 16px;
-    padding: 20px 22px;
+    padding: 24px 24px;
     gap: 16px;
+    z-index: 40;
   }
   .home-page .menu-panel a {
-    font-size: 16px;
-    padding: 6px 0;
+    font-size: 18px;
+    padding: 10px 0;
   }
 }
 
