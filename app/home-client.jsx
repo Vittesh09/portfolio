@@ -244,6 +244,15 @@ export default function HomeClient() {
             </div>
           </div>
 
+          <nav className="mobile-pill-menu" aria-label="Primary">
+            <a href="/about/">About</a>
+            <a href="/playground/">Playground</a>
+            <a href="/work/">Work</a>
+            <a href="/assets/resume/Vittesh_Sinha_Resume.pdf" download>
+              Resume
+            </a>
+          </nav>
+
           <div className="footer">
             <p>˗ˏˋ ꒰ 🧡 ꒱ ˎˊ˗</p>
             © 2026 Vittesh Sinha

@@ -578,8 +578,8 @@ html.cursor-ready body {
 .home-page .menu { position: relative; }
 
 .home-page .menu-button {
-  width: 28px;
-  height: 20px;
+  width: 18px;
+  height: 12px;
   position: relative;
   cursor: pointer;
   user-select: none;
@@ -588,8 +588,8 @@ html.cursor-ready body {
   justify-content: space-between;
   background: transparent;
   border: 0;
-  padding: 8px;
-  border-radius: 8px;
+  padding: 0;
+  border-radius: 0;
   z-index: 41;
   touch-action: manipulation;
 }
@@ -601,19 +601,19 @@ html.cursor-ready body {
 
 .home-page .menu-button span {
   position: absolute;
-  left: 8px;
-  right: 8px;
+  left: 0;
+  right: 0;
   height: 1.5px;
   background: #111;
   transition: transform 0.25s ease, opacity 0.2s ease;
 }
 
-.home-page .menu-button span:nth-child(1) { top: 8px; }
-.home-page .menu-button span:nth-child(2) { top: 14px; }
-.home-page .menu-button span:nth-child(3) { top: 20px; }
+.home-page .menu-button span:nth-child(1) { top: 0px; }
+.home-page .menu-button span:nth-child(2) { top: 5px; }
+.home-page .menu-button span:nth-child(3) { bottom: 0; }
 
 .home-page .menu-button.active span:nth-child(1) {
-  transform: translateY(7px) rotate(45deg);
+  transform: translateY(5px) rotate(45deg);
 }
 
 .home-page .menu-button.active span:nth-child(2) {
@@ -621,7 +621,7 @@ html.cursor-ready body {
 }
 
 .home-page .menu-button.active span:nth-child(3) {
-  transform: translateY(-7px) rotate(-45deg);
+  transform: translateY(-5px) rotate(-45deg);
 }
 
 .home-page .menu-panel {
@@ -854,30 +854,10 @@ html.cursor-ready body {
   .home-page .layout { grid-template-columns: 1fr; }
   .home-page h1 { font-size: 30px; }
   .home-page .page { padding-left: 16px; padding-right: 16px; }
-  .home-page .menu {
-    position: fixed;
-    left: 50%;
-    bottom: 20px;
-    transform: translateX(-50%);
-    z-index: 42;
+  .home-page .menu,
+  .home-page .menu-panel {
+    display: none;
   }
-  .home-page .menu-button {
-    width: 52px;
-    height: 52px;
-    padding: 0;
-    border-radius: 26px;
-    background: #edf1f2;
-    border: 1px solid rgba(17, 17, 17, 0.18);
-    box-shadow: 0 6px 16px rgba(0,0,0,0.12);
-  }
-  .home-page .menu-button span {
-    left: 14px;
-    right: 14px;
-    height: 2px;
-  }
-  .home-page .menu-button span:nth-child(1) { top: 18px; }
-  .home-page .menu-button span:nth-child(2) { top: 25px; }
-  .home-page .menu-button span:nth-child(3) { top: 32px; }
   .home-page .image-wrap {
     height: auto;
   }
@@ -886,21 +866,32 @@ html.cursor-ready body {
     object-fit: contain;
     object-position: center top;
   }
-  .home-page .menu-panel {
+  .home-page .mobile-pill-menu {
     position: fixed;
     left: 16px;
     right: 16px;
-    bottom: 16px;
-    top: auto;
-    transform: translateY(16px);
-    border-radius: 16px;
-    padding: 22px 20px;
-    gap: 16px;
-    z-index: 40;
+    bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    background: #edf1f2;
+    border: 1px solid rgba(17, 17, 17, 0.14);
+    border-radius: 999px;
+    padding: 10px 14px;
+    box-shadow: 0 10px 24px rgba(0,0,0,0.12);
+    z-index: 42;
   }
-  .home-page .menu-panel a {
-    font-size: 18px;
-    padding: 10px 0;
+  .home-page .mobile-pill-menu a {
+    font-size: 13px;
+    color: #111;
+    text-decoration: none;
+    border-bottom: 1px solid transparent;
+    white-space: nowrap;
+  }
+  .home-page .mobile-pill-menu a:hover {
+    color: #ff4112;
+    border-color: #ff4112;
   }
 }
 
