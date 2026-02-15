@@ -19,7 +19,7 @@ export default function WorkClient() {
               height="100"
             />
             <h2 className="coming-title">Coming soon</h2>
-            <p className="coming-note">This page is being built, Thanks for your patience</p>
+            <p className="coming-note">The page is being built. Thank you for your patience.</p>
             <div className="coming-actions">
               <a className="coming-button" href="/">Go back</a>
               <a
