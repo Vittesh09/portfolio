@@ -41,8 +41,7 @@ export default function AboutPage() {
               <div className="about-text">
                 <p>
                   I’m a product designer focused on building systems that feel calm,
-                  trustworthy, and intentional — especially when the problems are
-                  complex or high stakes.
+                  trustworthy, and intentional.
                 </p>
                 <p>
                   Over the years, I’ve worked across automotive, consumer tech,
@@ -50,7 +49,7 @@ export default function AboutPage() {
                   ambiguity into clear, usable products.
                 </p>
                 <p>
-                  I care deeply about structure, constraints, and invisible details —
+                  I care deeply about structure, constraints, and invisible details
                   the kind users don’t notice, but would feel immediately if they were
                   missing.
                 </p>
