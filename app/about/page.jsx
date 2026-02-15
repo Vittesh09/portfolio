@@ -42,7 +42,7 @@ export default function AboutPage() {
                 <p>
                   I’m a product designer focused on building systems that feel calm,
                   trustworthy, and intentional — especially when the problems are
-                  complex or high-stakes.
+                  complex or high stakes.
                 </p>
                 <p>
                   Over the years, I’ve worked across automotive, consumer tech,
@@ -53,6 +53,16 @@ export default function AboutPage() {
                   I care deeply about structure, constraints, and invisible details —
                   the kind users don’t notice, but would feel immediately if they were
                   missing.
+                </p>
+                <p>
+                  You can find more of my work on{' '}
+                  <a href="https://www.behance.net/vitteshsinha" target="_blank" rel="noopener noreferrer">
+                    Behance
+                  </a>{' '}
+                  and connect with me on{' '}
+                  <a href="https://www.linkedin.com/in/vitteshsinha/" target="_blank" rel="noopener noreferrer">
+                    LinkedIn
+                  </a>.
                 </p>
               </div>
             </div>
