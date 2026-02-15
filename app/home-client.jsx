@@ -238,7 +238,7 @@ export default function HomeClient() {
                   alt="Portrait of Vittesh"
                   width="1293"
                   height="1293"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover', objectPosition: 'center' }}
+                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                 />
               </div>
             </div>
