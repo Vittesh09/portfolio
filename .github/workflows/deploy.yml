@@ -51,8 +51,12 @@ jobs:
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
           script: |
-            rm -rf /home/${{ secrets.HOSTINGER_USER }}/public_html/*
-            cp -R ~/deploy_tmp/out/* /home/${{ secrets.HOSTINGER_USER }}/public_html/
-            date -u +"deployed %Y-%m-%dT%H:%M:%SZ" > /home/${{ secrets.HOSTINGER_USER }}/public_html/deploy.txt
-            ls -la /home/${{ secrets.HOSTINGER_USER }}/public_html
+            for path in /home/${{ secrets.HOSTINGER_USER }}/public_html /home/${{ secrets.HOSTINGER_USER }}/domains/vittesh.com/public_html; do
+              if [ -d "$path" ]; then
+                rm -rf "$path"/*
+                cp -R ~/deploy_tmp/out/* "$path"/
+                date -u +"deployed %Y-%m-%dT%H:%M:%SZ" > "$path"/deploy.txt
+                ls -la "$path"
+              fi
+            done
             rm -rf ~/deploy_tmp
