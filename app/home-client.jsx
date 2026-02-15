@@ -7,6 +7,7 @@ export default function HomeClient() {
   const [showToast, setShowToast] = useState(false);
   const [showCopyHint, setShowCopyHint] = useState(false);
   const audioRef = useRef(null);
+  const menuAudioRef = useRef(null);
   const menuPanelRef = useRef(null);
   const menuBtnRef = useRef(null);
 
@@ -39,20 +40,38 @@ export default function HomeClient() {
   }, [menuOpen]);
 
   const copyEmail = async () => {
-    try {
-      await navigator.clipboard.writeText('hello@vittesh.com');
-      if (audioRef.current) {
-        audioRef.current.volume = 0.2;
-        audioRef.current.currentTime = 0;
-        audioRef.current.play().catch(() => {});
-      }
-      setShowToast(true);
-      window.clearTimeout(window.__toastTimeout);
-      window.__toastTimeout = window.setTimeout(() => {
-        setShowToast(false);
-      }, 1400);
-    } catch {
+    setShowToast(true);
+    window.clearTimeout(window.__toastTimeout);
+    window.__toastTimeout = window.setTimeout(() => {
       setShowToast(false);
+    }, 1400);
+
+    if (audioRef.current) {
+      audioRef.current.volume = 0.2;
+      audioRef.current.currentTime = 0;
+      audioRef.current.play().catch(() => {});
+    } else {
+      const fallbackAudio = new Audio('/assets/copyemail.mp3');
+      fallbackAudio.volume = 0.2;
+      fallbackAudio.play().catch(() => {});
+    }
+
+    try {
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        await navigator.clipboard.writeText('hello@vittesh.com');
+      } else {
+        const textarea = document.createElement('textarea');
+        textarea.value = 'hello@vittesh.com';
+        textarea.setAttribute('readonly', '');
+        textarea.style.position = 'absolute';
+        textarea.style.left = '-9999px';
+        document.body.appendChild(textarea);
+        textarea.select();
+        document.execCommand('copy');
+        document.body.removeChild(textarea);
+      }
+    } catch {
+      // best-effort copy; toast already shown
     }
   };
 
@@ -60,6 +79,7 @@ export default function HomeClient() {
     <>
       <div className="home-page">
         <audio ref={audioRef} src="/assets/copyemail.mp3" preload="auto" />
+        <audio ref={menuAudioRef} src="/assets/menu-click.wav" preload="auto" />
         <div className="cursor"></div>
         <div className="cursor-follower"></div>
         <div id="toast" className={`toast ${showToast ? 'show' : ''}`}>
@@ -93,7 +113,14 @@ export default function HomeClient() {
                       aria-expanded={menuOpen ? 'true' : 'false'}
                       aria-controls="menuPanel"
                       aria-label="Open menu"
-                      onClick={() => setMenuOpen((prev) => !prev)}
+                      onClick={() => {
+                        if (menuAudioRef.current) {
+                          menuAudioRef.current.volume = 0.3;
+                          menuAudioRef.current.currentTime = 0;
+                          menuAudioRef.current.play().catch(() => {});
+                        }
+                        setMenuOpen((prev) => !prev);
+                      }}
                       ref={menuBtnRef}
                     >
                       <span></span>
