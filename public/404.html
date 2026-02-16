@@ -21,10 +21,11 @@
         text-align: center;
         padding: 64px 24px;
       }
-      h1 {
-        margin: 0 0 8px;
-        font-size: 36px;
+      h2 {
+        margin: 0 0 12px;
+        font-size: 28px;
         font-weight: 600;
+        white-space: nowrap;
       }
       p {
         margin: 0 0 20px;
@@ -35,18 +36,64 @@
       a {
         color: #111;
         text-decoration: none;
-        border-bottom: 1px solid #999;
+        border-bottom: 1px solid #111;
       }
-      a:hover { color: #ff4112; border-color: #ff4112; }
+      a:hover { color: #111; border-color: #111; }
+      .notfound-code {
+        font-size: 56px;
+        font-weight: 600;
+        letter-spacing: 0.08em;
+        margin-bottom: 10px;
+        background: linear-gradient(90deg, #111 0%, #777 50%, #111 100%);
+        background-size: 200% 100%;
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        animation: notfoundSweep 6s ease-in-out infinite;
+      }
+      .notfound-particles {
+        position: absolute;
+        inset: 0;
+        pointer-events: none;
+        opacity: 0.55;
+      }
+      .notfound-particles::before,
+      .notfound-particles::after {
+        content: "";
+        position: absolute;
+        inset: -20%;
+        background-image:
+          radial-gradient(circle, rgba(17,17,17,0.16) 1.2px, transparent 1.2px),
+          radial-gradient(circle, rgba(17,17,17,0.12) 1.2px, transparent 1.2px);
+        background-size: 70px 70px, 120px 120px;
+        background-position: 0 0, 40px 60px;
+        animation: particleFloat 18s linear infinite;
+      }
+      .notfound-particles::after {
+        opacity: 0.6;
+        animation-duration: 26s;
+        animation-direction: reverse;
+      }
+      @keyframes notfoundSweep {
+        0% { background-position: 200% 50%; }
+        50% { background-position: 0% 50%; }
+        100% { background-position: 200% 50%; }
+      }
+      @keyframes particleFloat {
+        0% { transform: translate3d(0, 0, 0); }
+        50% { transform: translate3d(20px, -30px, 0); }
+        100% { transform: translate3d(0, 0, 0); }
+      }
     </style>
   </head>
   <body>
     <div class="wrap">
+      <div class="notfound-particles" aria-hidden="true"></div>
       <div>
-        <h1>Vittesh Sinha</h1>
-        <p>Product Designer</p>
-        <p>Only those who wander discover what they’re seeking.</p>
-        <a href="/">Back to home</a>
+        <div class="notfound-code">404</div>
+        <h2>It seems you are&nbsp;lost</h2>
+        <p>Only those who wander discover what they’re&nbsp;seeking.</p>
+        <a href="/" aria-label="Back to home" style="display:inline-flex;align-items:center;justify-content:center;gap:6px;padding:10px 20px;border-radius:999px;border:1px solid #111;color:#111;text-decoration:none;font-size:13px;transition:background .2s ease,color .2s ease,border-color .2s ease,transform .2s ease,padding .2s ease;position:relative;">Back to home</a>
       </div>
     </div>
   </body>
