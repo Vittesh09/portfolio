@@ -1,0 +1,4 @@
+ErrorDocument 404 /404.html
+
+# Optional: keep /sitemap working without Hostinger default 404
+Redirect 301 /sitemap /sitemap.xml
