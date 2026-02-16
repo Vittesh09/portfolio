@@ -21,7 +21,9 @@ jobs:
         run: npm ci
 
       - name: Build (static export)
-        run: npm run build
+        run: |
+          npm run build
+          if [ -f public/.htaccess ]; then cp public/.htaccess out/.htaccess; fi
 
       - name: Deploy via SSH (rsync)
         uses: appleboy/ssh-action@v1.0.3
@@ -40,7 +42,7 @@ jobs:
           username: ${{ secrets.HOSTINGER_USER }}
           key: ${{ secrets.HOSTINGER_SSH_KEY }}
           port: ${{ secrets.HOSTINGER_PORT }}
-          source: "out/*"
+          source: "out"
           target: "~/deploy_tmp"
 
       - name: Swap into public_html
