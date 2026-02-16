@@ -1,42 +1,36 @@
 // Shared custom cursor (supports both cursor/follower and dot/ring pairs)
-document.documentElement.classList.add('cursor-ready');
 const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-const cursor = document.querySelector('.cursor');
-const follower = document.querySelector('.cursor-follower');
-const dot = document.querySelector('.cursor-dot');
-const ring = document.querySelector('.cursor-ring');
+function getCursorEls() {
+  return {
+    cursor: document.querySelector('.cursor'),
+    follower: document.querySelector('.cursor-follower'),
+    dot: document.querySelector('.cursor-dot'),
+    ring: document.querySelector('.cursor-ring')
+  };
+}
 
-if (!prefersReducedMotion && (cursor || dot) && (follower || ring)) {
+function initCursor() {
+  let { cursor, follower, dot, ring } = getCursorEls();
+
+  if (prefersReducedMotion || (!cursor && !dot) || (!follower && !ring)) {
+    return false;
+  }
+
+  document.documentElement.classList.add('cursor-ready');
+
   let mouseX = 0;
   let mouseY = 0;
   let primaryX = 0;
   let primaryY = 0;
   let secondaryX = 0;
   let secondaryY = 0;
-  let parallaxY = window.scrollY || 0;
-
-  const primarySpeed = dot ? 0.35 : 0.15;
-  const secondarySpeed = dot ? 0.15 : 0.15;
-  const parallaxStrength = 0.04;
-
-  window.addEventListener('scroll', () => {
-    parallaxY = window.scrollY || 0;
-  });
+  const primarySpeed = dot ? 0.35 : 0.25;
+  const secondarySpeed = dot ? 0.18 : 0.12;
 
   window.addEventListener('mousemove', (e) => {
     mouseX = e.clientX;
     mouseY = e.clientY;
-
-    if (cursor) {
-      cursor.style.left = mouseX + 'px';
-      cursor.style.top = mouseY + 'px';
-    }
-
-    if (dot) {
-      dot.style.transform =
-        `translate(${mouseX}px, ${mouseY}px) translate(-50%, -50%)`;
-    }
   });
 
   function animate() {
@@ -45,16 +39,37 @@ if (!prefersReducedMotion && (cursor || dot) && (follower || ring)) {
     secondaryX += (mouseX - secondaryX) * secondarySpeed;
     secondaryY += (mouseY - secondaryY) * secondarySpeed;
 
-    const parallaxOffset = parallaxY * parallaxStrength;
+    // Refresh element refs if we navigated to a new page.
+    if ((cursor && !cursor.isConnected) || (follower && !follower.isConnected) || (dot && !dot.isConnected) || (ring && !ring.isConnected)) {
+      ({ cursor, follower, dot, ring } = getCursorEls());
+      if ((!cursor && !dot) || (!follower && !ring)) {
+        requestAnimationFrame(animate);
+        return;
+      }
+    }
 
     if (follower) {
       follower.style.left = secondaryX + 'px';
-      follower.style.top = (secondaryY + parallaxOffset) + 'px';
+      follower.style.top = secondaryY + 'px';
     }
 
     if (ring) {
-      ring.style.transform =
-        `translate(${secondaryX}px, ${secondaryY + parallaxOffset}px) translate(-50%, -50%)`;
+      ring.style.left = secondaryX + 'px';
+      ring.style.top = secondaryY + 'px';
+      const ringScale = ring.classList.contains('click') ? 0.55 : 1;
+      ring.style.transform = `translate(-50%, -50%) scale(${ringScale})`;
+    }
+
+    if (cursor) {
+      cursor.style.left = primaryX + 'px';
+      cursor.style.top = primaryY + 'px';
+    }
+
+    if (dot) {
+      dot.style.left = primaryX + 'px';
+      dot.style.top = primaryY + 'px';
+      const dotScale = dot.classList.contains('click') ? 0.6 : 1;
+      dot.style.transform = `translate(-50%, -50%) scale(${dotScale})`;
     }
 
     requestAnimationFrame(animate);
@@ -62,16 +77,28 @@ if (!prefersReducedMotion && (cursor || dot) && (follower || ring)) {
   animate();
 
   window.addEventListener('mousedown', () => {
-    if (cursor) cursor.classList.add('click');
-    if (follower) follower.classList.add('click');
-    if (dot) dot.classList.add('click');
-    if (ring) ring.classList.add('click');
+    const els = getCursorEls();
+    if (els.cursor) els.cursor.classList.add('click');
+    if (els.follower) els.follower.classList.add('click');
+    if (els.dot) els.dot.classList.add('click');
+    if (els.ring) els.ring.classList.add('click');
   });
 
   window.addEventListener('mouseup', () => {
-    if (cursor) cursor.classList.remove('click');
-    if (follower) follower.classList.remove('click');
-    if (dot) dot.classList.remove('click');
-    if (ring) ring.classList.remove('click');
+    const els = getCursorEls();
+    if (els.cursor) els.cursor.classList.remove('click');
+    if (els.follower) els.follower.classList.remove('click');
+    if (els.dot) els.dot.classList.remove('click');
+    if (els.ring) els.ring.classList.remove('click');
   });
+  return true;
 }
+
+let attempts = 0;
+function tryInit() {
+  attempts += 1;
+  if (initCursor()) return;
+  if (attempts < 60) requestAnimationFrame(tryInit);
+}
+
+tryInit();
