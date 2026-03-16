@@ -31,9 +31,25 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <body className={manrope.className}>
         {children}
+        <Script
+          id="anim-once"
+          strategy="beforeInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                const key = 'vh_animate_once';
+                if (localStorage.getItem(key)) {
+                  document.documentElement.classList.add('no-animate');
+                } else {
+                  localStorage.setItem(key, '1');
+                }
+              } catch (e) {}
+            `
+          }}
+        />
         <Script src="/assets/js/cursor.js" strategy="afterInteractive" />
       </body>
     </html>

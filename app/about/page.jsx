@@ -28,43 +28,90 @@ export default function AboutPage() {
 
         <div className="about-content">
           <div className="about-wrap">
-            <div className="about-top">
-              <h1>About me</h1>
-              <a href="/" className="about-back">← Back</a>
-            </div>
-
-            <div className="about-layout">
-              <div className="about-image">
-                <img src="/assets/images/profile.png" alt="Vittesh Sinha" width="631" height="698" />
+            <div className="about-mobile">
+              <div className="about-mobile-stars">
+                <span className="about-star about-star-left" aria-hidden="true"></span>
+                <span className="about-star about-star-right" aria-hidden="true"></span>
               </div>
-
-              <div className="about-text">
-                <p>
-                  I’m a product designer focused on building systems that feel calm,
-                  trustworthy, and intentional.
-                </p>
-                <p>
-                  Over the years, I’ve worked across automotive, consumer tech,
-                  operations platforms, and enterprise software, helping teams turn
-                  ambiguity into clear, usable products.
-                </p>
-                <p>
-                  I care deeply about structure, constraints, and invisible details
-                  the kind users don’t notice, but would feel immediately if they were
-                  missing.
-                </p>
-                <p>
-                  You can find more of my work on{' '}
-                  <a href="https://www.behance.net/vitteshsinha" target="_blank" rel="noopener noreferrer">
-                    Behance
-                  </a>{' '}
-                  and connect with me on{' '}
-                  <a href="https://www.linkedin.com/in/vitteshsinha/" target="_blank" rel="noopener noreferrer">
-                    LinkedIn
-                  </a>.
-                </p>
+              <div className="about-mobile-words">
+                <span>Raw</span>
+                <span className="about-amp">&amp;</span>
+                <span>Real</span>
+              </div>
+              <div className="about-mobile-intro">
+                <span>Hello, I am</span>
+                <span className="about-mobile-arrow" aria-hidden="true">
+                  <img src="/assets/images/arrow.svg" alt="" />
+                </span>
+                <span>Vittesh Sinha</span>
               </div>
             </div>
+
+            <div className="about-desktop">
+              <div className="about-desktop-frame">
+                <div className="about-desktop-top">
+                  <div className="about-desktop-symbols">
+                    <div className="about-symbol">
+                      <span className="about-star" aria-hidden="true"></span>
+                      <span>Raw</span>
+                    </div>
+                    <span className="about-amp">&amp;</span>
+                    <div className="about-symbol">
+                      <span className="about-star" aria-hidden="true"></span>
+                      <span>Real</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="about-desktop-intro-wrap fade-up">
+                  <div className="about-desktop-intro">
+                    <span>Hello, I am</span>
+                    <span className="about-mobile-arrow" aria-hidden="true">
+                      <img src="/assets/images/arrow.svg" alt="" />
+                    </span>
+                    <span>Vittesh Sinha</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="about-body-shared">
+              <div className="about-desktop-photo">
+                <img
+                  className="about-photo fade-image"
+                  src="/assets/images/about.png"
+                  alt="Vittesh Sinha"
+                  width="1293"
+                  height="1293"
+                />
+              </div>
+              <div className="about-text-stack fade-up delay-1">
+                <div className="about-text-shared">
+                  <p>
+                    I’m a product designer focused on building systems that feel calm,
+                    trustworthy, and intentional.
+                  </p>
+                  <p>
+                    Over the years, I’ve worked across automotive, consumer tech,
+                    operations platforms, and enterprise software, helping teams turn
+                    ambiguity into clear, usable products. I care deeply about structure,
+                    constraints, and invisible details the kind users don’t notice, but
+                    would feel immediately if they were missing.
+                  </p>
+                  <p>
+                    You can find more of my work on{' '}
+                    <a href="https://www.behance.net/vitteshsinha" target="_blank" rel="noopener noreferrer">
+                      Behance
+                    </a>{' '}
+                    and connect with me on{' '}
+                    <a href="https://www.linkedin.com/in/vitteshsinha/" target="_blank" rel="noopener noreferrer">
+                      LinkedIn
+                    </a>.
+                  </p>
+                </div>
+                <a href="/" className="coming-button">Go back</a>
+              </div>
+            </div>
+
           </div>
         </div>
       </div>

@@ -25,9 +25,9 @@ export default function VirtualHumansPage() {
       <div className="vh-page">
         <div className="vh-wrap">
           <div className="vh-top">
-            <a href="/work/" className="vh-back">← Back to work</a>
-            <h1>Virtual Humans Experience Design</h1>
-            <div className="vh-subtitle">AR/VR · Emotional Analytics · Experience Design</div>
+            <a href="/work/" className="vh-back fade-up">← Back to work</a>
+            <h1 className="fade-up delay-1">Virtual Humans Experience Design</h1>
+            <div className="vh-subtitle fade-up delay-2">AR/VR · Emotional Analytics · Experience Design</div>
           </div>
 
           <div className="vh-meta">

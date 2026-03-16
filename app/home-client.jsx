@@ -3,9 +3,12 @@
 import { useEffect, useRef, useState } from 'react';
 
 export default function HomeClient() {
+  const heroName = 'Vittesh Sinha';
+  const scrambleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
   const [menuOpen, setMenuOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [showCopyHint, setShowCopyHint] = useState(false);
+  const [displayName, setDisplayName] = useState(heroName);
   const audioRef = useRef(null);
   const menuAudioRef = useRef(null);
   const menuPanelRef = useRef(null);
@@ -21,6 +24,7 @@ export default function HomeClient() {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [menuOpen]);
+
 
   useEffect(() => {
     if (!menuOpen) return;
@@ -38,6 +42,39 @@ export default function HomeClient() {
       document.removeEventListener('touchstart', handleClickOutside);
     };
   }, [menuOpen]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    if (mediaQuery.matches) {
+      setDisplayName(heroName);
+      return;
+    }
+
+    let frame = 0;
+    const totalFrames = heroName.length + 10;
+    const interval = window.setInterval(() => {
+      const nextName = heroName
+        .split('')
+        .map((character, index) => {
+          if (character === ' ') return ' ';
+          if (index < frame) return heroName[index];
+          return scrambleChars[Math.floor(Math.random() * scrambleChars.length)];
+        })
+        .join('');
+
+      setDisplayName(nextName);
+      frame += 1;
+
+      if (frame > totalFrames) {
+        window.clearInterval(interval);
+        setDisplayName(heroName);
+      }
+    }, 55);
+
+    return () => window.clearInterval(interval);
+  }, [heroName]);
 
   const copyEmail = async () => {
     setShowToast(true);
@@ -85,24 +122,13 @@ export default function HomeClient() {
         <div id="toast" className={`toast ${showToast ? 'show' : ''}`}>
           Email id copied
         </div>
-
         <div className="page">
           <div className="wrap">
             <div className="layout">
               <div className="content">
                 <div className="title-row">
-                  <h1 style={{ position: 'relative' }}>
-                    <span style={{ position: 'relative', display: 'inline-block' }}>
-                      V
-                      <img
-                        src="/assets/images/sticker.png"
-                        alt=""
-                        className="sticker-v"
-                        width="76"
-                        height="76"
-                      />
-                    </span>
-                    ittesh Sinha
+                  <h1 className="home-hero" style={{ position: 'relative' }}>
+                    {displayName}
                   </h1>
 
                   <div className="menu">
@@ -160,14 +186,14 @@ export default function HomeClient() {
                   </div>
                 </div>
 
-                <div className="meta">
+                <div className="meta home-fade fade-up delay-1">
                   Product Designer • Currently @{' '}
                   <a href="https://www.nagarro.com" target="_blank" rel="noopener noreferrer">
                     Nagarro
                   </a>
                 </div>
 
-                <div className="statement-group">
+                <div className="statement-group home-fade fade-up delay-2">
                   <p className="statement">
                     I design software that <strong>builds trust</strong>,{' '}
                     <strong>solves hard problems</strong>, and brings{' '}
@@ -178,7 +204,7 @@ export default function HomeClient() {
                   </p>
                 </div>
 
-                <div className="section">
+                <div className="section home-fade fade-up delay-3">
                   <div className="section-title">Previous work</div>
                   <div className="work-list">
                     <div className="work-item">
@@ -198,7 +224,7 @@ export default function HomeClient() {
                   </div>
                 </div>
 
-                <div className="contact">
+                <div className="contact home-fade fade-up delay-4">
                   <span className="email-wrap">
                     <button
                       type="button"
@@ -239,6 +265,7 @@ export default function HomeClient() {
                   width="1293"
                   height="1293"
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                  className="fade-image"
                 />
               </div>
             </div>
