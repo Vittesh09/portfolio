@@ -211,10 +211,11 @@ html.cursor-ready body {
 /* About */
 .about-page {
   min-height: 100dvh;
-  height: 100dvh;
+  height: auto;
   background: #edf1f2;
   color: #111;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 .about-page::before {
@@ -466,14 +467,6 @@ html.cursor-ready body {
 }
 
 @media (max-width: 640px) {
-  .about-page {
-    background: #ffffff;
-  }
-
-  .about-page::before {
-    display: none;
-  }
-
   .about-content {
     padding: 0 0 32px;
   }

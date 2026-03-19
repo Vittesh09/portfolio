@@ -41,7 +41,7 @@ export default function AboutPage() {
               <div className="about-mobile-intro">
                 <span>Hello, I am</span>
                 <span className="about-mobile-arrow" aria-hidden="true">
-                  <img src="/assets/images/arrow.svg" alt="" />
+                  <img src="/assets/images/Arrow.svg" alt="" />
                 </span>
                 <span>Vittesh Sinha</span>
               </div>
@@ -66,7 +66,7 @@ export default function AboutPage() {
                   <div className="about-desktop-intro">
                     <span>Hello, I am</span>
                     <span className="about-mobile-arrow" aria-hidden="true">
-                      <img src="/assets/images/arrow.svg" alt="" />
+                      <img src="/assets/images/Arrow.svg" alt="" />
                     </span>
                     <span>Vittesh Sinha</span>
                   </div>
