@@ -21,23 +21,27 @@ export const metadata = {
 export default function PlaygroundPage() {
   return (
     <>
-      <div className="work-page">
+      <div className="playground-page">
         <div className="cursor-dot"></div>
         <div className="cursor-ring"></div>
 
-        <div className="work-content">
-          <div className="work-coming">
-            <img
-              className="coming-logo fade-image"
-              src="/favicon.png"
-              alt="Vittesh logo"
-              width="100"
-              height="100"
-            />
-            <h2 className="coming-title fade-up-glow">Coming soon</h2>
-            <p className="coming-note fade-up delay-2">The page is being built. Thank you for your patience.</p>
-            <div className="coming-actions fade-up delay-3">
-              <a className="coming-button" href="/">Go back</a>
+        <div className="playground-content">
+          <div className="playground-wrap">
+            <div className="playground-coming">
+              <img
+                className="coming-logo fade-image"
+                src="/favicon.png"
+                alt="Vittesh logo"
+                width="100"
+                height="100"
+              />
+              <h2 className="coming-title fade-up-glow">Coming soon</h2>
+              <p className="coming-note fade-up delay-2">
+                The page is being built. Thank you for your patience.
+              </p>
+              <div className="coming-actions fade-up delay-3">
+                <a className="coming-button" href="/">Go back</a>
+              </div>
             </div>
           </div>
         </div>
