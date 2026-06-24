@@ -29,15 +29,6 @@ export default function AboutPage() {
         <div className="about-content">
           <div className="about-wrap">
             <div className="about-mobile">
-              <div className="about-mobile-stars">
-                <span className="about-star about-star-left" aria-hidden="true"></span>
-                <span className="about-star about-star-right" aria-hidden="true"></span>
-              </div>
-              <div className="about-mobile-words">
-                <span>Raw</span>
-                <span className="about-amp">&amp;</span>
-                <span>Real</span>
-              </div>
               <div className="about-mobile-intro">
                 <span>Hello, I am</span>
                 <span className="about-mobile-arrow" aria-hidden="true">
@@ -49,19 +40,6 @@ export default function AboutPage() {
 
             <div className="about-desktop">
               <div className="about-desktop-frame">
-                <div className="about-desktop-top">
-                  <div className="about-desktop-symbols">
-                    <div className="about-symbol">
-                      <span className="about-star" aria-hidden="true"></span>
-                      <span>Raw</span>
-                    </div>
-                    <span className="about-amp">&amp;</span>
-                    <div className="about-symbol">
-                      <span className="about-star" aria-hidden="true"></span>
-                      <span>Real</span>
-                    </div>
-                  </div>
-                </div>
                 <div className="about-desktop-intro-wrap fade-up">
                   <div className="about-desktop-intro">
                     <span>Hello, I am</span>

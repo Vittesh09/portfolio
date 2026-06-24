@@ -9,6 +9,7 @@ export default function HomeClient() {
   const [showToast, setShowToast] = useState(false);
   const [showCopyHint, setShowCopyHint] = useState(false);
   const [displayName, setDisplayName] = useState(heroName);
+  const [isDarkMode, setIsDarkMode] = useState(false);
   const audioRef = useRef(null);
   const menuAudioRef = useRef(null);
   const menuPanelRef = useRef(null);
@@ -42,6 +43,13 @@ export default function HomeClient() {
       document.removeEventListener('touchstart', handleClickOutside);
     };
   }, [menuOpen]);
+
+  useEffect(() => {
+    const savedThemeIsDark = window.localStorage.getItem('home-theme') === 'dark';
+    document.documentElement.classList.toggle('site-dark', savedThemeIsDark);
+    document.documentElement.style.colorScheme = savedThemeIsDark ? 'dark' : 'light';
+    setIsDarkMode(savedThemeIsDark);
+  }, []);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -112,9 +120,17 @@ export default function HomeClient() {
     }
   };
 
+  const toggleTheme = () => {
+    const nextTheme = !isDarkMode;
+    window.localStorage.setItem('home-theme', nextTheme ? 'dark' : 'light');
+    document.documentElement.classList.toggle('site-dark', nextTheme);
+    document.documentElement.style.colorScheme = nextTheme ? 'dark' : 'light';
+    setIsDarkMode(nextTheme);
+  };
+
   return (
     <>
-      <div className="home-page">
+      <div className={`home-page ${isDarkMode ? 'dark' : ''}`}>
         <audio ref={audioRef} src="/assets/copyemail.mp3" preload="auto" />
         <audio ref={menuAudioRef} src="/assets/menu-click.wav" preload="auto" />
         <div className="cursor"></div>
@@ -131,56 +147,69 @@ export default function HomeClient() {
                     {displayName}
                   </h1>
 
-                  <div className="menu">
+                  <div className="menu-actions">
                     <button
-                      id="menuBtn"
-                      className={`menu-button hamburger ${menuOpen ? 'active' : ''}`}
+                      className="theme-toggle"
                       type="button"
-                      aria-expanded={menuOpen ? 'true' : 'false'}
-                      aria-controls="menuPanel"
-                      aria-label="Open menu"
-                      onClick={() => {
-                        if (menuAudioRef.current) {
-                          menuAudioRef.current.volume = 0.3;
-                          menuAudioRef.current.currentTime = 0;
-                          menuAudioRef.current.play().catch(() => {});
-                        }
-                        setMenuOpen((prev) => !prev);
-                      }}
-                      ref={menuBtnRef}
+                      aria-pressed={isDarkMode}
+                      aria-label={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
+                      title={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
+                      onClick={toggleTheme}
                     >
-                      <span></span>
-                      <span></span>
-                      <span></span>
+                      <span aria-hidden="true">{isDarkMode ? '☀' : '☾'}</span>
                     </button>
 
-                    <div
-                      id="menuPanel"
-                      className={`menu-panel ${menuOpen ? 'show' : ''}`}
-                      ref={menuPanelRef}
-                    >
-                      <a href="/about/">About</a>
-                      <a href="/playground/">Playground</a>
-                      <a href="/work/">Work</a>
+                    <div className="menu">
+                      <button
+                        id="menuBtn"
+                        className={`menu-button hamburger ${menuOpen ? 'active' : ''}`}
+                        type="button"
+                        aria-expanded={menuOpen ? 'true' : 'false'}
+                        aria-controls="menuPanel"
+                        aria-label="Open menu"
+                        onClick={() => {
+                          if (menuAudioRef.current) {
+                            menuAudioRef.current.volume = 0.3;
+                            menuAudioRef.current.currentTime = 0;
+                            menuAudioRef.current.play().catch(() => {});
+                          }
+                          setMenuOpen((prev) => !prev);
+                        }}
+                        ref={menuBtnRef}
+                      >
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                      </button>
 
-                      <div className="resume-row">
-                        <a
-                          href="/assets/resume/Vittesh_Sinha_Resume.pdf"
-                          download
-                          className="resume-link"
-                        >
-                          Resume
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            height="20px"
-                            viewBox="0 -960 960 960"
-                            width="20px"
-                            fill="#111"
-                            className="download-icon"
+                      <div
+                        id="menuPanel"
+                        className={`menu-panel ${menuOpen ? 'show' : ''}`}
+                        ref={menuPanelRef}
+                      >
+                        <a href="/about/">About</a>
+                        <a href="/playground/">Playground</a>
+                        <a href="/work/">Work</a>
+
+                        <div className="resume-row">
+                          <a
+                            href="/assets/resume/Vittesh_Sinha_Resume.pdf"
+                            download
+                            className="resume-link"
                           >
-                            <path d="M480-336 288-528l51-51 105 105v-342h72v342l105-105 51 51-192 192ZM263.72-192Q234-192 213-213.15T192-264v-72h72v72h432v-72h72v72q0 29.7-21.16 50.85Q725.68-192 695.96-192H263.72Z" />
-                          </svg>
-                        </a>
+                            Resume
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              height="20px"
+                              viewBox="0 -960 960 960"
+                              width="20px"
+                              fill="currentColor"
+                              className="download-icon"
+                            >
+                              <path d="M480-336 288-528l51-51 105 105v-342h72v342l105-105 51 51-192 192ZM263.72-192Q234-192 213-213.15T192-264v-72h72v72h432v-72h72v72q0 29.7-21.16 50.85Q725.68-192 695.96-192H263.72Z" />
+                            </svg>
+                          </a>
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -258,16 +287,6 @@ export default function HomeClient() {
                 </div>
               </div>
 
-              <div className="image-wrap" style={{ height: 520 }}>
-                <img
-                  src="/assets/images/image2.png"
-                  alt="Portrait of Vittesh"
-                  width="1293"
-                  height="1293"
-                  style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-                  className="fade-image"
-                />
-              </div>
             </div>
           </div>
 

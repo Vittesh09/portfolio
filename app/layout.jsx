@@ -32,6 +32,20 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              try {
+                if (localStorage.getItem('home-theme') === 'dark') {
+                  document.documentElement.classList.add('site-dark');
+                  document.documentElement.style.colorScheme = 'dark';
+                }
+              } catch (e) {}
+            `
+          }}
+        />
+      </head>
       <body className={manrope.className}>
         {children}
         <Script
