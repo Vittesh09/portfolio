@@ -991,6 +991,11 @@ html.cursor-ready body {
   width: 100%;
 }
 
+/* On desktop, let landing wrapper children participate in page flex */
+.home-page .mobile-landing {
+  display: contents;
+}
+
 .home-page .layout {
   display: block;
 }
@@ -1383,39 +1388,70 @@ html.site-dark .home-page .footer {
 }
 
 @media (max-width: 640px) {
-  .home-page .page {
-    padding-bottom: 96px;
+  .home-page {
+    overflow-x: hidden;
+    overflow-y: auto;
   }
+
+  .home-page .mobile-landing {
+    display: flex;
+    flex-direction: column;
+    min-height: var(--vh-full);
+    flex-shrink: 0;
+  }
+
+  .home-page .page {
+    height: auto;
+    min-height: var(--vh-full);
+    justify-content: flex-start;
+    padding-left: 16px;
+    padding-right: 16px;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  }
+
+  .home-page .wrap {
+    flex: 1 0 auto;
+  }
+
   .home-page .layout {
     display: flex;
     flex-direction: column;
     gap: 20px;
   }
+
   .home-page h1 { font-size: 30px; }
-  .home-page .page { padding-left: 16px; padding-right: 16px; }
+
   .home-page .menu,
   .home-page .menu-panel {
     display: none;
   }
+
   .home-page .menu-actions {
     gap: 0;
   }
+
   .home-page .mobile-pill-menu {
-    position: fixed;
-    left: 16px;
-    right: 16px;
-    bottom: 20px;
+    position: static;
     display: flex;
     justify-content: space-between;
     align-items: center;
     gap: 10px;
+    width: 100%;
+    margin-top: auto;
+    flex-shrink: 0;
     background: rgba(237, 241, 242, 0.7);
     border: 1px solid rgba(255, 255, 255, 0.6);
     border-radius: 999px;
     padding: 10px 14px;
     box-shadow: 0 10px 24px rgba(0,0,0,0.12);
     backdrop-filter: blur(12px);
-    z-index: 42;
+  }
+
+  .home-page .footer {
+    margin-top: 0;
+    padding-top: 20px;
+    margin-bottom: 0;
+    flex-shrink: 0;
   }
   .home-page .mobile-pill-menu a {
     font-size: 13px;
@@ -1433,7 +1469,8 @@ html.site-dark .home-page .footer {
     border-color: rgba(255, 255, 255, 0.16);
     box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
   }
-html.site-dark .home-page .mobile-pill-menu a {
+
+  html.site-dark .home-page .mobile-pill-menu a {
     color: #f3f3f1;
   }
 }

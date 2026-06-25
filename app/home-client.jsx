@@ -139,6 +139,7 @@ export default function HomeClient() {
           Email id copied
         </div>
         <div className="page">
+          <div className="mobile-landing">
           <div className="wrap">
             <div className="layout">
               <div className="content">
@@ -298,6 +299,7 @@ export default function HomeClient() {
               Resume
             </a>
           </nav>
+          </div>
 
           <div className="footer">
             <p>˗ˏˋ ꒰ 🧡 ꒱ ˎˊ˗</p>
