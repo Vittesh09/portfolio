@@ -140,7 +140,8 @@ export default function HomeClient() {
         </div>
         <div className="page">
           <div className="mobile-landing">
-          <div className="wrap">
+            <div className="mobile-first-screen">
+              <div className="wrap">
             <div className="layout">
               <div className="content">
                 <div className="title-row">
@@ -287,7 +288,6 @@ export default function HomeClient() {
                   </a>
                 </div>
               </div>
-
             </div>
           </div>
 
@@ -304,6 +304,7 @@ export default function HomeClient() {
           <div className="footer">
             <p>˗ˏˋ ꒰ 🧡 ꒱ ˎˊ˗</p>
             © 2026 Vittesh Sinha
+          </div>
           </div>
         </div>
       </div>
