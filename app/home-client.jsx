@@ -164,7 +164,7 @@ export default function HomeClient() {
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
-                          strokeWidth="1"
+                          strokeWidth="2"
                           strokeLinecap="round"
                           aria-hidden="true"
                         >
@@ -173,16 +173,16 @@ export default function HomeClient() {
                         </svg>
                       ) : (
                         <svg
-                          className="theme-icon theme-icon-moon"
+                          className="theme-icon"
                           viewBox="0 0 24 24"
                           fill="none"
                           stroke="currentColor"
-                          strokeWidth="0.85"
+                          strokeWidth="2"
                           strokeLinecap="round"
                           strokeLinejoin="round"
                           aria-hidden="true"
                         >
-                          <path d="M20 14.5A7.5 7.5 0 0 1 9.5 4 6 6 0 1 0 20 14.5Z" />
+                          <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
                         </svg>
                       )}
                     </button>

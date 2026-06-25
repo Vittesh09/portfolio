@@ -1030,15 +1030,10 @@ html.cursor-ready body {
 }
 
 .home-page .theme-toggle .theme-icon {
-  width: 18px;
-  height: 18px;
+  width: 20px;
+  height: 20px;
   display: block;
-}
-
-.home-page .theme-toggle .theme-icon-moon {
-  width: 17px;
-  height: 17px;
-  stroke-width: 0.85;
+  stroke-width: 2;
 }
 
 .home-page .theme-toggle:hover {
