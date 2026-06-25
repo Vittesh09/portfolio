@@ -1025,10 +1025,20 @@ html.cursor-ready body {
   cursor: pointer;
   display: inline-grid;
   place-items: center;
-  font-family: system-ui, sans-serif;
-  font-size: 18px;
   line-height: 1;
   transition: color 0.18s ease, transform 0.18s ease;
+}
+
+.home-page .theme-toggle .theme-icon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.home-page .theme-toggle .theme-icon-moon {
+  width: 17px;
+  height: 17px;
+  stroke-width: 0.85;
 }
 
 .home-page .theme-toggle:hover {

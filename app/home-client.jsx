@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 
 export default function HomeClient() {
   const heroName = 'Vittesh Sinha';
-  const scrambleChars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
+  const scrambleChars = 'SHNAHITESHVIiesihinaivvtechsshs';
   const [menuOpen, setMenuOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [showCopyHint, setShowCopyHint] = useState(false);
@@ -158,7 +158,33 @@ export default function HomeClient() {
                       title={`Switch to ${isDarkMode ? 'light' : 'dark'} mode`}
                       onClick={toggleTheme}
                     >
-                      <span aria-hidden="true">{isDarkMode ? '☀' : '☾'}</span>
+                      {isDarkMode ? (
+                        <svg
+                          className="theme-icon"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="1"
+                          strokeLinecap="round"
+                          aria-hidden="true"
+                        >
+                          <circle cx="12" cy="12" r="4" />
+                          <path d="M12 2v1.5M12 20.5V22M4.22 4.22l1.06 1.06M18.72 18.72l1.06 1.06M2 12h1.5M20.5 12H22M4.22 19.78l1.06-1.06M18.72 5.28l1.06-1.06" />
+                        </svg>
+                      ) : (
+                        <svg
+                          className="theme-icon theme-icon-moon"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="0.85"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          aria-hidden="true"
+                        >
+                          <path d="M20 14.5A7.5 7.5 0 0 1 9.5 4 6 6 0 1 0 20 14.5Z" />
+                        </svg>
+                      )}
                     </button>
 
                     <div className="menu">
@@ -236,7 +262,7 @@ export default function HomeClient() {
                 </div>
 
                 <div className="section home-fade fade-up delay-3">
-                  <div className="section-title">Previous work</div>
+                  <div className="section-title">Previous Experiences</div>
                   <div className="work-list">
                     <div className="work-item">
                       <div>
