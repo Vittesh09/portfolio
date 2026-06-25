@@ -60,6 +60,8 @@ export default function AboutPage() {
                   alt="Vittesh Sinha"
                   width="1293"
                   height="1293"
+                  loading="lazy"
+                  decoding="async"
                 />
               </div>
               <div className="about-text-stack fade-up delay-1">

@@ -37,7 +37,7 @@ export default function RootLayout({ children }) {
           dangerouslySetInnerHTML={{
             __html: `
               try {
-                if (localStorage.getItem('home-theme') === 'dark') {
+                if (localStorage.getItem('home-theme') !== 'light') {
                   document.documentElement.classList.add('site-dark');
                   document.documentElement.style.colorScheme = 'dark';
                 }

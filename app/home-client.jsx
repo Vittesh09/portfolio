@@ -9,7 +9,7 @@ export default function HomeClient() {
   const [showToast, setShowToast] = useState(false);
   const [showCopyHint, setShowCopyHint] = useState(false);
   const [displayName, setDisplayName] = useState(heroName);
-  const [isDarkMode, setIsDarkMode] = useState(false);
+  const [isDarkMode, setIsDarkMode] = useState(true);
   const audioRef = useRef(null);
   const menuAudioRef = useRef(null);
   const menuPanelRef = useRef(null);
@@ -45,7 +45,7 @@ export default function HomeClient() {
   }, [menuOpen]);
 
   useEffect(() => {
-    const savedThemeIsDark = window.localStorage.getItem('home-theme') === 'dark';
+    const savedThemeIsDark = window.localStorage.getItem('home-theme') !== 'light';
     document.documentElement.classList.toggle('site-dark', savedThemeIsDark);
     document.documentElement.style.colorScheme = savedThemeIsDark ? 'dark' : 'light';
     setIsDarkMode(savedThemeIsDark);
@@ -131,8 +131,8 @@ export default function HomeClient() {
   return (
     <>
       <div className={`home-page ${isDarkMode ? 'dark' : ''}`}>
-        <audio ref={audioRef} src="/assets/copyemail.mp3" preload="auto" />
-        <audio ref={menuAudioRef} src="/assets/menu-click.wav" preload="auto" />
+        <audio ref={audioRef} src="/assets/copyemail.mp3" preload="none" />
+        <audio ref={menuAudioRef} src="/assets/menu-click.wav" preload="none" />
         <div className="cursor"></div>
         <div className="cursor-follower"></div>
         <div id="toast" className={`toast ${showToast ? 'show' : ''}`}>
