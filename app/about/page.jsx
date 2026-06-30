@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export const metadata = {
   title: 'About',
   description:
@@ -28,31 +30,19 @@ export default function AboutPage() {
 
         <div className="about-content">
           <div className="about-wrap">
-            <div className="about-mobile">
-              <div className="about-mobile-intro">
-                <span>Hello, I am</span>
-                <span className="about-mobile-arrow" aria-hidden="true">
-                  <img src="/assets/images/Arrow.svg" alt="" />
-                </span>
-                <span>Vittesh Sinha</span>
-              </div>
+            <div className="about-header fade-up">
+              <p className="playground-index-eyebrow">
+                <Link href="/" className="playground-eyebrow-back" aria-label="Go back home">
+                  <span className="playground-eyebrow-arrow" aria-hidden="true">
+                    <img src="/assets/images/Arrow.svg" alt="" />
+                  </span>
+                  About
+                </Link>
+              </p>
+              <h1 className="playground-index-title">Hello, I am Vittesh Sinha</h1>
             </div>
 
-            <div className="about-desktop">
-              <div className="about-desktop-frame">
-                <div className="about-desktop-intro-wrap fade-up">
-                  <div className="about-desktop-intro">
-                    <span>Hello, I am</span>
-                    <span className="about-mobile-arrow" aria-hidden="true">
-                      <img src="/assets/images/Arrow.svg" alt="" />
-                    </span>
-                    <span>Vittesh Sinha</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="about-body-shared">
+            <div className="about-body-shared fade-up delay-1">
               <div className="about-desktop-photo">
                 <img
                   className="about-photo fade-image"
@@ -64,7 +54,7 @@ export default function AboutPage() {
                   decoding="async"
                 />
               </div>
-              <div className="about-text-stack fade-up delay-1">
+              <div className="about-text-stack">
                 <div className="about-text-shared">
                   <p>
                     I’m a product designer focused on building systems that feel calm,
@@ -88,10 +78,8 @@ export default function AboutPage() {
                     </a>.
                   </p>
                 </div>
-                <a href="/" className="coming-button">Go back</a>
               </div>
             </div>
-
           </div>
         </div>
       </div>
