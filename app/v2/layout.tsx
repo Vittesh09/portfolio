@@ -1,0 +1,53 @@
+import {
+  Instrument_Serif,
+  JetBrains_Mono,
+  Plus_Jakarta_Sans
+} from 'next/font/google';
+import { SiteShell } from '@/src/components/v2/layout/SiteShell';
+import '@/src/styles/v2.css';
+import '@/src/styles/singularity.css';
+
+const jakarta = Plus_Jakarta_Sans({
+  subsets: ['latin'],
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-jakarta',
+  display: 'swap'
+});
+
+const instrument = Instrument_Serif({
+  subsets: ['latin'],
+  weight: ['400'],
+  style: ['normal', 'italic'],
+  variable: '--font-instrument',
+  display: 'swap'
+});
+
+const jetbrains = JetBrains_Mono({
+  subsets: ['latin'],
+  weight: ['400', '500'],
+  variable: '--font-jetbrains',
+  display: 'swap'
+});
+
+export const metadata = {
+  title: 'V2 Preview · Vittesh Sinha',
+  description:
+    'Portfolio of Vittesh Sinha, product designer shipping clearer experiences for complex software.',
+  robots: { index: false, follow: false }
+};
+
+const themeInit = `
+(function(){try{var t=localStorage.getItem('v2-theme');var r=document.currentScript&&document.currentScript.parentElement;if(!r||!r.classList.contains('v2-root'))r=document.querySelector('.v2-root');if(r){r.classList.remove('light');if(t==='dark')r.classList.add('dark');}}catch(e){}})();
+`;
+
+export default function V2Layout({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      className={`v2-root ${jakarta.variable} ${instrument.variable} ${jetbrains.variable} ${jakarta.className}`}
+      suppressHydrationWarning
+    >
+      <script dangerouslySetInnerHTML={{ __html: themeInit }} />
+      <SiteShell>{children}</SiteShell>
+    </div>
+  );
+}

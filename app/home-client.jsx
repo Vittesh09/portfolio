@@ -1,15 +1,18 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { isSiteCounterEnabled, registerSiteVisit } from '../lib/site-counter';
 
 export default function HomeClient() {
   const heroName = 'Vittesh Sinha';
   const scrambleChars = 'SHNAHITESHVIiesihinaivvtechsshs';
+  const siteCounterEnabled = isSiteCounterEnabled();
   const [menuOpen, setMenuOpen] = useState(false);
   const [showToast, setShowToast] = useState(false);
   const [showCopyHint, setShowCopyHint] = useState(false);
   const [displayName, setDisplayName] = useState(heroName);
   const [isDarkMode, setIsDarkMode] = useState(true);
+  const [visitorCount, setVisitorCount] = useState(null);
   const audioRef = useRef(null);
   const menuAudioRef = useRef(null);
   const menuPanelRef = useRef(null);
@@ -83,6 +86,28 @@ export default function HomeClient() {
 
     return () => window.clearInterval(interval);
   }, [heroName]);
+
+  useEffect(() => {
+    if (!siteCounterEnabled) return;
+
+    let cancelled = false;
+
+    async function syncVisitorCount() {
+      try {
+        const count = await registerSiteVisit();
+        if (!cancelled && Number.isFinite(count)) {
+          setVisitorCount(count);
+        }
+      } catch {
+        // counter is decorative; ignore failures
+      }
+    }
+
+    syncVisitorCount();
+    return () => {
+      cancelled = true;
+    };
+  }, [siteCounterEnabled]);
 
   const copyEmail = async () => {
     setShowToast(true);
@@ -249,6 +274,12 @@ export default function HomeClient() {
                     Nagarro
                   </a>
                 </div>
+
+                {visitorCount ? (
+                  <div className="visit-count home-fade fade-up delay-1">
+                    {visitorCount.toLocaleString('en-US')} people have stopped by
+                  </div>
+                ) : null}
 
                 <div className="statement-group home-fade fade-up delay-2">
                   <p className="statement">

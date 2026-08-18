@@ -1719,6 +1719,14 @@ html.site-dark .playground-tool-card-external:hover .playground-tool-external-ic
   color: #666;
 }
 
+.home-page .visit-count {
+  margin-top: 8px;
+  font-size: 12px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: #888;
+}
+
 .home-page .meta a,
 .home-page .contact a,
 .home-page .contact button {
@@ -1923,6 +1931,7 @@ html.site-dark .home-page .download-icon {
 }
 
 html.site-dark .home-page .meta,
+html.site-dark .home-page .visit-count,
 html.site-dark .home-page .muted,
 html.site-dark .home-page .section-title,
 html.site-dark .home-page .role-title {

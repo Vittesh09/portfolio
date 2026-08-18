@@ -4,6 +4,9 @@ const path = require('path');
 const nextConfig = {
   output: 'export',
   trailingSlash: true,
+  images: {
+    unoptimized: true
+  },
   devIndicators: false,
   turbopack: {
     root: path.join(__dirname)
