@@ -60,11 +60,11 @@ export const horizonFragmentShader = /* glsl */ `
 export const diskVertexShader = /* glsl */ `
   varying vec2 vUv;
   varying float vRadius;
-  varying float vAngle;
+  varying vec2 vPolar;
   void main() {
     vUv = uv;
     vRadius = length(position.xy);
-    vAngle = atan(position.y, position.x);
+    vPolar = position.xy;
     gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
   }
 `;
@@ -82,7 +82,7 @@ export const diskFragmentShader = /* glsl */ `
 
   varying vec2 vUv;
   varying float vRadius;
-  varying float vAngle;
+  varying vec2 vPolar;
 
   vec3 mod289(vec3 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
   vec4 mod289(vec4 x) { return x - floor(x * (1.0 / 289.0)) * 289.0; }
@@ -134,19 +134,29 @@ export const diskFragmentShader = /* glsl */ `
 
   void main() {
     float normalizedRadius = smoothstep(${DISK_INNER.toFixed(2)}, ${DISK_OUTER.toFixed(2)}, vRadius);
+    vec2 dir = normalize(vPolar + 1e-6);
+    float vAngle = atan(dir.y, dir.x);
 
     float spiral = vAngle * 3.0 - (1.0 / (normalizedRadius + 0.1)) * 2.0;
-    vec2 noiseUv = vec2(
-      vUv.x + uTime * uFlowSpeed * (2.0 / (vRadius * 0.3 + 1.0)) + sin(spiral) * 0.1,
-      vUv.y * 0.8 + cos(spiral) * 0.1
+    float flow = uTime * uFlowSpeed * (2.0 / (vRadius * 0.3 + 1.0));
+    float wrapR = uNoiseScale * 0.28;
+    vec2 wrapped = vec2(
+      dir.x * cos(flow) - dir.y * sin(flow),
+      dir.x * sin(flow) + dir.y * cos(flow)
     );
-    float n1 = snoise(vec3(noiseUv * uNoiseScale, uTime * 0.15));
-    float n2 = snoise(vec3(noiseUv * uNoiseScale * 3.0 + 0.8, uTime * 0.22));
-    float n3 = snoise(vec3(noiseUv * uNoiseScale * 6.0 + 1.5, uTime * 0.3));
-    float noiseVal = (n1 * 0.45 + n2 * 0.35 + n3 * 0.2);
+    vec3 noiseP = vec3(
+      wrapped.x * wrapR + sin(spiral) * 0.1,
+      vUv.y * 0.8 * uNoiseScale + cos(spiral) * 0.1,
+      wrapped.y * wrapR
+    );
+
+    float n1 = snoise(noiseP + vec3(0.0, 0.0, uTime * 0.15));
+    float n2 = snoise(noiseP * 3.0 + vec3(0.8, 0.0, uTime * 0.22));
+    float n3 = snoise(noiseP * 6.0 + vec3(1.5, 0.0, uTime * 0.3));
+    float n4 = snoise(noiseP * 11.0 + vec3(2.2, 0.0, uTime * 0.38));
+    float noiseVal = n1 * 0.38 + n2 * 0.3 + n3 * 0.2 + n4 * 0.12;
     noiseVal = (noiseVal + 1.0) * 0.5;
 
-    // Inner = hot cream, mid = accent red, outer = deep ember (3 stops)
     vec3 color = uColorOuter;
     color = mix(color, uColorEmber, smoothstep(0.0, 0.35, normalizedRadius));
     color = mix(color, uColorAccent, smoothstep(0.25, 0.6, normalizedRadius));

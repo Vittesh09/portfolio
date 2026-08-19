@@ -2,10 +2,10 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';
 import { animate, motion, useInView } from 'framer-motion';
-import { BlackHole } from '@/src/components/v2/black-hole/BlackHole';
-import { LandingExperienceKiss } from '@/src/components/v2/archive/LandingExperienceKiss';
+import { BlackHoleLazy } from '@/src/components/v2/black-hole/BlackHoleLazy';
 import { useKissMode } from '@/src/components/v2/layout/KissModeProvider';
 import { CopyEmail } from '@/src/components/v2/ui/CopyEmail';
 import { ResumeDownload } from '@/src/components/v2/ui/ResumeDownload';
@@ -17,6 +17,14 @@ import {
   trustSignals,
   whyPoints
 } from '@/src/config/v2/site';
+
+const LandingExperienceKiss = dynamic(
+  () =>
+    import('@/src/components/v2/archive/LandingExperienceKiss').then((mod) => ({
+      default: mod.LandingExperienceKiss
+    })),
+  { ssr: false }
+);
 
 function Label({ children }: { children: React.ReactNode }) {
   return <p className="archive-label text-text-muted">{children}</p>;
@@ -87,8 +95,8 @@ function LandingExperienceArchive() {
   return (
     <>
       <section className="v2-hero-stage v2-black-hole-hero border-b border-white/10">
-        <BlackHole key="archive-orbit-v28" />
-        <div className="relative z-10 mx-auto flex max-w-[1600px] flex-col px-4 md:min-h-[calc(100svh-57px)] md:px-6 md:py-8">
+        <BlackHoleLazy key="archive-orbit-v28" />
+        <div className="relative z-10 mx-auto flex max-w-[1600px] flex-col px-4 md:min-h-[calc(100svh-57px)] md:px-8 md:py-8">
           {/* First fold on mobile: copy + CTAs only. Meta sits below and scrolls in. */}
           <div className="archive-hero relative flex min-h-[calc(100svh-57px)] flex-1 flex-col justify-center py-10 md:min-h-0 md:py-6">
             <motion.div
@@ -235,7 +243,7 @@ function LandingExperienceArchive() {
       </section>
 
       <section id="work" className="scroll-mt-16 border-b border-border-subtle">
-        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-6 md:py-24">
+        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-8 md:py-24">
           <div className="grid gap-8 md:grid-cols-12 md:items-end">
             <div className="md:col-span-8">
               <Label>Selected work · 3 case studies</Label>
@@ -334,7 +342,7 @@ function LandingExperienceArchive() {
       </section>
 
       <section id="contact" className="archive-blue scroll-mt-16">
-        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-6 md:py-24">
+        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-8 md:py-24">
           <Label>Contact</Label>
           <div className="mt-10 grid gap-10 md:grid-cols-12 md:items-end">
             <h2 className="archive-display text-[clamp(2.5rem,8vw,5.75rem)] md:col-span-9">

@@ -13,7 +13,7 @@ export function CaseStudyExperience({ project }: { project: Project }) {
   return (
     <article>
       <section className="border-b border-border-subtle">
-        <div className="mx-auto max-w-[1600px] px-4 py-8 md:px-6 md:py-12">
+        <div className="mx-auto max-w-[1600px] px-4 py-8 md:px-8 md:py-12">
           <Link href="/v2/#work" className="archive-label text-text-muted hover:text-accent-pop">
             ← Back to work
           </Link>
@@ -96,7 +96,7 @@ export function CaseStudyExperience({ project }: { project: Project }) {
       </section>
 
       <section className="border-b border-border-subtle">
-        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-6 md:py-24">
+        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-8 md:py-24">
           <p className="archive-label text-text-muted">02 / Screens &amp; moments</p>
           <div className="mt-10 grid gap-5 md:grid-cols-2">
             {project.images.slice(1).map((image, index) => (
@@ -114,6 +114,8 @@ export function CaseStudyExperience({ project }: { project: Project }) {
                     src={image.src}
                     alt={image.alt}
                     fill
+                    loading="lazy"
+                    decoding="async"
                     className="object-contain p-5 md:p-8"
                     sizes={
                       project.images.length === 2
@@ -135,7 +137,7 @@ export function CaseStudyExperience({ project }: { project: Project }) {
       </section>
 
       <section className="border-b border-border-subtle">
-        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-6 md:py-24">
+        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-8 md:py-24">
           <p className="archive-label text-text-muted">03 / How I worked</p>
           <h2 className="archive-display mt-5 text-[clamp(2.5rem,8vw,5.5rem)]">The approach.</h2>
           <div className="mt-12 grid border border-border-subtle md:grid-cols-3">
@@ -203,7 +205,7 @@ export function CaseStudyExperience({ project }: { project: Project }) {
       <section className="border-b border-border-subtle">
         <Link
           href={`/v2/work/${next.slug}/`}
-          className="group mx-auto grid max-w-[1600px] gap-5 px-4 py-14 md:grid-cols-12 md:items-end md:px-6 md:py-20"
+          className="group mx-auto grid max-w-[1600px] gap-5 px-4 py-14 md:grid-cols-12 md:items-end md:px-8 md:py-20"
         >
           <div className="md:col-span-9">
             <p className="archive-label text-text-muted">Next case study</p>

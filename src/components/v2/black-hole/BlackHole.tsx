@@ -16,3 +16,5 @@ export function BlackHole() {
     />
   );
 }
+
+export default BlackHole;

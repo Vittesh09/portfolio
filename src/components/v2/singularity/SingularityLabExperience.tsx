@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useRef, useState } from 'react';
-import { BlackHole } from '@/src/components/v2/singularity/BlackHole';
+import { BlackHoleLazy } from '@/src/components/v2/singularity/BlackHoleLazy';
 import {
   DEFAULT_SINGULARITY_PARAMS,
   type SingularityParams
@@ -118,7 +118,7 @@ export function SingularityLabExperience() {
       ref={stageRef}
       className="bh-hero bh-lab relative overflow-hidden border-0"
     >
-      <BlackHole heroRef={stageRef} mode="lab" paramsRef={paramsRef} />
+      <BlackHoleLazy heroRef={stageRef} mode="lab" paramsRef={paramsRef} />
 
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-start justify-between gap-4 p-4 md:p-6">
         <div className="pointer-events-auto max-w-md rounded-sm border border-white/15 bg-black/55 px-4 py-3 backdrop-blur-md">

@@ -86,7 +86,7 @@ export function AboutExperience() {
       </section>
 
       <section className="border-b border-border-subtle">
-        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-6 md:py-24">
+        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-8 md:py-24">
           <p className="archive-label text-text-muted">Where I&apos;ve worked · 2018 to now</p>
           <h2 className="archive-display mt-5 text-[clamp(2.75rem,8vw,6rem)]">Experience.</h2>
           <div className="mt-12 border-t border-border-subtle">
@@ -131,7 +131,7 @@ export function AboutExperience() {
       </section>
 
       <section className="archive-blue">
-        <div className="mx-auto flex max-w-[1600px] flex-col gap-8 px-4 py-16 md:flex-row md:items-end md:justify-between md:px-6 md:py-20">
+        <div className="mx-auto flex max-w-[1600px] flex-col gap-8 px-4 py-16 md:flex-row md:items-end md:justify-between md:px-8 md:py-20">
           <h2 className="archive-serif max-w-[16ch] text-[clamp(2rem,4.5vw,3.5rem)]">
             Building something hard to use?
           </h2>

@@ -69,7 +69,7 @@ export function WorkbenchExperience() {
   return (
     <article>
       <section className="archive-grid border-b border-border-subtle">
-        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-6 md:py-24">
+        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-8 md:py-24">
           <p className="archive-label text-accent-pop">Available for work</p>
           <h1 className="archive-display archive-display--hero mt-4 text-[clamp(3rem,12vw,7.5rem)]">
             Work
@@ -87,7 +87,7 @@ export function WorkbenchExperience() {
       </section>
 
       <section className="border-b border-border-subtle">
-        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-6 md:py-24">
+        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-8 md:py-24">
           <p className="archive-label text-text-muted">01 / Interface components</p>
           <h2 className="archive-display mt-5 text-[clamp(2.5rem,7vw,5rem)]">Reusable bits.</h2>
           <div className="mt-12 grid gap-5 lg:grid-cols-3">
@@ -120,7 +120,7 @@ export function WorkbenchExperience() {
       </section>
 
       <section className="border-b border-border-subtle">
-        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-6 md:py-24">
+        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-8 md:py-24">
           <p className="archive-label text-text-muted">02 / Side projects</p>
           <h2 className="archive-display mt-5 text-[clamp(2.5rem,7vw,5rem)]">Explorations.</h2>
           <div className="mt-12 grid gap-5 md:grid-cols-2">
@@ -134,6 +134,8 @@ export function WorkbenchExperience() {
                     src={experiment.image}
                     alt=""
                     fill
+                    loading="lazy"
+                    decoding="async"
                     className="archive-image object-contain p-5 md:p-8"
                     sizes="(max-width: 768px) 100vw, 50vw"
                   />

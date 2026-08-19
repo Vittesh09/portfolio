@@ -2,10 +2,10 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
-import { BlackHole } from '@/src/components/v2/singularity/BlackHole';
-import { LandingExperienceKiss } from '@/src/components/v2/archive/LandingExperienceKiss';
+import { BlackHoleLazy } from '@/src/components/v2/singularity/BlackHoleLazy';
 import { useKissMode } from '@/src/components/v2/layout/KissModeProvider';
 import { AnimatedStat } from '@/src/components/v2/motion/landingMotion';
 import { CopyEmail } from '@/src/components/v2/ui/CopyEmail';
@@ -13,6 +13,14 @@ import { ResumeDownload } from '@/src/components/v2/ui/ResumeDownload';
 import { useMobileLanding } from '@/src/components/v2/ui/useMobileLanding';
 import { projects } from '@/src/config/v2/caseStudies';
 import { siteConfig, trustLogos, trustSignals } from '@/src/config/v2/site';
+
+const LandingExperienceKiss = dynamic(
+  () =>
+    import('@/src/components/v2/archive/LandingExperienceKiss').then((mod) => ({
+      default: mod.LandingExperienceKiss
+    })),
+  { ssr: false }
+);
 
 function Label({ children }: { children: React.ReactNode }) {
   return <p className="archive-label text-text-muted">{children}</p>;
@@ -26,6 +34,12 @@ export function LandingExperienceSingularity() {
 
   useEffect(() => {
     setClientReady(true);
+    if (
+      !window.matchMedia('(max-width: 768px)').matches &&
+      !window.matchMedia('(pointer: coarse)').matches
+    ) {
+      void import('@/src/components/v2/singularity/BlackHole');
+    }
   }, []);
 
   // Mobile always uses Kiss; desktop SM toggles Kiss via KissModeProvider.
@@ -51,9 +65,9 @@ export function LandingExperienceSingularity() {
   return (
     <>
       <section ref={heroRef} className="bh-hero is-intro border-b border-white/10">
-        <BlackHole heroRef={heroRef} />
+        {clientReady ? <BlackHoleLazy heroRef={heroRef} /> : null}
 
-        <div className="relative z-10 mx-auto flex max-w-[1600px] flex-col px-4 md:min-h-[calc(100svh-57px)] md:px-6 md:py-8">
+        <div className="relative z-10 mx-auto flex max-w-[1600px] flex-col px-4 md:min-h-[calc(100svh-57px)] md:px-8 md:py-8">
           <div className="archive-hero relative flex min-h-[calc(100svh-57px)] flex-1 flex-col justify-center py-10 md:min-h-0 md:py-6">
             <div className="relative z-10 max-w-[760px] md:w-[58%]">
               <h1 className="bh-sr-only">
@@ -161,7 +175,7 @@ export function LandingExperienceSingularity() {
       </section>
 
       <section id="work" className="scroll-mt-16 border-b border-border-subtle">
-        <div className="mx-auto max-w-[1600px] px-4 py-16 md:min-h-[100svh] md:px-6 md:py-24">
+        <div className="mx-auto max-w-[1600px] px-4 py-16 md:min-h-[100svh] md:px-8 md:py-24">
           <div className="grid gap-8 md:grid-cols-12 md:items-end">
             <div className="md:col-span-8">
               <Label>Selected work · 3 case studies</Label>
@@ -198,6 +212,8 @@ export function LandingExperienceSingularity() {
                       src={project.image}
                       alt=""
                       fill
+                      loading="lazy"
+                      decoding="async"
                       className="archive-image object-contain p-4 group-hover:scale-[1.02] md:p-8"
                       sizes={index === 0 ? '100vw' : '(max-width: 768px) 100vw, 50vw'}
                     />
@@ -232,6 +248,8 @@ export function LandingExperienceSingularity() {
               src="/assets/images/profile.png"
               alt={siteConfig.name}
               fill
+              loading="lazy"
+              decoding="async"
               className="archive-image object-cover"
               sizes="(max-width: 768px) 100vw, 42vw"
             />
@@ -260,7 +278,7 @@ export function LandingExperienceSingularity() {
       </section>
 
       <section id="contact" className="archive-blue scroll-mt-16">
-        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-6 md:py-24">
+        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-8 md:py-24">
           <Label>Contact</Label>
           <div className="mt-10 grid gap-10 md:grid-cols-12 md:items-end">
             <h2 className="archive-display text-[clamp(2.5rem,8vw,5.75rem)] md:col-span-9">

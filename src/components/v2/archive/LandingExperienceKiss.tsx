@@ -38,7 +38,7 @@ export function LandingExperienceKiss() {
         ref={heroRef}
         className="v2-kiss-hero is-kiss-intro archive-grid border-b border-border-subtle"
       >
-        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-6 md:py-24">
+        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-8 md:py-24">
           {/* Mobile — headline + rising subline */}
           <div className="v2-kiss-copy md:hidden">
             <AnimatedHeroTitle
@@ -180,7 +180,7 @@ export function LandingExperienceKiss() {
       </section>
 
       <section id="work" className="scroll-mt-16 border-b border-border-subtle">
-        <div className="mx-auto max-w-[1600px] px-4 py-10 md:min-h-[100svh] md:px-6 md:py-14">
+        <div className="mx-auto max-w-[1600px] px-4 py-10 md:min-h-[100svh] md:px-8 md:py-14">
           <RevealOnScroll className="grid items-end gap-4 md:grid-cols-12">
             <div className="md:col-span-8">
               <p className="archive-label text-text-muted">01 / Selected work</p>
@@ -252,7 +252,7 @@ export function LandingExperienceKiss() {
       </section>
 
       <section id="contact" className="archive-blue scroll-mt-16">
-        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-6 md:py-24">
+        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-8 md:py-24">
           <RevealOnScroll>
             <p className="archive-label text-white/60">03 / Contact</p>
             <div className="mt-10 grid gap-10 md:grid-cols-12 md:items-end">

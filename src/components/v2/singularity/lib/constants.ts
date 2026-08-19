@@ -5,6 +5,8 @@ export const DISK_OUTER = 8.0;
 export const DISK_TILT = (-70 * Math.PI) / 180;
 /** Mild bank so the disk reads diagonal in the default framing. */
 export const DISK_BANK = (-18 * Math.PI) / 180;
+/** In-plane yaw — park the ring join on the far edge, off the bright face. */
+export const DISK_YAW = (108 * Math.PI) / 180;
 
 /** Tight archival palette — cream + red only, no rainbow. */
 export const COLORS = {

@@ -15,7 +15,8 @@ import {
   DISK_BANK,
   DISK_INNER,
   DISK_OUTER,
-  DISK_TILT
+  DISK_TILT,
+  DISK_YAW
 } from '../lib/constants';
 import {
   DEFAULT_SINGULARITY_PARAMS,
@@ -97,7 +98,9 @@ export function useBlackHole(
     placeCamera();
 
     const renderer = new THREE.WebGLRenderer({
-      antialias: true,
+      antialias: !mobile,
+      alpha: false,
+      stencil: false,
       powerPreference: 'high-performance'
     });
     renderer.outputColorSpace = THREE.SRGBColorSpace;
@@ -463,6 +466,7 @@ export function useBlackHole(
       core.add(diskTilt);
 
       const disk = new THREE.Mesh(diskGeo, diskMaterial);
+      disk.rotation.z = DISK_YAW;
       disk.renderOrder = 1;
       diskTilt.add(disk);
 
@@ -1247,7 +1251,7 @@ export function useBlackHole(
       } catch (err) {
         console.warn('[singularity] frame error', err);
       }
-      raf = requestAnimationFrame(frame);
+      if (!disposed && running) raf = requestAnimationFrame(frame);
     };
 
     const start = () => {

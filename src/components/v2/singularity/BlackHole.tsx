@@ -3,6 +3,7 @@
 import { useRef, type RefObject } from 'react';
 import { useBlackHole } from './hooks/useBlackHole';
 import type { BlackHoleOptions } from './lib/params';
+import '@/src/styles/singularity.css';
 
 type Props = {
   heroRef: RefObject<HTMLElement | null>;
@@ -24,3 +25,5 @@ export function BlackHole({ heroRef, mode = 'hero', paramsRef, className = '' }:
     />
   );
 }
+
+export default BlackHole;

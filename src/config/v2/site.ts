@@ -27,7 +27,6 @@ export const siteConfig = {
     { label: 'Home', href: '/v2/' },
     { label: 'Work', href: '/v2/#work' },
     { label: 'About', href: '/v2/about/' },
-    { label: 'Singularity', href: '/v2/singularity/' },
     { label: 'Contact', href: '/v2/#contact' }
   ]
 } as const;

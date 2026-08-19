@@ -4,7 +4,6 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { siteConfig } from '@/src/config/v2/site';
-import { KissNavControl } from '@/src/components/v2/ui/KissNavControl';
 import { ThemeToggle } from '@/src/components/v2/ui/ThemeToggle';
 import { useMobileLanding } from '@/src/components/v2/ui/useMobileLanding';
 
@@ -179,7 +178,7 @@ export function ArchiveHeader() {
         className="v2-archive-header fixed inset-x-0 top-0 z-[110] border-b"
         aria-hidden={!(visible || open)}
       >
-        <div className="v2-archive-header-bar mx-auto flex max-w-[1600px] items-center justify-between px-4 py-3 md:px-6">
+        <div className="v2-archive-header-bar mx-auto flex max-w-[1600px] items-center justify-between px-4 py-3 md:px-8">
           <Link href="/v2/" onClick={goHome} className="archive-label font-medium">
             Vittesh Sinha®
           </Link>
@@ -194,12 +193,9 @@ export function ArchiveHeader() {
                 {item.label}
               </Link>
             ))}
-            <span className="inline-flex items-center gap-4">
-              <Link href="/v2/machine/" className={navOptionClass}>
-                [Machine]
-              </Link>
-              {isHome ? <KissNavControl /> : null}
-            </span>
+            <Link href="/v2/machine/" className={navOptionClass}>
+              [Machine]
+            </Link>
             <ThemeToggle />
           </nav>
           <div className="flex items-center gap-1 md:hidden">
@@ -242,9 +238,6 @@ export function ArchiveHeader() {
               >
                 <span className="text-2xl font-semibold tracking-tight">[Machine]</span>
               </Link>
-              {isHome ? (
-                <KissNavControl layout="mobile" onActivate={() => setOpen(false)} />
-              ) : null}
               {isMobile ? (
                 <p className="archive-label px-1 py-4 text-text-muted">
                   Open on desktop for a better experience

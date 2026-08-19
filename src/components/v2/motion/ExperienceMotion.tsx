@@ -10,6 +10,65 @@ type GatePhase = 'loading' | 'ready' | 'exit' | 'hidden';
 
 const INTRO_STORAGE_KEY = 'v2-auto-intro';
 
+function collectScrollTitles(root: ParentNode) {
+  return Array.from(
+    root.querySelectorAll<HTMLElement>(
+      'main h1, main h2, main h3, main .archive-serif, footer .archive-serif'
+    )
+  ).filter((el) => {
+    if (el.classList.contains('bh-sr-only')) return false;
+    if (el.classList.contains('archive-display--stat')) return false;
+    if (el.closest('.v2-black-hole-hero, .v2-kiss-hero, .v2-hero-title')) return false;
+    return true;
+  });
+}
+
+function useTitleReveals(enabled: boolean, pathname: string | null, kissMode: boolean) {
+  useLayoutEffect(() => {
+    if (!enabled) return;
+    const root = document.querySelector('.v2-root');
+    if (!root) return;
+
+    const titles = collectScrollTitles(root);
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+    if (reduce) {
+      titles.forEach((title) => {
+        title.classList.add('v2-title-reveal', 'is-in');
+      });
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          entry.target.classList.add('is-in');
+          observer.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.18, rootMargin: '0px 0px -12% 0px' }
+    );
+
+    const fold = window.innerHeight * 0.88;
+    titles.forEach((title) => {
+      title.classList.add('v2-title-reveal');
+      if (title.getBoundingClientRect().top < fold) {
+        title.classList.add('is-in');
+        return;
+      }
+      observer.observe(title);
+    });
+
+    return () => {
+      observer.disconnect();
+      titles.forEach((title) => {
+        title.classList.remove('v2-title-reveal', 'is-in');
+      });
+    };
+  }, [enabled, pathname, kissMode]);
+}
+
 function useSectionReveals(enabled: boolean) {
   useEffect(() => {
     if (!enabled) return;
@@ -180,6 +239,7 @@ export function ExperienceMotion() {
   const experienceReady = phase === 'hidden';
   useLenisSmoothScroll(experienceReady && !isMachine);
   useSectionReveals(experienceReady);
+  useTitleReveals(experienceReady, pathname, kissMode);
 
   useEffect(() => {
     const root = document.querySelector('.v2-root');

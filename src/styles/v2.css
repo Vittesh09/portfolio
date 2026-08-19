@@ -1,15 +1,15 @@
 @tailwind components;
 @tailwind utilities;
 
-/* V2 direction D — a bright-red research archive on warm paper. */
+/* V2 direction D — a bright-red research archive on cool gray-blue. */
 .v2-root {
-  --v2-bg-primary: #eeeade;
-  --v2-bg-surface: #f7f4eb;
-  --v2-bg-muted: #d9d4c7;
-  --v2-text-primary: #101010;
-  --v2-text-secondary: #4f4d48;
-  --v2-text-muted: #817e76;
-  --v2-border-subtle: #b9b4a8;
+  --v2-bg-primary: #eef1f5;
+  --v2-bg-surface: #f6f8fb;
+  --v2-bg-muted: #e1e6ee;
+  --v2-text-primary: #13151a;
+  --v2-text-secondary: #4c5360;
+  --v2-text-muted: #7c8492;
+  --v2-border-subtle: #c4cbd6;
   --v2-accent-pop: #f23828;
   --v2-accent-blue: #f23828;
   background: var(--v2-bg-primary);
@@ -523,6 +523,24 @@
   will-change: auto;
 }
 
+.v2-root .v2-title-reveal {
+  opacity: 0;
+  filter: blur(5px);
+  transform: translate3d(0, 0.85rem, 0);
+  transition:
+    opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.9s cubic-bezier(0.16, 1, 0.3, 1),
+    filter 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  will-change: opacity, transform, filter;
+}
+
+.v2-root .v2-title-reveal.is-in {
+  opacity: 1;
+  filter: blur(0);
+  transform: none;
+  will-change: auto;
+}
+
 /* Mobile / kiss hero — staggered load (mirrors singularity bh-intro-fade) */
 .v2-root .v2-kiss-hero.is-kiss-intro:not(.is-kiss-in) .v2-kiss-fade {
   filter: blur(5px);
@@ -601,6 +619,14 @@
 
   .v2-root .v2-motion-section {
     opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .v2-root .v2-title-reveal,
+  .v2-root .v2-title-reveal.is-in {
+    opacity: 1;
+    filter: none;
     transform: none;
     transition: none;
   }

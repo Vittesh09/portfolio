@@ -1,5 +1,3 @@
-import { toCanvas } from 'html-to-image';
-
 /**
  * Capture size must match getBoundingClientRect used by placeTextPlane.
  * Clone is forced fully visible — live DOM is never flashed for capture.
@@ -13,7 +11,8 @@ export async function captureWarpSource(node: HTMLElement): Promise<HTMLCanvasEl
     const rect = node.getBoundingClientRect();
     const width = Math.max(1, Math.round(rect.width));
     const height = Math.max(1, Math.round(rect.height));
-    const ratio = Math.min(3, Math.max(2, (window.devicePixelRatio || 1) * 1.5));
+    const ratio = Math.min(2, Math.max(1, window.devicePixelRatio || 1));
+    const { toCanvas } = await import('html-to-image');
 
     return await toCanvas(node, {
       pixelRatio: ratio,
@@ -27,7 +26,6 @@ export async function captureWarpSource(node: HTMLElement): Promise<HTMLCanvasEl
         transform: 'none',
         filter: 'none',
         textShadow: 'none',
-        WebkitFontSmoothing: 'antialiased',
         color: '#f2efe6',
         backgroundColor: 'transparent',
         ['--v2-text-primary' as string]: '#f2efe6',

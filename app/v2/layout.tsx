@@ -5,11 +5,10 @@ import {
 } from 'next/font/google';
 import { SiteShell } from '@/src/components/v2/layout/SiteShell';
 import '@/src/styles/v2.css';
-import '@/src/styles/singularity.css';
 
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
-  weight: ['400', '500', '600', '700'],
+  weight: ['400', '500', '600'],
   variable: '--font-jakarta',
   display: 'swap'
 });
@@ -17,14 +16,13 @@ const jakarta = Plus_Jakarta_Sans({
 const instrument = Instrument_Serif({
   subsets: ['latin'],
   weight: ['400'],
-  style: ['normal', 'italic'],
   variable: '--font-instrument',
   display: 'swap'
 });
 
 const jetbrains = JetBrains_Mono({
   subsets: ['latin'],
-  weight: ['400', '500'],
+  weight: ['400'],
   variable: '--font-jetbrains',
   display: 'swap'
 });
@@ -37,7 +35,7 @@ export const metadata = {
 };
 
 const themeInit = `
-(function(){try{var t=localStorage.getItem('v2-theme');var r=document.currentScript&&document.currentScript.parentElement;if(!r||!r.classList.contains('v2-root'))r=document.querySelector('.v2-root');if(r){r.classList.remove('light');if(t==='dark')r.classList.add('dark');}}catch(e){}})();
+(function(){try{var t=localStorage.getItem('v2-theme');var r=document.currentScript&&document.currentScript.parentElement;if(!r||!r.classList.contains('v2-root'))r=document.querySelector('.v2-root');if(r){r.classList.remove('light');var dark=t==='dark'||((t!=='light')&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(dark)r.classList.add('dark');else r.classList.remove('dark');}}catch(e){}})();
 `;
 
 export default function V2Layout({ children }: { children: React.ReactNode }) {
