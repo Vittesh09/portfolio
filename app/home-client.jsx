@@ -216,7 +216,6 @@ export default function HomeClient() {
                         ref={menuPanelRef}
                       >
                         <a href="/about/">About</a>
-                        <a href="/playground/">Playground</a>
                         <a href="/work/">Work</a>
 
                         <div className="resume-row">
@@ -319,7 +318,6 @@ export default function HomeClient() {
 
           <nav className="mobile-pill-menu" aria-label="Primary">
             <a href="/about/">About</a>
-            <a href="/playground/">Playground</a>
             <a href="/work/">Work</a>
             <a href="/assets/resume/Vittesh_Sinha_Resume.pdf" download>
               Resume
