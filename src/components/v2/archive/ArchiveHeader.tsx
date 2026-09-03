@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { siteConfig } from '@/src/config/v2/site';
 import { ThemeToggle } from '@/src/components/v2/ui/ThemeToggle';
+import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
 import { useMobileLanding } from '@/src/components/v2/ui/useMobileLanding';
 
 const navOptionClass =
@@ -29,6 +30,8 @@ export function ArchiveHeader() {
 
   openRef.current = open;
   visibleRef.current = visible;
+
+  const headerInertProps = !(visible || open) ? ({ inert: true } as const) : {};
 
   const clearHide = () => {
     if (hideTimer.current !== null) {
@@ -176,24 +179,44 @@ export function ArchiveHeader() {
         ref={headerRef}
         data-hidden={visible || open ? 'false' : 'true'}
         className="v2-archive-header fixed inset-x-0 top-0 z-[110] border-b"
-        aria-hidden={!(visible || open)}
+        {...headerInertProps}
       >
         <div className="v2-archive-header-bar mx-auto flex max-w-[1600px] items-center justify-between px-4 py-3 md:px-8">
-          <Link href="/v2/" onClick={goHome} className="archive-label font-medium">
+          <Link
+            href="/v2/"
+            onClick={goHome}
+            className={`${navOptionClass} font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`}
+          >
             Vittesh Sinha®
+            <span className="v2-visually-hidden"> — Home</span>
           </Link>
-          <nav className="hidden items-center gap-7 md:flex">
-            {siteConfig.nav.map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                onClick={item.href === '/v2/' ? goHome : undefined}
-                className={navOptionClass}
-              >
-                {item.label}
-              </Link>
-            ))}
-            <Link href="/v2/machine/" className={navOptionClass}>
+          <nav className="hidden items-center gap-7 md:flex" aria-label="Primary">
+            {siteConfig.nav.map((item) => {
+              const isHash = item.href.includes('#');
+              const NavTag = isHash ? HashNavLink : Link;
+              const isCurrent =
+                item.label === 'About'
+                  ? Boolean(pathname?.startsWith('/v2/about'))
+                  : item.label === 'Home'
+                    ? isHome
+                    : false;
+              return (
+                <NavTag
+                  key={item.href}
+                  href={item.href}
+                  onClick={item.href === '/v2/' ? goHome : undefined}
+                  className={navOptionClass}
+                  aria-current={isCurrent ? 'page' : undefined}
+                >
+                  {item.label}
+                </NavTag>
+              );
+            })}
+            <Link
+              href="/v2/machine/"
+              className={navOptionClass}
+              aria-current={pathname?.includes('/machine') ? 'page' : undefined}
+            >
               [Machine]
             </Link>
             <ThemeToggle />
@@ -202,8 +225,9 @@ export function ArchiveHeader() {
             <ThemeToggle />
             <button
               type="button"
-              className={`${navOptionClass} border border-border-subtle px-3`}
+              className={`${navOptionClass} min-h-11 border border-border-subtle px-3`}
               aria-expanded={open}
+              aria-controls="v2-mobile-nav"
               onClick={() => setOpen((value) => !value)}
             >
               {open ? 'Close' : 'Menu'}
@@ -212,29 +236,39 @@ export function ArchiveHeader() {
         </div>
 
         {open ? (
-          <nav className="border-t border-border-subtle px-2 pb-2 md:hidden">
+          <nav
+            id="v2-mobile-nav"
+            className="border-t border-border-subtle px-2 pb-2 md:hidden"
+            aria-label="Mobile"
+          >
             <div className="flex flex-col">
-              {siteConfig.nav.map((item, index) => (
-                <Link
-                  key={item.href}
-                  href={item.href}
-                  onClick={(event) => {
-                    if (item.href === '/v2/') {
-                      goHome(event);
-                      return;
-                    }
-                    setOpen(false);
-                  }}
-                  className="v2-nav-mobile-row flex items-baseline justify-between border-b border-border-subtle"
-                >
-                  <span className="text-2xl font-semibold tracking-tight">{item.label}</span>
-                  <span className="archive-label text-accent-pop">0{index + 1}</span>
-                </Link>
-              ))}
+              {siteConfig.nav.map((item, index) => {
+                const isHash = item.href.includes('#');
+                const NavTag = isHash ? HashNavLink : Link;
+                return (
+                  <NavTag
+                    key={item.href}
+                    href={item.href}
+                    onClick={(event) => {
+                      if (item.href === '/v2/') {
+                        goHome(event);
+                        return;
+                      }
+                      setOpen(false);
+                    }}
+                    className="v2-nav-mobile-row flex min-h-11 items-baseline justify-between border-b border-border-subtle"
+                  >
+                    <span className="text-2xl font-semibold tracking-tight">{item.label}</span>
+                    <span className="archive-label text-accent-pop" aria-hidden>
+                      0{index + 1}
+                    </span>
+                  </NavTag>
+                );
+              })}
               <Link
                 href="/v2/machine/"
                 onClick={() => setOpen(false)}
-                className="v2-nav-mobile-row flex w-full border-b border-border-subtle text-left"
+                className="v2-nav-mobile-row flex min-h-11 w-full border-b border-border-subtle text-left"
               >
                 <span className="text-2xl font-semibold tracking-tight">[Machine]</span>
               </Link>

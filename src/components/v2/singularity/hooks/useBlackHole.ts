@@ -539,8 +539,11 @@ export function useBlackHole(
     let lastCapture = 0;
     /** Warp bitmap captured — WebGL is the only visible headline. */
     let textReady = false;
+    /** First frame text became ready — drives opacity fade instead of a hard cut. */
+    let textRevealStartedAt = 0;
     const TEXT_CAPTURE_AFTER_COPY_MS = 450;
     const TEXT_CAPTURE_FALLBACK_MS = 2200;
+    const TEXT_REVEAL_MS = 1100;
 
     /** Keep a hole near its home without forcing world-Z (that changed depth/size). */
     const clampToPlayArea = (target = activeHole.core, home = activeHole.home) => {
@@ -696,7 +699,9 @@ export function useBlackHole(
       }
 
       textMesh.visible = true;
-      textMaterial.uniforms.uOpacity.value = 1;
+      if (!textRevealStartedAt) textRevealStartedAt = performance.now();
+      const t = Math.min(1, (performance.now() - textRevealStartedAt) / TEXT_REVEAL_MS);
+      textMaterial.uniforms.uOpacity.value = easeOutCubic(t);
     };
 
     const enableCopyFallback = () => {
@@ -739,9 +744,12 @@ export function useBlackHole(
         textMaterial.uniforms.uMap.value = textTexture;
         placeTextPlane();
 
+        const firstReveal = !textReady;
         textReady = true;
+        if (firstReveal) textRevealStartedAt = performance.now();
         textMesh.visible = true;
-        textMaterial.uniforms.uOpacity.value = 1;
+        // Opacity is eased in syncTextWarpVisibility — start from 0 on first reveal
+        if (firstReveal) textMaterial.uniforms.uOpacity.value = 0;
         lastCapture = performance.now();
         placeTextPlane();
       } catch (error) {
@@ -1370,6 +1378,7 @@ export function useBlackHole(
       hero?.classList.remove('is-bh-dragging');
       hero?.classList.remove('is-intro-done');
       hero?.classList.remove('is-copy-in');
+      hero?.classList.remove('bh-copy-fallback');
       mount.classList.remove('is-intro-done');
       if (grabProxy.parentNode) grabProxy.parentNode.removeChild(grabProxy);
       if (grabCursor.parentNode) grabCursor.parentNode.removeChild(grabCursor);

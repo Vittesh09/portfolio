@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { motion } from 'framer-motion';
 import type { Project } from '@/src/config/v2/caseStudies';
 import { projects } from '@/src/config/v2/caseStudies';
+import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
 
 export function CaseStudyExperience({ project }: { project: Project }) {
   const next =
@@ -14,9 +15,9 @@ export function CaseStudyExperience({ project }: { project: Project }) {
     <article>
       <section className="border-b border-border-subtle">
         <div className="mx-auto max-w-[1600px] px-4 py-8 md:px-8 md:py-12">
-          <Link href="/v2/#work" className="archive-label text-text-muted hover:text-accent-pop">
+          <HashNavLink href="/v2/#work" className="archive-label text-text-muted hover:text-accent-pop">
             ← Back to work
-          </Link>
+          </HashNavLink>
           <div className="mt-12 grid gap-8 md:grid-cols-12 md:items-end">
             <div className="md:col-span-8">
               <p className="archive-label text-accent-pop">
@@ -34,7 +35,7 @@ export function CaseStudyExperience({ project }: { project: Project }) {
         <div className="relative aspect-[16/9] bg-[#070707] md:aspect-[21/8]">
           <Image
             src={project.image}
-            alt={project.images[0]?.alt ?? ''}
+            alt={project.images[0]?.alt || `${project.title} overview`}
             fill
             priority
             className="object-contain p-5 md:p-10"

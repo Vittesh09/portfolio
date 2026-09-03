@@ -19,6 +19,8 @@ Do **not** restyle from `vittesh_portfolio_amaterasu_style.md` (sage/emerald) un
 
 - Cool gray-blue light surfaces + ink dark; accent `#F23828` / dark `#FF5447`
 - Oversized geometric display (Jakarta), Instrument serif for quotes, JetBrains Mono labels (`archive-label`)
+- Type floor: never below **11px** (0.6875rem) on mobile; at 11px use **uppercase** (`archive-label`)
+- Exception: Quick facts captions (`Years shipping`, etc.) stay **11px sentence case** (`.v2-trust-fact-label`)
 - Hairline `border-subtle` rules, four-column research grid, mono indexes (`01`, `↗`, `→`)
 - Theme: system default + paper / ink; CSS vars on `.v2-root` / `.v2-root.dark`
 

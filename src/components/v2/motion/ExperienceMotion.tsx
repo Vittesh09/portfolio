@@ -125,7 +125,9 @@ function AmbientCursor({ enabled }: { enabled: boolean }) {
       const target = event.target;
       setInteractive(
         target instanceof Element &&
-          Boolean(target.closest('a, button, [role="button"], input, textarea, select'))
+          Boolean(
+            target.closest('a, button, [role="button"], input, textarea, select, label')
+          )
       );
     };
     const down = () => setPressed(true);
@@ -142,16 +144,27 @@ function AmbientCursor({ enabled }: { enabled: boolean }) {
 
   if (!enabled) return null;
 
+  /* Orbit only while pressed and not over a CTA */
+  const orbit = pressed && !interactive;
+
   return (
     <motion.div
       aria-hidden
       className="v2-ambient-cursor"
       data-interactive={interactive}
+      data-pressed={pressed}
+      data-orbit={orbit}
       style={{ x: smoothX, y: smoothY }}
-      animate={{ scale: pressed ? 0.65 : interactive ? 1.55 : 1 }}
+      animate={{ scale: pressed ? 0.88 : interactive ? 1.55 : 1 }}
       transition={{ duration: 0.18 }}
     >
-      <span />
+      <span className="v2-ambient-cursor-orbit" aria-hidden>
+        <span className="v2-ambient-cursor-trail" data-trail="4" />
+        <span className="v2-ambient-cursor-trail" data-trail="3" />
+        <span className="v2-ambient-cursor-trail" data-trail="2" />
+        <span className="v2-ambient-cursor-trail" data-trail="1" />
+        <span className="v2-ambient-cursor-core" />
+      </span>
     </motion.div>
   );
 }

@@ -93,23 +93,23 @@ export const services = [
 export const experience = [
   {
     company: 'Nagarro',
-    role: 'Product Designer',
+    role: 'Senior Product Designer',
     period: 'Nov 2023 to Present',
     detail:
-      'Designing fleet tools, cloud cost platforms, and multi-tenant workflows where a wrong click costs real money.'
+      'End-to-end UX for enterprise, logistics, and fitness platforms — real-time KPI dashboards, VR emotion insights, research-led prioritization, and AI-assisted prototyping.'
   },
   {
     company: 'Simple Energy',
-    role: 'UX Designer',
+    role: 'Product Designer',
     period: 'Feb 2022 to Nov 2023',
     detail:
-      'Shaped EV discovery and ownership experiences so technical claims and day-to-day controls felt calm and trustworthy.'
+      'Owned the cross-platform design system (apps, internal tools, scooter HMI). Shipped the Simple One app and e-scooter HMI, cutting task-flow complexity by 10–15%.'
   },
   {
-    company: 'Curefit',
-    role: 'Operation & Experience Design',
-    period: 'Oct 2018 to Jan 2022',
+    company: 'Cult.fit',
+    role: 'User Research & Experience Design',
+    period: 'Oct 2018 to Feb 2022',
     detail:
-      'Designed ops and member experiences under peak load: handoffs, rituals, and tools that had to work when every minute counted.'
+      'Research, journeys, and interfaces for fitness and wellness. Designed half-hour class flows (+15% NPS across 100+ centers) and field research for in-center experiences.'
   }
 ] as const;

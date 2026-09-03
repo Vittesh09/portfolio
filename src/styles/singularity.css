@@ -154,6 +154,7 @@
   padding-bottom: 1.25rem;
   padding-right: 0.75rem;
   position: relative;
+  z-index: 2;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-rendering: geometricPrecision;
@@ -167,11 +168,25 @@
   z-index: 0;
 }
 
-/* If WebGL capture fails, show DOM copy as fallback */
+/* If WebGL capture fails, show DOM copy as fallback with a soft fade-in */
 .v2-root .bh-hero.bh-copy-fallback .bh-copy-source {
-  opacity: 1 !important;
+  opacity: 0 !important;
   pointer-events: auto;
   z-index: 2;
+  animation: bh-copy-fallback-in 1s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards;
+}
+
+@keyframes bh-copy-fallback-in {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translate3d(0, 0.85rem, 0);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 .v2-root .bh-copy .archive-display--hero,
@@ -233,6 +248,13 @@
     opacity: 1;
     transform: none;
     transition: none;
+  }
+
+  .v2-root .bh-hero.bh-copy-fallback .bh-copy-source {
+    animation: none;
+    opacity: 1 !important;
+    filter: none;
+    transform: none;
   }
 }
 

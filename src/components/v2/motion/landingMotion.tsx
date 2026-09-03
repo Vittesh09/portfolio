@@ -9,7 +9,7 @@ import {
 } from 'framer-motion';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
-const LETTER_MS = 320;
+const LETTER_MS = 420;
 
 export type HeroTitleLine = {
   text: string;
@@ -17,8 +17,7 @@ export type HeroTitleLine = {
 };
 
 export const HERO_TITLE_LINES_KISS: HeroTitleLine[] = [
-  { text: 'Thoughtfully' },
-  { text: 'designed.' },
+  { text: 'Thoughtfully designed.' },
   { text: 'Purposefully simple.', accent: true }
 ];
 
@@ -27,9 +26,9 @@ export const HERO_TITLE_LINES_SINGULARITY: HeroTitleLine[] = [
   { text: 'Purposefully simple.', accent: true }
 ];
 
-export function heroTitleDuration(lines: HeroTitleLine[], stagger = 0.028) {
+export function heroTitleDuration(lines: HeroTitleLine[], stagger = 0.032) {
   const chars = lines.reduce((count, line) => count + line.text.length, 0);
-  return 0.06 + Math.max(0, chars - 1) * stagger + LETTER_MS / 1000;
+  return 0.1 + Math.max(0, chars - 1) * stagger + LETTER_MS / 1000;
 }
 
 type AnimatedHeroTitleProps = {
@@ -45,7 +44,7 @@ export function AnimatedHeroTitle({
   lines,
   className,
   play = true,
-  stagger = 0.028,
+  stagger = 0.032,
   onComplete
 }: AnimatedHeroTitleProps) {
   const reduceMotion = useReducedMotion();
@@ -70,9 +69,12 @@ export function AnimatedHeroTitle({
   if (reduceMotion) {
     return (
       <h1 className={className}>
-        {lines.map((line, lineIndex) => (
-          <span key={line.text} className="v2-hero-title-line block">
-            <span className={line.accent ? 'text-accent-pop' : undefined}>{line.text}</span>
+        {lines.map((line) => (
+          <span
+            key={line.text}
+            className={`v2-hero-title-line ${line.accent ? 'text-accent-pop' : ''}`}
+          >
+            {line.text}
           </span>
         ))}
       </h1>
@@ -90,7 +92,7 @@ export function AnimatedHeroTitle({
           return (
             <span
               key={`${lineIndex}-${line.text}`}
-              className={`v2-hero-title-line block ${line.accent ? 'text-accent-pop' : ''}`}
+              className={`v2-hero-title-line ${line.accent ? 'text-accent-pop' : ''}`}
             >
               {words.map((word, wordIndex) => (
                 <span key={`${lineIndex}-${wordIndex}`} className="v2-hero-title-word">
@@ -141,11 +143,11 @@ function AnimatedLetter({
   return (
     <motion.span
       className={isSpace ? 'v2-hero-title-space' : 'v2-hero-title-char'}
-      initial={{ opacity: 0, y: '0.36em' }}
-      animate={play ? { opacity: 1, y: 0 } : { opacity: 0, y: '0.36em' }}
+      initial={{ opacity: 0, y: '0.42em', filter: 'blur(4px)' }}
+      animate={play ? { opacity: 1, y: 0, filter: 'blur(0px)' } : { opacity: 0, y: '0.42em', filter: 'blur(4px)' }}
       transition={{
         duration: LETTER_MS / 1000,
-        delay: 0.06 + index * stagger,
+        delay: 0.1 + index * stagger,
         ease: EASE
       }}
     >
@@ -266,7 +268,7 @@ type MobileHeroSublineProps = {
   children: React.ReactNode;
 };
 
-/** Mobile kiss only — intro line rises toward the headline after it appears. */
+/** Intro line rises toward the headline after the letter reveal. */
 export function MobileHeroSubline({ play, className, children }: MobileHeroSublineProps) {
   const reduceMotion = useReducedMotion();
 

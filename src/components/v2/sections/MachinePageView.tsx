@@ -62,13 +62,15 @@ export function MachinePageView() {
           <button
             type="button"
             onClick={copyAll}
+            aria-live="polite"
             style={{
               font: 'inherit',
               padding: '8px 16px',
               cursor: 'pointer',
               border: '1px solid #111',
               background: '#111',
-              color: '#fff'
+              color: '#fff',
+              minHeight: 44
             }}
           >
             {copied ? 'Copied' : 'Copy to clipboard'}

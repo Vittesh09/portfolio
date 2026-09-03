@@ -59,7 +59,7 @@ function ControlSlider({
   return (
     <label className="block">
       <span className="flex items-center justify-between gap-3">
-        <span className="archive-label text-white/55">{def.label}</span>
+        <span className="archive-label text-white/80">{def.label}</span>
         <span className="font-mono text-[11px] text-white/70">{value}</span>
       </span>
       <input
@@ -136,7 +136,8 @@ export function SingularityLabExperience() {
           <button
             type="button"
             onClick={toggleSecondHole}
-            className={`archive-label border px-4 py-2 backdrop-blur-md ${
+            aria-pressed={dualHoles}
+            className={`archive-label min-h-11 border px-4 py-2 backdrop-blur-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white ${
               dualHoles
                 ? 'border-[#f23828]/60 bg-[#f23828]/20 text-[#f2efe6]'
                 : 'border-white/20 bg-black/55 text-white'
@@ -147,21 +148,23 @@ export function SingularityLabExperience() {
           <button
             type="button"
             onClick={() => setPanelOpen((open) => !open)}
-            className="archive-label border border-white/20 bg-black/55 px-4 py-2 text-white backdrop-blur-md"
+            aria-expanded={panelOpen}
+            aria-controls="singularity-lab-controls"
+            className="archive-label min-h-11 border border-white/20 bg-black/55 px-4 py-2 text-white backdrop-blur-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             {panelOpen ? 'Hide controls' : 'Show controls'}
           </button>
           <button
             type="button"
             onClick={reset}
-            className="archive-label border border-white/20 bg-black/55 px-4 py-2 text-white backdrop-blur-md"
+            className="archive-label min-h-11 border border-white/20 bg-black/55 px-4 py-2 text-white backdrop-blur-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             Reset
           </button>
           <button
             type="button"
             onClick={copyJson}
-            className="archive-label border border-white/20 bg-black/55 px-4 py-2 text-white backdrop-blur-md"
+            className="archive-label min-h-11 border border-white/20 bg-black/55 px-4 py-2 text-white backdrop-blur-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             Copy JSON
           </button>
@@ -169,7 +172,11 @@ export function SingularityLabExperience() {
       </div>
 
       {panelOpen ? (
-        <aside className="absolute bottom-4 right-4 z-20 flex max-h-[min(70svh,34rem)] w-[min(100%-2rem,22rem)] flex-col overflow-hidden rounded-sm border border-white/15 bg-black/70 text-[#f2efe6] shadow-2xl backdrop-blur-md md:bottom-6 md:right-6">
+        <aside
+          id="singularity-lab-controls"
+          className="absolute bottom-4 right-4 z-20 flex max-h-[min(70svh,34rem)] w-[min(100%-2rem,22rem)] flex-col overflow-hidden rounded-sm border border-white/15 bg-black/70 text-[#f2efe6] shadow-2xl backdrop-blur-md md:bottom-6 md:right-6"
+          aria-label="Singularity parameters"
+        >
           <div className="border-b border-white/10 px-4 py-3">
             <p className="archive-label text-white/50">Parameters</p>
           </div>
@@ -185,7 +192,7 @@ export function SingularityLabExperience() {
                       onChange={(event) => setColor(color.key, event.target.value)}
                       className="h-8 w-8 cursor-pointer rounded-sm border border-white/20 bg-transparent"
                     />
-                    <span className="archive-label text-white/55">{color.label}</span>
+                    <span className="archive-label text-white/80">{color.label}</span>
                   </label>
                 ))}
               </div>

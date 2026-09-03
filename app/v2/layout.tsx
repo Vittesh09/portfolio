@@ -42,6 +42,7 @@ export default function V2Layout({ children }: { children: React.ReactNode }) {
   return (
     <div
       className={`v2-root ${jakarta.variable} ${instrument.variable} ${jetbrains.variable} ${jakarta.className}`}
+      lang="en"
       suppressHydrationWarning
     >
       <script dangerouslySetInnerHTML={{ __html: themeInit }} />

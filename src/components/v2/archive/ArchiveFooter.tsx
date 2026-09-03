@@ -1,49 +1,69 @@
 import Link from 'next/link';
 import { siteConfig } from '@/src/config/v2/site';
-import { IndiaTime } from '@/src/components/v2/ui/IndiaTime';
+import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
 
 export function ArchiveFooter() {
   return (
-    <footer className="border-t border-border-subtle">
-      <div className="mx-auto grid max-w-[1600px] md:grid-cols-12">
-        <div className="border-b border-border-subtle p-5 md:col-span-5 md:border-b-0 md:border-r md:p-8">
-          <p className="archive-label text-text-muted">In short</p>
-          <p className="archive-serif mt-5 max-w-[18ch] text-[clamp(1.5rem,2.8vw,2rem)]">
-            I design products people can finish using, without fighting the interface.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 border-b border-border-subtle md:col-span-4 md:border-b-0 md:border-r">
-          <div className="border-r border-border-subtle p-5 md:p-8">
-            <p className="archive-label text-text-muted">On this site</p>
+    <footer className="v2-footer">
+      <div className="v2-footer-inner">
+        <div className="v2-footer-navs">
+          <nav className="v2-footer-nav" aria-labelledby="footer-site-label">
+            <p className="archive-label text-text-muted" id="footer-site-label">
+              On this site
+            </p>
             <div className="mt-4 flex flex-col gap-2 text-sm">
-              <Link href="/v2/">Home</Link>
-              <Link href="/v2/#work">Work</Link>
-              <Link href="/v2/about/">About</Link>
-              <Link href="/v2/machine/">Machine</Link>
+              <Link href="/v2/" className="underline-offset-4 hover:underline">
+                Home
+              </Link>
+              <HashNavLink href="/v2/#work" className="underline-offset-4 hover:underline">
+                Work
+              </HashNavLink>
+              <Link href="/v2/about/" className="underline-offset-4 hover:underline">
+                About
+              </Link>
+              <Link href="/v2/machine/" className="underline-offset-4 hover:underline">
+                Machine
+              </Link>
             </div>
-          </div>
-          <div className="p-5 md:p-8">
+          </nav>
+          <nav className="v2-footer-nav" aria-label="Elsewhere">
             <p className="archive-label text-text-muted">Elsewhere</p>
             <div className="mt-4 flex flex-col gap-2 text-sm">
-              <a href={siteConfig.links.linkedin} target="_blank" rel="noreferrer">
-                LinkedIn ↗
+              <a
+                href={siteConfig.links.linkedin}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline-offset-4 hover:underline"
+              >
+                LinkedIn <span className="v2-visually-hidden">(opens in a new tab)</span>
+                <span aria-hidden> ↗</span>
               </a>
-              <a href={siteConfig.links.behance} target="_blank" rel="noreferrer">
-                Behance ↗
+              <a
+                href={siteConfig.links.behance}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline-offset-4 hover:underline"
+              >
+                Behance <span className="v2-visually-hidden">(opens in a new tab)</span>
+                <span aria-hidden> ↗</span>
               </a>
-              <a href={siteConfig.links.resume} download>
-                Resume ↓
+              <a
+                href={siteConfig.links.resume}
+                download
+                className="underline-offset-4 hover:underline"
+              >
+                Resume <span aria-hidden>↓</span>
               </a>
             </div>
-          </div>
+          </nav>
         </div>
-        <div className="archive-blue flex flex-col justify-between p-5 md:col-span-3 md:p-8">
-          <p className="archive-label text-white/70">Email</p>
-          <a href={`mailto:${siteConfig.email}`} className="mt-10 break-all text-lg font-semibold">
-            {siteConfig.email}
-          </a>
-          <p className="archive-label mt-8 text-white/60" suppressHydrationWarning>
-            © {new Date().getFullYear()} · <IndiaTime className="text-white/60" />
+
+        <div className="v2-site-footer-brand" aria-label="Copyright">
+          <p className="v2-site-footer-mark" aria-hidden="true">
+            ˗ˏˋ ꒰ 🧡 ꒱ ˎˊ˗
+          </p>
+          <p className="v2-site-footer-copy">
+            <span className="v2-visually-hidden">With love. </span>© 2026 {siteConfig.name}
           </p>
         </div>
       </div>

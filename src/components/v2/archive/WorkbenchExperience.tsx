@@ -15,7 +15,7 @@ function ComponentPreview({ index }: { index: number }) {
       <div className="rounded-sm border border-white/25 bg-[#101116] p-4 text-white">
         <div className="flex items-center justify-between">
           <span className="archive-label text-white/50">RDS recommendation</span>
-          <span className="rounded-full bg-[#79f2bd] px-2 py-1 text-[9px] font-semibold text-black">
+          <span className="rounded-full bg-[#79f2bd] px-2 py-1 text-[11px] font-semibold uppercase text-black">
             Save $420/mo
           </span>
         </div>
@@ -39,7 +39,7 @@ function ComponentPreview({ index }: { index: number }) {
           <div key={level} className="flex items-center gap-3 border border-white/10 p-3">
             <span className="h-2 w-2 rounded-full" style={{ background: color }} />
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-semibold uppercase tracking-wider">{level}</p>
+              <p className="text-[11px] font-semibold uppercase tracking-wider">{level}</p>
               <p className="truncate text-xs text-white/55">{detail}</p>
             </div>
             <span className="text-xs">→</span>
