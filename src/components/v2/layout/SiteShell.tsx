@@ -31,7 +31,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         </>
       ) : isSingularityLab ? (
         <KissModeProvider>
-          <div className="min-h-screen bg-black text-[#f2efe6]">
+          <div className="min-h-svh bg-black text-[#f2efe6]">
             <SkipLink />
             <ArchiveHeader />
             <main id="v2-main">{children}</main>
@@ -39,7 +39,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         </KissModeProvider>
       ) : (
         <KissModeProvider>
-          <div className="min-h-screen">
+          <div className="min-h-svh">
             <SkipLink />
             <ExperienceMotion />
             <ArchiveHeader />

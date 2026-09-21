@@ -125,7 +125,7 @@ export function LandingExperienceKiss() {
 
       <section className="v2-trust-band border-b border-border-subtle">
         <div className="v2-trust-band-inner mx-auto w-full max-w-[1600px]">
-          <div className="v2-trust-row grid grid-cols-3 gap-x-5 gap-y-4 md:grid-cols-4 md:gap-0">
+          <div className="v2-trust-row grid grid-cols-1 gap-x-5 gap-y-4 md:grid-cols-4 md:gap-0">
             <RevealOnScroll className="hidden flex-col justify-center md:flex">
               <Label>Quick facts</Label>
             </RevealOnScroll>
@@ -144,7 +144,7 @@ export function LandingExperienceKiss() {
               </RevealOnScroll>
             ))}
           </div>
-          <div className="v2-trust-row grid grid-cols-3 gap-x-5 gap-y-4 md:grid-cols-4 md:gap-0">
+          <div className="v2-trust-row grid grid-cols-1 gap-x-5 gap-y-4 md:grid-cols-4 md:gap-0">
             <RevealOnScroll className="hidden flex-col justify-center md:flex">
               <Label>I&apos;ve worked with</Label>
             </RevealOnScroll>

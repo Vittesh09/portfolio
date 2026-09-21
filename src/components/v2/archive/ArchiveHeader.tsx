@@ -49,9 +49,17 @@ export function ArchiveHeader() {
   }, [pathname]);
 
   useEffect(() => {
-    if (open) {
-      setVisible(true);
-    }
+    if (!open) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setOpen(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener('keydown', onKey);
+    };
   }, [open]);
 
   useEffect(() => {

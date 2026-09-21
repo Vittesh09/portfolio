@@ -7,7 +7,8 @@
     "start": "next start",
     "lint": "next lint",
     "check:v2": "node scripts/check-v2-consistency.mjs",
-    "sync:v2-agent": "node scripts/sync-v2-agent-docs.mjs"
+    "sync:v2-agent": "node scripts/sync-v2-agent-docs.mjs",
+    "test:v2-viewport": "playwright test"
   },
   "dependencies": {
     "framer-motion": "^12.42.2",
