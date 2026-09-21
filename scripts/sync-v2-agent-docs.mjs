@@ -50,9 +50,9 @@ export function collectFacts() {
     heroHeadline: grabExport(profile, 'heroHeadline'),
     linkedin: /linkedin: '([^']+)'/.exec(profile)?.[1] ?? '',
     behance: /behance: '([^']+)'/.exec(profile)?.[1] ?? '',
-    employers: [...profile.matchAll(/name: '(Nagarro|Simple Energy|Curefit)'/g)].map(
-      (match) => match[1]
-    ),
+    employers: [
+      ...profile.matchAll(/name: '(Nagarro|Simple Energy|Cult\.fit \(formerly Curefit\))'/g)
+    ].map((match) => match[1]),
     caseTitles: titles
   };
 }
@@ -80,7 +80,7 @@ export function buildAgentDocs(facts) {
     ),
     '',
     'Machine-readable profile: https://www.vittesh.com/v2/machine/',
-    'Full markdown: https://www.vittesh.com/llms-full.txt',
+    'Full markdown: https://www.vittesh.com/machine.md',
     'JSON: https://www.vittesh.com/machine.json',
     `LinkedIn: ${facts.linkedin}`,
     `Behance: ${facts.behance}`,
@@ -97,10 +97,8 @@ if (process.argv[1] && process.argv[1].endsWith('sync-v2-agent-docs.mjs')) {
   const recordNote =
     'This file is a snapshot for crawlers. The live generator is src/config/v2/agentDocuments.ts.';
   write('public/llms.txt', llms);
-  write(
-    'public/llms-full.txt',
-    [
-      `# Machine profile: ${facts.name}`,
+  const full = [
+      `# ${facts.name}`,
       '',
       'This page is a machine-readable version of the portfolio for AI agents.',
       `Last updated: ${facts.lastUpdated}`,
@@ -112,7 +110,7 @@ if (process.argv[1] && process.argv[1].endsWith('sync-v2-agent-docs.mjs')) {
       `Availability: ${facts.availability}`,
       `Location: ${facts.locationLine}`,
       '',
-      'Employment:',
+      'Employers:',
       ...facts.employers.map((name) => `- ${name}`),
       '',
       'Case studies:',
@@ -120,8 +118,9 @@ if (process.argv[1] && process.argv[1].endsWith('sync-v2-agent-docs.mjs')) {
       '',
       recordNote,
       ''
-    ].join('\n')
-  );
+    ].join('\n');
+  write('public/llms-full.txt', full);
+  write('public/machine.md', full);
   write(
     'public/machine.json',
     `${JSON.stringify(

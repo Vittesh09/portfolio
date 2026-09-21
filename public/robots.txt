@@ -22,7 +22,7 @@ Allow: /
 # Keep machine-readable surfaces crawlable.
 Allow: /v2/machine/
 Allow: /llms.txt
-Allow: /llms-full.txt
+Allow: /machine.md
 Allow: /machine.json
 Allow: /sitemap.xml
 

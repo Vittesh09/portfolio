@@ -5,6 +5,7 @@ export {
   getLlmsFull,
   getLlmsTxt,
   getMachineJsonLd,
+  getMachineMarkdown,
   getMachinePlainText,
   getMachineRecord,
   machineMeta

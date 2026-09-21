@@ -35,7 +35,7 @@ export function v2PageMetadata({
     alternates: {
       canonical,
       types: {
-        'text/markdown': `${SITE_URL}/llms-full.txt`
+        'text/markdown': `${SITE_URL}/machine.md`
       }
     },
     openGraph: {
