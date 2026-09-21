@@ -1,9 +1,13 @@
 import { AboutExperience } from '@/src/components/v2/archive/AboutExperience';
+import { profile } from '@/src/config/v2/profile';
+import { v2PageMetadata } from '@/src/config/v2/seo';
 
 export const metadata = {
-  title: 'About · V2 Preview',
-  description:
-    'About Vittesh Sinha, product designer with 6+ years across automotive, VR, cloud, and enterprise products.'
+  ...v2PageMetadata({
+    title: `About · ${profile.name}`,
+    description: profile.aboutShort,
+    path: '/about/'
+  })
 };
 
 export default function V2AboutPage() {

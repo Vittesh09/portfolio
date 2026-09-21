@@ -1,12 +1,25 @@
 import { LandingExperienceSingularity } from '@/src/components/v2/archive/LandingExperienceSingularity';
+import { getHomeJsonLd } from '@/src/config/v2/agentDocuments';
+import { metaDescription, profile } from '@/src/config/v2/profile';
+import { v2PageMetadata } from '@/src/config/v2/seo';
 
 export const metadata = {
-  title: 'Home · V2 Preview',
-  description:
-    'Vittesh Sinha, product designer for cars, VR, cloud tools, and enterprise software. I make powerful products easier to use.'
+  ...v2PageMetadata({
+    title: `${profile.name} | ${profile.title}`,
+    description: metaDescription,
+    path: '/'
+  })
 };
 
 /** Primary archive homepage — singularity landing + v2 site chrome. */
 export default function V2HomePage() {
-  return <LandingExperienceSingularity />;
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(getHomeJsonLd()) }}
+      />
+      <LandingExperienceSingularity />
+    </>
+  );
 }

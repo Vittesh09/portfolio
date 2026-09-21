@@ -4,6 +4,8 @@ import {
   Plus_Jakarta_Sans
 } from 'next/font/google';
 import { SiteShell } from '@/src/components/v2/layout/SiteShell';
+import { metaDescription } from '@/src/config/v2/profile';
+import { v2DefaultTitle, v2PageMetadata, v2Robots } from '@/src/config/v2/seo';
 import '@/src/styles/v2.css';
 
 const jakarta = Plus_Jakarta_Sans({
@@ -28,10 +30,12 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: 'V2 Preview · Vittesh Sinha',
-  description:
-    'Portfolio of Vittesh Sinha, product designer shipping clearer experiences for complex software.',
-  robots: { index: false, follow: false }
+  ...v2PageMetadata({
+    title: v2DefaultTitle,
+    description: metaDescription,
+    path: '/'
+  }),
+  robots: v2Robots()
 };
 
 export const viewport = {

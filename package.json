@@ -3,9 +3,11 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run sync:v2-agent && npm run check:v2 && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check:v2": "node scripts/check-v2-consistency.mjs",
+    "sync:v2-agent": "node scripts/sync-v2-agent-docs.mjs"
   },
   "dependencies": {
     "framer-motion": "^12.42.2",
