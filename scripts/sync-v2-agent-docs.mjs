@@ -34,19 +34,25 @@ export function collectFacts() {
   const titles = grabTitles(studies).filter((title) =>
     ['Future City VR + EEG', 'Fleet Command Center', 'Cloud Cost Optimization'].includes(title)
   );
+  const profileBlock = /export const profile = \{([\s\S]*?)\n\} as const/.exec(profile)?.[1] ?? '';
+  const city = grabExport(profile, 'city');
+  const timezone = grabExport(profile, 'timezone');
+  const openTo = grabExport(profile, 'openTo');
 
   return {
     lastUpdated: grabExport(profile, 'lastUpdated'),
-    name: grabProfileField(profile, 'name'),
-    title: grabProfileField(profile, 'title'),
+    name: /name: '([^']+)'/.exec(profileBlock)?.[1] ?? '',
+    title: /title: '([^']+)'/.exec(profileBlock)?.[1] ?? '',
     yearsExperience: grabExport(profile, 'yearsExperience'),
-    email: grabProfileField(profile, 'email'),
+    email: /email: '([^']+)'/.exec(profileBlock)?.[1] ?? '',
     availability: grabExport(profile, 'availability'),
-    locationLine: /locationLine: `([^`]+)`/.exec(profile)?.[1] ?? '',
+    locationLine: `Based in ${city}, India · ${timezone} · ${openTo}`,
     heroHeadline: grabExport(profile, 'heroHeadline'),
-    linkedin: grabProfileField(profile, 'linkedin'),
-    behance: grabProfileField(profile, 'behance'),
-    employers: [...profile.matchAll(/name: '([^']+)',\n    role:/g)].map((match) => match[1]),
+    linkedin: /linkedin: '([^']+)'/.exec(profile)?.[1] ?? '',
+    behance: /behance: '([^']+)'/.exec(profile)?.[1] ?? '',
+    employers: [...profile.matchAll(/name: '(Nagarro|Simple Energy|Curefit)'/g)].map(
+      (match) => match[1]
+    ),
     caseTitles: titles
   };
 }
