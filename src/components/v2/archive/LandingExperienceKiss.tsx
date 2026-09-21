@@ -60,7 +60,7 @@ export function LandingExperienceKiss() {
           <div className="v2-kiss-copy md:hidden">
             <HeroPortrait className="mb-1" />
             <h1
-              className="v2-kiss-fade archive-display archive-display--hero text-[clamp(2.75rem,10vw,6.5rem)]"
+              className="v2-kiss-fade archive-display archive-display--hero text-[clamp(1.85rem,8vw,2.5rem)]"
               style={{ transitionDelay: '0.06s' }}
             >
               <span className="v2-hero-line">Thoughtfully designed.</span>

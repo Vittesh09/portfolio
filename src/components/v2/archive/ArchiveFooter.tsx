@@ -1,3 +1,4 @@
+import Image from 'next/image';
 import Link from 'next/link';
 import { siteConfig } from '@/src/config/v2/site';
 import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
@@ -9,7 +10,7 @@ export function ArchiveFooter() {
         <div className="v2-footer-navs">
           <nav className="v2-footer-nav" aria-labelledby="footer-site-label">
             <p className="archive-label text-text-muted" id="footer-site-label">
-              On this site
+              Explore
             </p>
             <div className="mt-4 flex flex-col gap-2 text-sm">
               <Link href="/v2/" className="underline-offset-4 hover:underline">
@@ -26,8 +27,8 @@ export function ArchiveFooter() {
               </Link>
             </div>
           </nav>
-          <nav className="v2-footer-nav" aria-label="Elsewhere">
-            <p className="archive-label text-text-muted">Elsewhere</p>
+          <nav className="v2-footer-nav v2-footer-nav--more" aria-label="Know more">
+            <p className="archive-label text-text-muted">Know more</p>
             <div className="mt-4 flex flex-col gap-2 text-sm">
               <a
                 href={siteConfig.links.linkedin}
@@ -49,10 +50,12 @@ export function ArchiveFooter() {
               </a>
               <a
                 href={siteConfig.links.resume}
-                download
+                target="_blank"
+                rel="noopener noreferrer"
                 className="underline-offset-4 hover:underline"
               >
-                Resume <span aria-hidden>↓</span>
+                Resume <span className="v2-visually-hidden">(opens in a new tab)</span>
+                <span aria-hidden> ↗</span>
               </a>
             </div>
           </nav>
@@ -66,6 +69,16 @@ export function ArchiveFooter() {
             <span className="v2-visually-hidden">With love. </span>© 2026 {siteConfig.name}
           </p>
         </div>
+      </div>
+
+      <div className="v2-footer-landscape" aria-hidden="true">
+        <Image
+          src="/assets/images/footer-landscape.jpg"
+          alt=""
+          fill
+          sizes="100vw"
+          className="v2-footer-landscape-img"
+        />
       </div>
     </footer>
   );

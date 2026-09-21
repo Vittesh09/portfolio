@@ -185,7 +185,7 @@ export function ArchiveHeader() {
           <Link
             href="/v2/"
             onClick={goHome}
-            className={`${navOptionClass} font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`}
+            className={`${navOptionClass} v2-archive-wordmark font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`}
           >
             Vittesh Sinha®
             <span className="v2-visually-hidden"> — Home</span>

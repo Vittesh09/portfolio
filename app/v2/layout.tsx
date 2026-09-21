@@ -34,6 +34,12 @@ export const metadata = {
   robots: { index: false, follow: false }
 };
 
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  viewportFit: 'cover'
+};
+
 const themeInit = `
 (function(){try{var t=localStorage.getItem('v2-theme');var r=document.currentScript&&document.currentScript.parentElement;if(!r||!r.classList.contains('v2-root'))r=document.querySelector('.v2-root');if(r){r.classList.remove('light');var dark=t==='dark'||((t!=='light')&&window.matchMedia('(prefers-color-scheme: dark)').matches);if(dark)r.classList.add('dark');else r.classList.remove('dark');}}catch(e){}})();
 `;

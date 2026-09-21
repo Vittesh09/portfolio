@@ -17,11 +17,13 @@ export function ResumeDownload({
   return (
     <a
       href={href}
-      download
+      target="_blank"
+      rel="noopener noreferrer"
       className={`${ctaBase} w-full md:w-auto ${ctaClass(variant, 'secondary')} ${className}`}
     >
-      <span className="md:hidden">Resume download</span>
+      <span className="md:hidden">Resume</span>
       <span className="hidden md:inline">{label}</span>
+      <span className="v2-visually-hidden"> (opens in a new tab)</span>
     </a>
   );
 }

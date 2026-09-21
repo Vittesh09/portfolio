@@ -202,10 +202,12 @@ export function AboutExperience() {
             </HashNavLink>
             <a
               href={siteConfig.links.resume}
-              download
+              target="_blank"
+              rel="noopener noreferrer"
               className="archive-label border border-border-subtle px-5 py-3"
             >
-              Download resume ↓
+              Resume ↗
+              <span className="v2-visually-hidden"> (opens in a new tab)</span>
             </a>
           </div>
         </div>
