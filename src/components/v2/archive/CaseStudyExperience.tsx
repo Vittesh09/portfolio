@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import type { Project } from '@/src/config/v2/caseStudies';
-import { projects } from '@/src/config/v2/caseStudies';
+import { howMeasured, projects } from '@/src/config/v2/caseStudies';
 import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
 
 export function CaseStudyExperience({ project }: { project: Project }) {
@@ -53,6 +53,7 @@ export function CaseStudyExperience({ project }: { project: Project }) {
             <p className="archive-label text-text-muted">Project details</p>
             <dl className="mt-8 space-y-5">
               {[
+                ['Company', project.company],
                 ['Client', project.client],
                 ['Industry', project.industry],
                 ['Role', project.role],
@@ -73,6 +74,9 @@ export function CaseStudyExperience({ project }: { project: Project }) {
             </h2>
             <p className="mt-8 max-w-2xl text-sm leading-relaxed text-text-secondary">
               {project.summary}
+            </p>
+            <p className="mt-6 max-w-2xl text-sm leading-relaxed text-text-secondary">
+              How measured: {howMeasured(project)}
             </p>
           </div>
         </div>

@@ -1,3 +1,8 @@
+import type { MetricEvidence } from '@/src/config/v2/profile';
+import { fleetToolsCountNote } from '@/src/config/v2/profile';
+
+const unconfirmedMethod = 'TODO: [FILL: baseline and method for this metric]';
+
 export type Project = {
   slug: string;
   index: string;
@@ -6,6 +11,7 @@ export type Project = {
   company: string;
   cardRole: string;
   outcomeLine: string;
+  outcomeEvidence: MetricEvidence[];
   tags: string[];
   industry: string;
   client: string;
@@ -33,9 +39,18 @@ export const projects: Project[] = [
     title: 'Future City VR + EEG',
     summary:
       'I designed a 1:1 city in VR and a dashboard that turned live EEG into stress, delight, and fatigue planners could act on.',
-    company: 'TODO: [FILL: Simple Energy or Nagarro; 2023 is the handover year, so confirm]',
-    cardRole: 'TODO: [FILL: case 01 role]',
-    outcomeLine: 'TODO: [FILL: case 01 outcome, e.g. time to insight, planner adoption, study size]',
+    company: 'TODO: [FILL: Simple Energy or Nagarro. 2023 is the handover year, so confirm]',
+    cardRole: 'Product & Spatial Experience Designer',
+    outcomeLine:
+      'Planners got 50+ spatial insight points and found three layout bottlenecks before anything was built.',
+    outcomeEvidence: [
+      {
+        metric: '50+ spatial insight points and three layout bottlenecks before build',
+        baseline: unconfirmedMethod,
+        method: unconfirmedMethod,
+        source: 'Future City VR + EEG'
+      }
+    ],
     tags: ['Spatial UX', 'VR', 'Neuro-tech'],
     industry: 'Urban Development · Spatial Computing',
     client: 'Future-city development group',
@@ -97,15 +112,22 @@ export const projects: Project[] = [
     summary:
       'I consolidated maps, cameras, alerts, routes, and maintenance into one multi-tenant command center for fleets of 500+ vehicles.',
     company: 'TODO: [FILL: case 02 company]',
-    cardRole: 'TODO: [FILL: case 02 role]',
-    outcomeLine:
-      'TODO: [FILL: case 02 outcome, e.g. reduction in tools/tabs, response time, adoption across 500+ vehicle fleets]',
+    cardRole: 'Senior Product Designer',
+    outcomeLine: 'Monitoring effort dropped 28% and critical response improved 45%.',
+    outcomeEvidence: [
+      {
+        metric: '28% less monitoring effort and 45% better critical response',
+        baseline: unconfirmedMethod,
+        method: unconfirmedMethod,
+        source: 'Fleet Command Center'
+      }
+    ],
     tags: ['Enterprise', 'Logistics', 'B2B SaaS'],
     industry: 'Fleet Logistics · Enterprise SaaS',
     client: 'Enterprise fleet operations',
     customers: 'Dispatchers and operators managing fleets of 500+ vehicles',
     challenge:
-      'Stop forcing dispatchers to monitor a fleet across seven separate apps when every second of an incident counts.',
+      `Stop forcing dispatchers to monitor a fleet across seven separate apps when every second of an incident counts. ${fleetToolsCountNote}`,
     role: 'Senior Product Designer',
     platforms: 'Responsive web command center',
     year: '2024',
@@ -161,8 +183,16 @@ export const projects: Project[] = [
     summary:
       'I designed a FinOps workspace that turns messy AWS usage into ranked recommendations teams can act on.',
     company: 'TODO: [FILL: case 03 company]',
-    cardRole: 'TODO: [FILL: case 03 role]',
-    outcomeLine: 'TODO: [FILL: case 03 outcome / an actual savings figure or %]',
+    cardRole: 'Senior Product Designer',
+    outcomeLine: 'Waste diagnosis got 30% faster across 20+ AWS services.',
+    outcomeEvidence: [
+      {
+        metric: '30% faster waste diagnosis across 20+ AWS services',
+        baseline: unconfirmedMethod,
+        method: unconfirmedMethod,
+        source: 'Cloud Cost Optimization'
+      }
+    ],
     tags: ['FinOps', 'AI', 'Cloud SaaS'],
     industry: 'Cloud Infrastructure · DevOps',
     client: 'Cloud engineering and finance teams',
@@ -226,4 +256,13 @@ export function getProject(slug: string) {
 
 export function getAllSlugs() {
   return projects.map((project) => project.slug);
+}
+
+export function howMeasured(project: Project) {
+  return project.outcomeEvidence
+    .map(
+      (item) =>
+        `${item.metric}. Baseline: ${item.baseline}. Method: ${item.method}. Source: ${item.source}.`
+    )
+    .join(' ');
 }

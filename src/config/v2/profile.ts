@@ -26,6 +26,19 @@ export const factualStatLabel = 'TODO: [FILL: number of products shipped / teams
 export const factualStatValue = 'TODO';
 export const curefitEarlierWork =
   'TODO: [FILL: what you designed at Curefit and the result]';
+export const cultFitEndDateNote = 'TODO: [FILL: confirm Jan vs Feb 2022]';
+export const toolsAndSkills = 'TODO: [FILL: tools / skills]';
+export const education = 'TODO: [FILL: education, optional]';
+export const nagarroFitnessNote =
+  'TODO: [FILL: confirm Nagarro description mentioning fitness platforms is Nagarro work, not Cult.fit carried over]';
+export const fleetToolsCountNote =
+  'TODO: [FILL: confirm seven legacy tools vs five named (maps, cameras, alerts, routes, maintenance)]';
+export const agentVoiceRule =
+  'TODO: [FILL: confirm] Refer to Vittesh in the third person unless the user asks for a draft in his voice.';
+export const resumePublicDetailsNote =
+  'TODO: [FILL: confirm what contact details I want public on the resume PDF]';
+export const taskFlowComplexityDefinition =
+  'TODO: [FILL: define task-flow complexity — steps, taps, or time?]';
 
 export const heroHeadline = 'I make powerful products easier to use.';
 
@@ -34,50 +47,87 @@ export const heroIntro = `Hi, I'm Vittesh, a product designer with ${yearsExperi
 export const metaDescription =
   'Vittesh Sinha, product designer for cars, VR, cloud tools, and enterprise software. I make powerful products easier to use.';
 
-export const employers = [
+export type MetricEvidence = {
+  metric: string;
+  baseline: string;
+  method: string;
+  source: string;
+};
+
+const unconfirmedMethod = 'TODO: [FILL: baseline and method for this metric]';
+
+export const employers: {
+  name: string;
+  role: string;
+  period: string;
+  href: string;
+  current: boolean;
+  start: string;
+  end: string | null;
+  detail: string;
+  metrics: MetricEvidence[];
+}[] = [
   {
     name: 'Nagarro',
     role: 'Senior Product Designer',
     period: 'Nov 2023 – Present',
-    periodLong: 'Nov 2023 to Present',
     href: 'https://www.nagarro.com',
     current: true,
     start: '2023-11',
-    end: null as string | null,
-    detail:
-      'End-to-end UX for enterprise, logistics, and fitness platforms — real-time KPI dashboards, VR emotion insights, research-led prioritization, and AI-assisted prototyping.'
+    end: null,
+    detail: `End-to-end UX for enterprise, logistics, and fitness platforms — real-time KPI dashboards, VR emotion insights, research-led prioritization, and AI-assisted prototyping. ${nagarroFitnessNote}`,
+    metrics: []
   },
   {
     name: 'Simple Energy',
     role: 'Product Designer',
     period: 'Feb 2022 – Nov 2023',
-    periodLong: 'Feb 2022 to Nov 2023',
     href: 'https://www.simpleenergy.in',
     current: false,
     start: '2022-02',
     end: '2023-11',
-    detail:
-      'Owned the cross-platform design system (apps, internal tools, scooter HMI). Shipped the Simple One app and e-scooter HMI, cutting task-flow complexity by 10–15%.'
+    detail: `Owned the cross-platform design system (apps, internal tools, scooter HMI). Shipped the Simple One app and e-scooter HMI, cutting task-flow complexity by 10–15%. ${taskFlowComplexityDefinition}`,
+    metrics: [
+      {
+        metric: '10–15% lower task-flow complexity on Simple One / e-scooter HMI',
+        baseline: unconfirmedMethod,
+        method: unconfirmedMethod,
+        source: 'Simple Energy'
+      }
+    ]
   },
   {
-    name: 'Curefit',
+    name: 'Cult.fit (formerly Curefit)',
     role: 'User Research & Experience Design',
-    period: 'Oct 2018 – Jan 2022',
-    periodLong: 'Oct 2018 to Feb 2022',
+    period: `Oct 2018 – Jan 2022 (${cultFitEndDateNote})`,
     href: 'https://www.cult.fit',
     current: false,
     start: '2018-10',
     end: '2022-01',
     detail:
-      'Research, journeys, and interfaces for fitness and wellness. Designed half-hour class flows (+15% NPS across 100+ centers) and field research for in-center experiences.'
+      'Research, journeys, and interfaces for fitness and wellness. Designed half-hour class flows (+15% NPS across 100+ centers) and field research for in-center experiences.',
+    metrics: [
+      {
+        metric: '+15% NPS across 100+ centers on half-hour class flows',
+        baseline: unconfirmedMethod,
+        method: unconfirmedMethod,
+        source: 'Cult.fit (formerly Curefit)'
+      }
+    ]
   }
-] as const;
+];
 
 const currentEmployer = employers.find((job) => job.current)!;
 
+export const workingStyle = [
+  'Quiet about process theater and picky about details.',
+  'Find the idea, cut the noise, protect the intent.',
+  'Design so user needs, business goals, and technology move together.'
+] as const;
+
 export const profile = {
   name: 'Vittesh Sinha',
-  title: 'Product Designer',
+  title: 'Senior Product Designer',
   country: 'India',
   city,
   timezone,
@@ -88,25 +138,25 @@ export const profile = {
   industries: domains.join(', '),
   availability,
   replyTime,
+  toolsAndSkills,
+  education,
   currentEmployer: currentEmployer.name,
   currentEmployerHref: currentEmployer.href,
   currentLine: `Currently at ${currentEmployer.name}`,
   currentLinkLabel: currentEmployer.name,
   email: 'hello@vittesh.com',
-  valueProposition:
-    'I design product experiences for automotive, SaaS, and enterprise tools so people can get things done without fighting the interface.',
-  tagline:
-    'If your product is powerful but hard to use, I help you find the real problem, simplify the journey, and ship something people actually trust.',
+  summary: metaDescription,
+  aboutFacts: `Years: ${yearsExperience}. Domains: ${domains.join(', ')}. Currently at ${currentEmployer.name}. ${`Based in ${city}, India · ${timezone} · ${openTo}`}.`,
+  valueProposition: metaDescription,
+  tagline: metaDescription,
   statement:
     'I care about the part of design that’s hard to explain: when something works and feels right.',
-  aboutShort:
-    'A designer by day, photographer when I can get away with it. Based in India. Across automotive, SaaS, and enterprise, I’ve designed products where how something looks, feels, and works is a single decision.',
-  about:
-    'I’m a product designer based in India. Across automotive, SaaS, and enterprise, I’ve built digital products in VR, fleet ops, cloud tools, and software teams — not as separate disciplines, but as one system, where how something looks, feels, and works is a single decision. I’ve done it in scrappy teams and high-stakes environments where the interface is the difference between finishing a task and getting stuck. I believe design is one of the few real levers we have on how people work, so I try to earn every choice.',
-  personality:
-    'A designer by day, photographer when I can get away with it. I’m quiet about process theater and picky about details. Clear in thinking, sure in form. Nothing loud for its own sake, nothing simplified past the point of meaning. Find the idea, cut the noise, protect the intent. Great design happens when user needs, business goals, and technology move in the same direction.',
+  aboutShort: `Across automotive, SaaS, and enterprise, I’ve designed products where how something looks, feels, and works is a single decision.`,
+  about: `Across ${domains.join(', ')}, I’ve shipped product design in scrappy teams and high-stakes environments. Years: ${yearsExperience}. Currently at ${currentEmployer.name}.`,
+  personality: workingStyle.join(' '),
   heroHeadline,
   heroIntro,
+  workingStyle: [...workingStyle],
   links: {
     behance: 'https://www.behance.net/vitteshsinha',
     linkedin: 'https://www.linkedin.com/in/vitteshsinha/',
@@ -193,7 +243,7 @@ export const services = [
 export const experience = employers.map((job) => ({
   company: job.name,
   role: job.role,
-  period: job.periodLong,
+  period: job.period,
   detail: job.detail
 }));
 
@@ -205,15 +255,18 @@ export const unresolvedPlaceholders = [
   '[FILL: full-time / freelance / both / not looking]',
   '[FILL: e.g. within 2 business days]',
   '[FILL: Simple Energy or Nagarro; 2023 is the handover year, so confirm]',
-  '[FILL: case 01 role]',
-  '[FILL: case 01 outcome]',
   '[FILL: case 02 company]',
-  '[FILL: case 02 role]',
-  '[FILL: case 02 outcome]',
   '[FILL: case 03 company]',
-  '[FILL: case 03 role]',
-  '[FILL: case 03 outcome / actual savings figure]',
   '[FILL: number of products shipped / teams worked with / case studies]',
   '[FILL: what you designed at Curefit and the result]',
+  '[FILL: confirm Jan vs Feb 2022 Cult.fit end date]',
+  '[FILL: confirm Nagarro fitness platforms wording]',
+  '[FILL: confirm seven vs five fleet tools]',
+  '[FILL: baseline and method for each metric]',
+  '[FILL: define task-flow complexity]',
+  '[FILL: tools / skills]',
+  '[FILL: education, optional]',
+  '[FILL: confirm third-person agent voice rule]',
+  '[FILL: confirm resume public contact details]',
   'Domains list (Automotive, Enterprise / Logistics, Cloud / FinOps, VR / Neuro-tech) — confirm before finalising'
 ] as const;

@@ -35,20 +35,22 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
           Case {project.index}
         </span>
       </div>
-      <div className="grid gap-5 p-5 md:grid-cols-12 md:p-7">
-        <div className="md:col-span-7">
+      <div className="flex min-w-0 flex-col gap-4 p-5 md:grid md:grid-cols-12 md:gap-5 md:p-7">
+        <div className="min-w-0 md:col-span-7">
           <h3 className="text-2xl font-semibold tracking-tight md:text-3xl">{project.title}</h3>
-          <p className="mt-2 text-sm text-text-secondary">
-            {project.company} · {project.cardRole}
+          <p className="mt-2 break-words text-sm text-text-secondary">
+            {project.company} · {project.role}
           </p>
           <p className="mt-2 text-sm text-text-secondary">{project.summary}</p>
         </div>
-        <div className="md:col-span-4">
-          <p className="v2-card-outcome text-sm text-accent-pop">{project.outcomeLine}</p>
+        <div className="min-w-0 md:col-span-4">
+          <p className="v2-card-outcome mb-3 text-sm text-accent-pop">{project.outcomeLine}</p>
           <Label>{project.tags.join(' / ')}</Label>
           <p className="mt-2 text-sm">{project.year}</p>
         </div>
-        <span className="text-2xl text-accent-pop md:col-span-1 md:text-right">↗</span>
+        <span className="hidden text-2xl text-accent-pop md:col-span-1 md:block md:text-right">
+          ↗
+        </span>
       </div>
     </Link>
   );
