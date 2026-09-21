@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { siteConfig } from '@/src/config/v2/site';
+import { profile } from '@/src/config/v2/profile';
 import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
 
 export function ArchiveFooter() {
@@ -22,8 +23,8 @@ export function ArchiveFooter() {
               <Link href="/v2/about/" className="underline-offset-4 hover:underline">
                 About
               </Link>
-              <Link href="/v2/machine/" className="underline-offset-4 hover:underline">
-                Machine
+              <Link href={profile.agentNav.href} className="underline-offset-4 hover:underline">
+                {profile.agentNav.label}
               </Link>
             </div>
           </nav>
@@ -73,11 +74,18 @@ export function ArchiveFooter() {
 
       <div className="v2-footer-landscape" aria-hidden="true">
         <Image
+          src="/assets/images/footer-landscape-light.jpg"
+          alt=""
+          fill
+          sizes="100vw"
+          className="v2-footer-landscape-img v2-footer-landscape-img--light"
+        />
+        <Image
           src="/assets/images/footer-landscape.jpg"
           alt=""
           fill
           sizes="100vw"
-          className="v2-footer-landscape-img"
+          className="v2-footer-landscape-img v2-footer-landscape-img--dark"
         />
       </div>
     </footer>

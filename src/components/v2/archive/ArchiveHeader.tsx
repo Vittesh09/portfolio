@@ -4,6 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { siteConfig } from '@/src/config/v2/site';
+import { profile } from '@/src/config/v2/profile';
 import { ThemeToggle } from '@/src/components/v2/ui/ThemeToggle';
 import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
 import { useMobileLanding } from '@/src/components/v2/ui/useMobileLanding';
@@ -11,9 +12,9 @@ import { useMobileLanding } from '@/src/components/v2/ui/useMobileLanding';
 const navOptionClass =
   'archive-label v2-nav-option group transition-colors hover:text-accent-pop';
 
-/** Hide shortly after scroll activity stops. */
-const HIDE_AFTER_MS = 700;
+/** Stay on screen at the top of the page. Hide only while scrolling down. */
 const TOP_STAY_PX = 12;
+const PEEK_PX = 80;
 
 export function ArchiveHeader() {
   const [open, setOpen] = useState(false);
@@ -21,7 +22,6 @@ export function ArchiveHeader() {
   const pathname = usePathname();
   const isHome = pathname === '/v2' || pathname === '/v2/';
   const isMobile = useMobileLanding();
-  const hideTimer = useRef<number | null>(null);
   const lastY = useRef(0);
   const openRef = useRef(open);
   const visibleRef = useRef(visible);
@@ -32,31 +32,6 @@ export function ArchiveHeader() {
   visibleRef.current = visible;
 
   const headerInertProps = !(visible || open) ? ({ inert: true } as const) : {};
-
-  const clearHide = () => {
-    if (hideTimer.current !== null) {
-      window.clearTimeout(hideTimer.current);
-      hideTimer.current = null;
-    }
-  };
-
-  /** Hide once the user has stopped scrolling (menu open → stay). */
-  const scheduleHide = () => {
-    clearHide();
-    hideTimer.current = window.setTimeout(() => {
-      if (openRef.current) return;
-      if (window.scrollY <= TOP_STAY_PX) {
-        setVisible(true);
-        return;
-      }
-      setVisible(false);
-    }, HIDE_AFTER_MS);
-  };
-
-  const showWhileScrolling = () => {
-    setVisible(true);
-    scheduleHide();
-  };
 
   const goHome = (event: MouseEvent<HTMLAnchorElement>) => {
     setOpen(false);
@@ -75,12 +50,7 @@ export function ArchiveHeader() {
 
   useEffect(() => {
     if (open) {
-      clearHide();
       setVisible(true);
-      return;
-    }
-    if (typeof window !== 'undefined' && window.scrollY > TOP_STAY_PX) {
-      scheduleHide();
     }
   }, [open]);
 
@@ -113,11 +83,11 @@ export function ArchiveHeader() {
 
     const onScrollActivity = (event?: Event) => {
       const y = window.scrollY;
-      const delta = Math.abs(y - lastY.current);
+      const goingDown = y > lastY.current + 2;
+      const goingUp = y < lastY.current - 2;
       lastY.current = y;
 
-      if (y <= TOP_STAY_PX) {
-        clearHide();
+      if (openRef.current || y <= TOP_STAY_PX) {
         setVisible(true);
         return;
       }
@@ -127,17 +97,14 @@ export function ArchiveHeader() {
           ? Math.abs(Number(event.detail?.velocity ?? 0))
           : null;
 
-      // Lenis keeps emitting near the end with ~0 velocity — don't treat that as "scrolling"
       const moving =
-        delta > 0.75 || (velocity !== null ? velocity > 0.04 : event?.type === 'wheel' || event?.type === 'touchmove');
+        goingDown ||
+        goingUp ||
+        (velocity !== null ? velocity > 0.04 : false);
 
-      if (moving) {
-        showWhileScrolling();
-        return;
-      }
-
-      // Settled after Lenis lerp — ensure hide timer is running
-      scheduleHide();
+      if (!moving) return;
+      if (goingDown) setVisible(false);
+      else setVisible(true);
     };
 
     const onWheel = (event: WheelEvent) => onScrollActivity(event);
@@ -145,12 +112,9 @@ export function ArchiveHeader() {
     const onScroll = (event: Event) => onScrollActivity(event);
     const onLenis = (event: Event) => onScrollActivity(event);
 
-    // Peek only when already hidden — never cancel a pending hide forever
     const onPointerMove = (event: PointerEvent) => {
-      if (event.clientY > 14) return;
-      if (visibleRef.current || openRef.current) return;
+      if (event.clientY > PEEK_PX) return;
       setVisible(true);
-      scheduleHide();
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -159,11 +123,9 @@ export function ArchiveHeader() {
     window.addEventListener('touchmove', onTouchMove, { passive: true });
     window.addEventListener('pointermove', onPointerMove, { passive: true });
 
-    if (window.scrollY > TOP_STAY_PX) scheduleHide();
-    else setVisible(true);
+    setVisible(window.scrollY <= TOP_STAY_PX || visibleRef.current);
 
     return () => {
-      clearHide();
       window.removeEventListener('scroll', onScroll);
       window.removeEventListener('v2-lenis-scroll', onLenis);
       window.removeEventListener('wheel', onWheel);
@@ -213,11 +175,13 @@ export function ArchiveHeader() {
               );
             })}
             <Link
-              href="/v2/machine/"
+              href={profile.agentNav.href}
               className={navOptionClass}
+              title={profile.agentNav.title}
+              aria-label={profile.agentNav.title}
               aria-current={pathname?.includes('/machine') ? 'page' : undefined}
             >
-              [Machine]
+              {profile.agentNav.label}
             </Link>
             <ThemeToggle />
           </nav>
@@ -266,11 +230,13 @@ export function ArchiveHeader() {
                 );
               })}
               <Link
-                href="/v2/machine/"
+                href={profile.agentNav.href}
                 onClick={() => setOpen(false)}
+                title={profile.agentNav.title}
+                aria-label={profile.agentNav.title}
                 className="v2-nav-mobile-row flex min-h-11 w-full border-b border-border-subtle text-left"
               >
-                <span className="text-2xl font-semibold tracking-tight">[Machine]</span>
+                <span className="text-2xl font-semibold tracking-tight">{profile.agentNav.label}</span>
               </Link>
               {isMobile ? (
                 <p className="archive-label px-1 py-4 text-text-muted">

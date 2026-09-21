@@ -18,4 +18,31 @@
   <url>
     <loc>https://www.vittesh.com/work-pages/virtual-humans/</loc>
   </url>
+  <url>
+    <loc>https://www.vittesh.com/v2/</loc>
+  </url>
+  <url>
+    <loc>https://www.vittesh.com/v2/about/</loc>
+  </url>
+  <url>
+    <loc>https://www.vittesh.com/v2/machine/</loc>
+  </url>
+  <url>
+    <loc>https://www.vittesh.com/v2/work/vr-eeg-analytics/</loc>
+  </url>
+  <url>
+    <loc>https://www.vittesh.com/v2/work/fleet-command-center/</loc>
+  </url>
+  <url>
+    <loc>https://www.vittesh.com/v2/work/cloud-cost-optimization/</loc>
+  </url>
+  <url>
+    <loc>https://www.vittesh.com/llms.txt</loc>
+  </url>
+  <url>
+    <loc>https://www.vittesh.com/llms-full.txt</loc>
+  </url>
+  <url>
+    <loc>https://www.vittesh.com/machine.json</loc>
+  </url>
 </urlset>

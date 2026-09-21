@@ -1,0 +1,25 @@
+{
+  "lastUpdated": "2026-09-21",
+  "name": "Nagarro",
+  "title": "Product Designer",
+  "email": "hello@vittesh.com",
+  "yearsExperience": "TODO: [FILL: 7+ or 8+]",
+  "availability": "TODO: [FILL: full-time / freelance / both / not looking]",
+  "location": "Based in ${city}, India · ${timezone} · ${openTo}",
+  "employers": [
+    "Nagarro",
+    "Simple Energy",
+    "Curefit"
+  ],
+  "caseStudies": [
+    "Future City VR + EEG",
+    "Fleet Command Center",
+    "Cloud Cost Optimization"
+  ],
+  "links": {
+    "home": "https://www.vittesh.com/v2/",
+    "machine": "https://www.vittesh.com/v2/machine/",
+    "linkedin": "https://www.linkedin.com/in/vitteshsinha/",
+    "behance": "https://www.behance.net/vitteshsinha"
+  }
+}
