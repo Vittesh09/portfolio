@@ -8,6 +8,10 @@ type FieldName = 'name' | 'email' | 'message';
 
 const ACCESS_KEY = process.env.NEXT_PUBLIC_WEB3FORMS_ACCESS_KEY ?? '';
 
+function headerSafe(value: string, max: number) {
+  return value.replace(/[\r\n\0]+/g, ' ').trim().slice(0, max);
+}
+
 type ContactFormProps = {
   className?: string;
   /** Heading id that names this form (WCAG 1.3.1 / 4.1.2) */
@@ -68,9 +72,9 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
       setStatus('sent');
       return;
     }
-    const name = String(data.get('name') ?? '').trim();
-    const email = String(data.get('email') ?? '').trim();
-    const message = String(data.get('message') ?? '').trim();
+    const name = headerSafe(String(data.get('name') ?? '').trim(), 120);
+    const email = headerSafe(String(data.get('email') ?? '').trim(), 254);
+    const message = String(data.get('message') ?? '').trim().slice(0, 5000);
 
     const nextInvalid: Partial<Record<FieldName, string>> = {};
     if (!name) nextInvalid.name = 'Enter your name.';
@@ -227,7 +231,7 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
             aria-invalid={invalid.name ? true : undefined}
             aria-describedby={fieldDescribedBy('name', nameErrorId)}
             className={`v2-contact-field ${invalid.name ? 'is-invalid' : ''}`}
-            placeholder="Your name"
+            maxLength={120}
           />
           {invalid.name ? (
             <p id={nameErrorId} className="v2-contact-field-error">
@@ -254,7 +258,7 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
             aria-invalid={invalid.email ? true : undefined}
             aria-describedby={fieldDescribedBy('email', emailErrorId)}
             className={`v2-contact-field ${invalid.email ? 'is-invalid' : ''}`}
-            placeholder="Email address"
+            maxLength={254}
           />
           {invalid.email ? (
             <p id={emailErrorId} className="v2-contact-field-error">
@@ -280,7 +284,7 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
             className={`v2-contact-field v2-contact-field--area ${
               invalid.message ? 'is-invalid' : ''
             }`}
-            placeholder="Start typing here"
+            maxLength={5000}
           />
           {invalid.message ? (
             <p id={messageErrorId} className="v2-contact-field-error">
@@ -314,6 +318,9 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
           </p>
         ) : null}
       </div>
+      <p className="mt-4 text-sm leading-relaxed text-text-secondary">
+        I use submissions only to reply. Nothing is sold or added to a marketing list.
+      </p>
     </form>
   );
 }
