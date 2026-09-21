@@ -50,13 +50,11 @@ export function CopyEmail({
       className={`${ctaBase} w-full max-w-full gap-4 text-left md:justify-between ${ctaClass(variant, 'primary')} ${className}`}
       aria-label={copied ? 'Email copied to clipboard' : `Copy email ${email}`}
     >
-      <span className="font-normal normal-case tracking-normal md:hidden">
-        {copied ? 'Copied' : 'Copy email'}
+      <span className="v2-visually-hidden" aria-live="polite">
+        {copied ? 'Copied' : ''}
       </span>
-      <span className="hidden min-w-0 truncate font-normal normal-case tracking-normal md:inline">
-        {email}
-      </span>
-      <span className="hidden shrink-0 uppercase md:inline" aria-hidden>
+      <span className="min-w-0 truncate font-normal normal-case tracking-normal">{email}</span>
+      <span className="shrink-0 uppercase" aria-hidden>
         {copied ? 'Copied' : 'Copy'}
       </span>
     </button>

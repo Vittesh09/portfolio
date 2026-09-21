@@ -1,5 +1,6 @@
-import { siteConfig } from '@/src/config/v2/site';
+import { availability, replyTime } from '@/src/config/v2/profile';
 import { ContactForm } from '@/src/components/v2/ui/ContactForm';
+import { CopyEmail } from '@/src/components/v2/ui/CopyEmail';
 
 type ContactPanelProps = {
   headingId?: string;
@@ -20,14 +21,15 @@ export function ContactPanel({
         <div className="v2-contact-intro">
           <div>
             <h2 id={headingId} className="archive-display v2-contact-title">
-              Let&apos;s collaborate
+              Let&apos;s talk
             </h2>
-            <a
-              href={`mailto:${siteConfig.email}`}
-              className="v2-contact-email focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-pop"
-            >
-              {siteConfig.email}
-            </a>
+            <p className="mt-5 max-w-md text-base leading-relaxed text-text-secondary">
+              I&apos;m open to {availability}. Tell me what you&apos;re building and where the
+              design is stuck. I reply within {replyTime}.
+            </p>
+            <div className="mt-6 max-w-md">
+              <CopyEmail variant="surface" className="w-full" />
+            </div>
           </div>
         </div>
 

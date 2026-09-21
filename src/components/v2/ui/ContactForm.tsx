@@ -55,12 +55,19 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
 
     if (!ACCESS_KEY) {
       setStatus('error');
-      setError('Form isn’t connected yet. Use the email link instead.');
+      setError(`Form isn’t connected yet. Or email me at ${siteConfig.email}.`);
       return;
     }
 
     const form = event.currentTarget;
     const data = new FormData(form);
+    if (String(data.get('company_website') ?? '').trim()) {
+      form.reset();
+      setInvalid({});
+      setError('');
+      setStatus('sent');
+      return;
+    }
     const name = String(data.get('name') ?? '').trim();
     const email = String(data.get('email') ?? '').trim();
     const message = String(data.get('message') ?? '').trim();
@@ -115,7 +122,11 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
       setStatus('sent');
     } catch (err) {
       setStatus('error');
-      setError(err instanceof Error ? err.message : 'Couldn’t send. Please try again.');
+      setError(
+        err instanceof Error
+          ? `${err.message} Or email me at ${siteConfig.email}.`
+          : `Couldn’t send. Or email me at ${siteConfig.email}.`
+      );
     }
   }
 
@@ -123,7 +134,7 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
     <form
       id={formId}
       onSubmit={onSubmit}
-      className={`v2-contact-form ${className}`.trim()}
+      className={`v2-contact-form relative ${className}`.trim()}
       noValidate
       aria-labelledby={labelledBy}
       aria-busy={status === 'sending' || undefined}
@@ -187,6 +198,17 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
           ) : null}
         </div>
       ) : null}
+
+      <div className="v2-visually-hidden" aria-hidden="true">
+        <label htmlFor={`${formId}-company-website`}>Company website</label>
+        <input
+          id={`${formId}-company-website`}
+          name="company_website"
+          type="text"
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
 
       <div className="v2-contact-fields">
         <div className="v2-contact-field-group">
