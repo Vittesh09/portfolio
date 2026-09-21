@@ -9,9 +9,13 @@ import { BlackHoleLazy } from '@/src/components/v2/black-hole/BlackHoleLazy';
 import { useKissMode } from '@/src/components/v2/layout/KissModeProvider';
 import { CopyEmail } from '@/src/components/v2/ui/CopyEmail';
 import { ContactPanel } from '@/src/components/v2/ui/ContactPanel';
-import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
 import { ResumeDownload } from '@/src/components/v2/ui/ResumeDownload';
+import { EarlierWorkRow } from '@/src/components/v2/archive/EarlierWorkRow';
+import { HeroIntroCopy } from '@/src/components/v2/archive/HeroIntroCopy';
+import { HeroMeta } from '@/src/components/v2/archive/HeroMeta';
+import { ProjectCard } from '@/src/components/v2/archive/ProjectCard';
 import { projects } from '@/src/config/v2/caseStudies';
+import { heroHeadline } from '@/src/config/v2/profile';
 import {
   processSteps,
   siteConfig,
@@ -54,7 +58,7 @@ function AnimatedStat({ value }: { value: string }) {
     return () => controls.stop();
   }, [mounted, inView, target]);
 
-  if (target === null) {
+  if (value.includes('TODO') || target === null) {
     return (
       <motion.span
         ref={ref}
@@ -109,13 +113,9 @@ function LandingExperienceArchive() {
             >
               <Label>Available for work</Label>
               <h1 className="archive-display archive-display--hero mt-4 text-[clamp(2.6rem,4.5vw,4.75rem)]">
-                <span className="v2-hero-line">Thoughtfully designed.</span>
-                <span className="v2-hero-line text-accent-pop">Purposefully simple.</span>
+                <span className="v2-hero-line">{heroHeadline}</span>
               </h1>
-              <p className="mt-8 max-w-xl text-base leading-relaxed text-text-secondary md:mt-10 md:text-lg">
-                Hi, I am Vittesh. I create digital products that balance human needs, business
-                goals, and technical constraints, one interaction at a time.
-              </p>
+              <HeroIntroCopy className="mt-8 max-w-xl text-base leading-relaxed text-text-secondary md:mt-10 md:text-lg" />
               <div className="mt-8 flex max-w-xl flex-col gap-3 sm:flex-row sm:flex-wrap md:mt-10">
                 <CopyEmail variant="hero" className="sm:min-w-[min(100%,20rem)] sm:flex-1" />
                 <ResumeDownload variant="hero" className="sm:w-auto" />
@@ -124,26 +124,7 @@ function LandingExperienceArchive() {
           </div>
 
           <div className="v2-hero-meta grid gap-5 border-t border-white/15 px-0 py-6 md:grid-cols-12 md:pb-0 md:pt-5">
-            <div className="md:col-span-3">
-              <Label>Current position</Label>
-              <p className="mt-2 text-sm">{siteConfig.current}</p>
-            </div>
-            <div className="md:col-span-3">
-              <Label>What I focus on</Label>
-              <p className="mt-2 text-sm">Cars · VR · Cloud · Enterprise tools</p>
-            </div>
-            <div className="md:col-span-3">
-              <Label>Based in</Label>
-              <p className="mt-2 text-sm">{siteConfig.location} · Open to remote</p>
-            </div>
-            <div className="flex items-end md:col-span-3 md:justify-end">
-              <HashNavLink
-                href="/v2/#work"
-                className="archive-label inline-flex items-center gap-3 bg-white px-5 py-3 text-black"
-              >
-                See selected work <span>↓</span>
-              </HashNavLink>
-            </div>
+            <HeroMeta />
           </div>
         </div>
       </section>
@@ -276,43 +257,11 @@ function LandingExperienceArchive() {
                 transition={{ delay: (index % 2) * 0.08 }}
                 className={index === 0 ? 'md:col-span-2' : ''}
               >
-                <Link
-                  href={`/v2/work/${project.slug}/`}
-                  className="archive-project-card group block border border-border-subtle bg-bg-surface"
-                >
-                  <div
-                    className={`relative overflow-hidden bg-[#070707] ${
-                      index === 0 ? 'aspect-[16/7]' : 'aspect-[4/3]'
-                    }`}
-                  >
-                    <Image
-                      src={project.image}
-                      alt=""
-                      fill
-                      className="archive-image object-contain p-4 group-hover:scale-[1.02] md:p-8"
-                      sizes={index === 0 ? '100vw' : '(max-width: 768px) 100vw, 50vw'}
-                    />
-                    <span className="archive-label absolute right-3 top-3 bg-bg-primary px-3 py-2">
-                      Case {project.index}
-                    </span>
-                  </div>
-                  <div className="grid gap-5 p-5 md:grid-cols-12 md:p-7">
-                    <div className="md:col-span-7">
-                      <h3 className="text-2xl font-semibold tracking-tight md:text-3xl">
-                        {project.title}
-                      </h3>
-                      <p className="mt-2 text-sm text-text-secondary">{project.summary}</p>
-                    </div>
-                    <div className="md:col-span-4">
-                      <Label>{project.tags.join(' / ')}</Label>
-                      <p className="mt-2 text-sm">{project.year}</p>
-                    </div>
-                    <span className="text-2xl text-accent-pop md:col-span-1 md:text-right">↗</span>
-                  </div>
-                </Link>
+                <ProjectCard project={project} index={index} />
               </motion.article>
             ))}
           </div>
+          <EarlierWorkRow />
         </div>
       </section>
 

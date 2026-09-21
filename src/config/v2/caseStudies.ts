@@ -3,6 +3,8 @@ export type Project = {
   index: string;
   title: string;
   summary: string;
+  company: string;
+  cardRole: string;
   outcomeLine: string;
   tags: string[];
   industry: string;
@@ -31,8 +33,9 @@ export const projects: Project[] = [
     title: 'Future City VR + EEG',
     summary:
       'I designed a 1:1 city in VR and a dashboard that turned live EEG into stress, delight, and fatigue planners could act on.',
-    outcomeLine:
-      'Planners got 50+ spatial insight points and found three layout bottlenecks before anything was built.',
+    company: 'TODO: [FILL: Simple Energy or Nagarro; 2023 is the handover year, so confirm]',
+    cardRole: 'TODO: [FILL: case 01 role]',
+    outcomeLine: 'TODO: [FILL: case 01 outcome, e.g. time to insight, planner adoption, study size]',
     tags: ['Spatial UX', 'VR', 'Neuro-tech'],
     industry: 'Urban Development · Spatial Computing',
     client: 'Future-city development group',
@@ -93,8 +96,10 @@ export const projects: Project[] = [
     title: 'Fleet Command Center',
     summary:
       'I consolidated maps, cameras, alerts, routes, and maintenance into one multi-tenant command center for fleets of 500+ vehicles.',
+    company: 'TODO: [FILL: case 02 company]',
+    cardRole: 'TODO: [FILL: case 02 role]',
     outcomeLine:
-      'Dispatchers stopped tab-hopping across seven tools. Monitoring effort dropped 28% and critical response improved 45%.',
+      'TODO: [FILL: case 02 outcome, e.g. reduction in tools/tabs, response time, adoption across 500+ vehicle fleets]',
     tags: ['Enterprise', 'Logistics', 'B2B SaaS'],
     industry: 'Fleet Logistics · Enterprise SaaS',
     client: 'Enterprise fleet operations',
@@ -154,9 +159,10 @@ export const projects: Project[] = [
     index: '03',
     title: 'Cloud Cost Optimization',
     summary:
-      'I designed a FinOps workspace that turns messy AWS usage into ranked recommendations with exact monthly savings.',
-    outcomeLine:
-      'Engineering and finance finally shared one view. Waste diagnosis got 30% faster across 20+ AWS services.',
+      'I designed a FinOps workspace that turns messy AWS usage into ranked recommendations teams can act on.',
+    company: 'TODO: [FILL: case 03 company]',
+    cardRole: 'TODO: [FILL: case 03 role]',
+    outcomeLine: 'TODO: [FILL: case 03 outcome / an actual savings figure or %]',
     tags: ['FinOps', 'AI', 'Cloud SaaS'],
     industry: 'Cloud Infrastructure · DevOps',
     client: 'Cloud engineering and finance teams',

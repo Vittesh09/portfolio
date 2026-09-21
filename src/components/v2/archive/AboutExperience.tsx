@@ -67,7 +67,7 @@ export function AboutExperience() {
               <p className="archive-label text-accent-pop md:text-right">
                 {siteConfig.current}
                 <br />
-                Based in {siteConfig.location}
+                {siteConfig.location}
               </p>
             </div>
             <div className="mt-8 border-t border-white/20 pt-5">

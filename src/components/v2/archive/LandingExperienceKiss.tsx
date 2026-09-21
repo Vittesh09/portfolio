@@ -11,7 +11,12 @@ import {
   RevealOnScroll,
   useKissHeroIntro
 } from '@/src/components/v2/motion/landingMotion';
+import { EarlierWorkRow } from '@/src/components/v2/archive/EarlierWorkRow';
+import { HeroIntroCopy } from '@/src/components/v2/archive/HeroIntroCopy';
+import { HeroMeta } from '@/src/components/v2/archive/HeroMeta';
+import { ProjectCard } from '@/src/components/v2/archive/ProjectCard';
 import { projects } from '@/src/config/v2/caseStudies';
+import { heroHeadline } from '@/src/config/v2/profile';
 import { siteConfig, trustLogos, trustSignals } from '@/src/config/v2/site';
 
 function Label({ children }: { children: React.ReactNode }) {
@@ -38,13 +43,6 @@ function HeroPortrait({ className = '' }: { className?: string }) {
   );
 }
 
-const introCopy = (
-  <>
-    Hi, I am <span className="text-accent-pop">Vittesh</span>, Product Designer with 7+ years of
-    working experience. I make powerful products easier to use.
-  </>
-);
-
 /** Simple mode — workbench-style grids, light motion on load + scroll. */
 export function LandingExperienceKiss() {
   const { heroRef } = useKissHeroIntro();
@@ -63,15 +61,11 @@ export function LandingExperienceKiss() {
               className="v2-kiss-fade archive-display archive-display--hero text-[clamp(1.85rem,8vw,2.5rem)]"
               style={{ transitionDelay: '0.06s' }}
             >
-              <span className="v2-hero-line">Thoughtfully designed.</span>
-              <span className="v2-hero-line text-accent-pop">Purposefully simple.</span>
+              <span className="v2-hero-line">{heroHeadline}</span>
             </h1>
-            <p
+            <HeroIntroCopy
               className="v2-kiss-fade mt-6 max-w-xl text-base leading-relaxed text-text-secondary"
-              style={{ transitionDelay: '0.14s' }}
-            >
-              {introCopy}
-            </p>
+            />
           </div>
 
           <div
@@ -101,16 +95,13 @@ export function LandingExperienceKiss() {
               className="v2-kiss-fade archive-display archive-display--hero text-[clamp(2.75rem,10vw,6.5rem)]"
               style={{ transitionDelay: '0.06s' }}
             >
-              <span className="v2-hero-line">Thoughtfully designed.</span>
-              <span className="v2-hero-line text-accent-pop">Purposefully simple.</span>
+              <span className="v2-hero-line">{heroHeadline}</span>
             </h1>
             <div
               className="v2-kiss-fade mt-12 grid gap-6 border-t border-border-subtle pt-6 md:grid-cols-12"
               style={{ transitionDelay: '0.14s' }}
             >
-              <p className="text-base leading-relaxed text-text-secondary md:col-span-7 md:text-lg">
-                {introCopy}
-              </p>
+              <HeroIntroCopy className="text-base leading-relaxed text-text-secondary md:col-span-7 md:text-lg" />
               <div className="md:col-span-4 md:col-start-9">
                 <p className="text-sm leading-relaxed text-text-secondary">
                   {siteConfig.valueProposition}
@@ -127,26 +118,7 @@ export function LandingExperienceKiss() {
             className="v2-kiss-fade mt-12 hidden gap-6 border-t border-border-subtle pt-8 md:mt-12 md:grid md:grid-cols-12"
             style={{ transitionDelay: '0.22s' }}
           >
-            <div className="md:col-span-3">
-              <Label>Currently working</Label>
-              <p className="mt-2 text-sm">{siteConfig.current}</p>
-            </div>
-            <div className="md:col-span-3">
-              <Label>Industries I have worked on</Label>
-              <p className="mt-2 text-sm">{siteConfig.industries}</p>
-            </div>
-            <div className="md:col-span-3">
-              <Label>Based in</Label>
-              <p className="mt-2 text-sm">{siteConfig.location}</p>
-            </div>
-            <div className="hidden items-end md:col-span-3 md:flex md:justify-end">
-              <HashNavLink
-                href="/v2/#work"
-                className="archive-label inline-flex items-center gap-3 border border-border-subtle px-5 py-3"
-              >
-                See selected work <span>↓</span>
-              </HashNavLink>
-            </div>
+            <HeroMeta workHrefClassName="archive-label inline-flex items-center gap-3 border border-border-subtle px-5 py-3" />
           </div>
         </div>
       </section>
@@ -228,55 +200,11 @@ export function LandingExperienceKiss() {
                 y={20}
                 className={index === 0 ? 'md:col-span-2' : ''}
               >
-                <Link
-                  href={`/v2/work/${project.slug}/`}
-                  className="archive-project-card group block border border-border-subtle bg-bg-surface"
-                >
-                  <div
-                    className={`relative overflow-hidden bg-[#070707] ${
-                      index === 0 ? 'aspect-[16/10] md:aspect-[16/7]' : 'aspect-[4/3]'
-                    }`}
-                  >
-                    <Image
-                      src={project.image}
-                      alt=""
-                      fill
-                      loading="lazy"
-                      decoding="async"
-                      className="archive-image object-contain p-4 group-hover:scale-[1.02] md:p-8"
-                      sizes={
-                        index === 0
-                          ? '100vw'
-                          : '(max-width: 768px) 100vw, 50vw'
-                      }
-                    />
-                    <span className="archive-label absolute right-3 top-3 bg-bg-primary px-3 py-2">
-                      Case {project.index}
-                    </span>
-                  </div>
-                  <div className="grid gap-4 p-5 md:grid-cols-12 md:gap-5 md:p-7">
-                    <div className="md:col-span-7">
-                      <h3 className="text-xl font-semibold tracking-tight md:text-3xl">
-                        {project.title}
-                      </h3>
-                      <p className="mt-2 text-sm leading-relaxed text-text-secondary">
-                        {project.summary}
-                      </p>
-                    </div>
-                    <div className="flex items-end justify-between gap-4 md:col-span-5 md:block">
-                      <div>
-                        <Label>{project.tags.join(' / ')}</Label>
-                        <p className="mt-2 text-sm">{project.year}</p>
-                      </div>
-                      <span className="text-2xl text-accent-pop md:mt-0 md:block md:text-right">
-                        ↗
-                      </span>
-                    </div>
-                  </div>
-                </Link>
+                <ProjectCard project={project} index={index} />
               </RevealOnScroll>
             ))}
           </div>
+          <EarlierWorkRow />
         </div>
       </section>
 
@@ -300,7 +228,7 @@ export function LandingExperienceKiss() {
               <p className="archive-label text-accent-pop">
                 {siteConfig.current}
                 <br />
-                Based in {siteConfig.location}
+                {siteConfig.location}
               </p>
               <Link
                 href="/v2/about/"

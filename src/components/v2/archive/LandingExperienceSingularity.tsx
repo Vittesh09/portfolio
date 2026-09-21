@@ -10,10 +10,14 @@ import { useKissMode } from '@/src/components/v2/layout/KissModeProvider';
 import { AnimatedStat } from '@/src/components/v2/motion/landingMotion';
 import { ContactPanel } from '@/src/components/v2/ui/ContactPanel';
 import { CopyEmail } from '@/src/components/v2/ui/CopyEmail';
-import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
 import { ResumeDownload } from '@/src/components/v2/ui/ResumeDownload';
 import { useMobileLanding } from '@/src/components/v2/ui/useMobileLanding';
+import { EarlierWorkRow } from '@/src/components/v2/archive/EarlierWorkRow';
+import { HeroIntroCopy } from '@/src/components/v2/archive/HeroIntroCopy';
+import { HeroMeta } from '@/src/components/v2/archive/HeroMeta';
+import { ProjectCard } from '@/src/components/v2/archive/ProjectCard';
 import { projects } from '@/src/config/v2/caseStudies';
+import { heroHeadline } from '@/src/config/v2/profile';
 import { siteConfig, trustLogos, trustSignals } from '@/src/config/v2/site';
 
 const LandingExperienceKiss = dynamic(
@@ -27,14 +31,6 @@ const LandingExperienceKiss = dynamic(
 function Label({ children }: { children: React.ReactNode }) {
   return <p className="archive-label text-text-muted">{children}</p>;
 }
-
-const introCopy = (
-  <>
-    Hi, I am <span className="text-accent-pop">Vittesh</span>, Product Designer with 7+ years of
-    working experience. I create digital products that balance human needs, business goals, and
-    technical constraints, one interaction at a time.
-  </>
-);
 
 export function LandingExperienceSingularity() {
   const heroRef = useRef<HTMLElement>(null);
@@ -79,15 +75,14 @@ export function LandingExperienceSingularity() {
         <div className="relative z-10 mx-auto flex max-w-[1600px] flex-col px-4 md:min-h-[calc(100svh-57px)] md:px-8 md:py-8">
           <div className="archive-hero relative flex min-h-[calc(100svh-57px)] flex-1 flex-col justify-center py-10 md:min-h-0 md:py-6">
             <div className="relative z-10 max-w-[760px] md:w-[58%]">
-              <h1 className="bh-sr-only">Thoughtfully designed. Purposefully simple.</h1>
+              <h1 className="bh-sr-only">{heroHeadline}</h1>
               <div className="bh-copy bh-copy-source" data-bh-warp aria-hidden="true">
-                <h1 className="archive-display archive-display--hero text-[clamp(2.6rem,4.5vw,4.75rem)]">
-                  <span className="v2-hero-line">Thoughtfully designed.</span>
-                  <span className="v2-hero-line text-accent-pop">Purposefully simple.</span>
-                </h1>
-                <p className="bh-copy-sub mt-8 max-w-xl text-base leading-relaxed text-text-secondary md:mt-10 md:text-lg">
-                  {introCopy}
+                <p className="archive-display archive-display--hero text-[clamp(2.6rem,4.5vw,4.75rem)]">
+                  <span className="v2-hero-line">{heroHeadline}</span>
                 </p>
+                <div className="bh-copy-sub mt-8 max-w-xl text-base leading-relaxed text-text-secondary md:mt-10 md:text-lg">
+                  <HeroIntroCopy />
+                </div>
               </div>
               <div
                 className="bh-intro-fade bh-cta mt-8 flex max-w-xl flex-col gap-3 sm:flex-row sm:flex-wrap md:mt-10"
@@ -103,26 +98,7 @@ export function LandingExperienceSingularity() {
             className="bh-intro-fade v2-hero-meta grid gap-5 border-t border-white/15 px-0 py-6 md:grid-cols-12 md:pb-0 md:pt-5"
             style={{ transitionDelay: '0.32s' }}
           >
-            <div className="md:col-span-3">
-              <Label>Currently working</Label>
-              <p className="mt-2 text-sm">{siteConfig.current}</p>
-            </div>
-            <div className="md:col-span-3">
-              <Label>Industries I have worked on</Label>
-              <p className="mt-2 text-sm">{siteConfig.industries}</p>
-            </div>
-            <div className="md:col-span-3">
-              <Label>Based in</Label>
-              <p className="mt-2 text-sm">{siteConfig.location}</p>
-            </div>
-            <div className="flex items-end md:col-span-3 md:justify-end">
-              <HashNavLink
-                href="/v2/#work"
-                className="archive-label inline-flex items-center gap-3 bg-white px-5 py-3 text-black"
-              >
-                See selected work <span>↓</span>
-              </HashNavLink>
-            </div>
+            <HeroMeta />
           </div>
         </div>
       </section>
@@ -209,45 +185,11 @@ export function LandingExperienceSingularity() {
                 transition={{ delay: (index % 2) * 0.08 }}
                 className={index === 0 ? 'md:col-span-2' : ''}
               >
-                <Link
-                  href={`/v2/work/${project.slug}/`}
-                  className="archive-project-card group block border border-border-subtle bg-bg-surface"
-                >
-                  <div
-                    className={`relative overflow-hidden bg-[#070707] ${
-                      index === 0 ? 'aspect-[16/7]' : 'aspect-[4/3]'
-                    }`}
-                  >
-                    <Image
-                      src={project.image}
-                      alt=""
-                      fill
-                      loading="lazy"
-                      decoding="async"
-                      className="archive-image object-contain p-4 group-hover:scale-[1.02] md:p-8"
-                      sizes={index === 0 ? '100vw' : '(max-width: 768px) 100vw, 50vw'}
-                    />
-                    <span className="archive-label absolute right-3 top-3 bg-bg-primary px-3 py-2">
-                      Case {project.index}
-                    </span>
-                  </div>
-                  <div className="grid gap-5 p-5 md:grid-cols-12 md:p-7">
-                    <div className="md:col-span-7">
-                      <h3 className="text-2xl font-semibold tracking-tight md:text-3xl">
-                        {project.title}
-                      </h3>
-                      <p className="mt-2 text-sm text-text-secondary">{project.summary}</p>
-                    </div>
-                    <div className="md:col-span-4">
-                      <Label>{project.tags.join(' / ')}</Label>
-                      <p className="mt-2 text-sm">{project.year}</p>
-                    </div>
-                    <span className="text-2xl text-accent-pop md:col-span-1 md:text-right">↗</span>
-                  </div>
-                </Link>
+                <ProjectCard project={project} index={index} />
               </motion.article>
             ))}
           </div>
+          <EarlierWorkRow />
         </div>
       </section>
 

@@ -1,29 +1,33 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import {
-  animate,
-  motion,
-  useInView,
-  useReducedMotion
-} from 'framer-motion';
+import { animate, motion, useInView } from 'framer-motion';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 const LETTER_MS = 420;
+
+/** False until mount so SSR markup matches the first client render. */
+function usePrefersReducedMotion() {
+  const [reduced, setReduced] = useState(false);
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const sync = () => setReduced(media.matches);
+    sync();
+    media.addEventListener('change', sync);
+    return () => media.removeEventListener('change', sync);
+  }, []);
+  return reduced;
+}
 
 export type HeroTitleLine = {
   text: string;
   accent?: boolean;
 };
 
-export const HERO_TITLE_LINES_KISS: HeroTitleLine[] = [
-  { text: 'Thoughtfully designed.' },
-  { text: 'Purposefully simple.', accent: true }
-];
+export const HERO_TITLE_LINES_KISS: HeroTitleLine[] = [{ text: 'I make powerful products easier to use.' }];
 
 export const HERO_TITLE_LINES_SINGULARITY: HeroTitleLine[] = [
-  { text: 'Thoughtfully designed.' },
-  { text: 'Purposefully simple.', accent: true }
+  { text: 'I make powerful products easier to use.' }
 ];
 
 export function heroTitleDuration(lines: HeroTitleLine[], stagger = 0.032) {
@@ -47,7 +51,7 @@ export function AnimatedHeroTitle({
   stagger = 0.032,
   onComplete
 }: AnimatedHeroTitleProps) {
-  const reduceMotion = useReducedMotion();
+  const reduceMotion = usePrefersReducedMotion();
   const label = lines.map((line) => line.text).join(' ');
   const onCompleteRef = useRef(onComplete);
   onCompleteRef.current = onComplete;
@@ -65,21 +69,6 @@ export function AnimatedHeroTitle({
     }, totalDuration * 1000);
     return () => window.clearTimeout(id);
   }, [play, reduceMotion, totalDuration]);
-
-  if (reduceMotion) {
-    return (
-      <h1 className={className}>
-        {lines.map((line) => (
-          <span
-            key={line.text}
-            className={`v2-hero-title-line ${line.accent ? 'text-accent-pop' : ''}`}
-          >
-            {line.text}
-          </span>
-        ))}
-      </h1>
-    );
-  }
 
   let charIndex = 0;
 
@@ -143,7 +132,7 @@ function AnimatedLetter({
   return (
     <motion.span
       className={isSpace ? 'v2-hero-title-space' : 'v2-hero-title-char'}
-      initial={{ opacity: 0, y: '0.42em', filter: 'blur(4px)' }}
+      initial={false}
       animate={play ? { opacity: 1, y: 0, filter: 'blur(0px)' } : { opacity: 0, y: '0.42em', filter: 'blur(4px)' }}
       transition={{
         duration: LETTER_MS / 1000,
@@ -178,7 +167,7 @@ export function AnimatedStat({ value }: { value: string }) {
     return () => controls.stop();
   }, [mounted, inView, target]);
 
-  if (target === null) {
+  if (value.includes('TODO') || target === null) {
     return (
       <motion.span
         ref={ref}
@@ -217,25 +206,52 @@ type RevealOnScrollProps = {
   y?: number;
 };
 
-/** Fade + lift when the block enters the viewport (mobile-friendly scroll reveal). */
+/** Fade + lift when the block enters the viewport (classes applied after mount). */
 export function RevealOnScroll({
   children,
   className,
   delay = 0,
   y = 28
 }: RevealOnScrollProps) {
-  const reduceMotion = useReducedMotion();
+  const ref = useRef<HTMLDivElement>(null);
+  const reduceMotion = usePrefersReducedMotion();
+
+  useEffect(() => {
+    const el = ref.current;
+    if (!el || reduceMotion) return;
+
+    el.style.opacity = '0';
+    el.style.transform = `translateY(${y}px)`;
+
+    const show = () => {
+      el.style.transition = `opacity 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s, transform 0.7s cubic-bezier(0.16, 1, 0.3, 1) ${delay}s`;
+      el.style.opacity = '1';
+      el.style.transform = 'translateY(0)';
+    };
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (!entry.isIntersecting) return;
+          show();
+          observer.unobserve(entry.target);
+        });
+      },
+      { threshold: 0.12, rootMargin: '-8% 0px -6% 0px' }
+    );
+    observer.observe(el);
+    return () => {
+      observer.disconnect();
+      el.style.opacity = '';
+      el.style.transform = '';
+      el.style.transition = '';
+    };
+  }, [reduceMotion, delay, y]);
 
   return (
-    <motion.div
-      className={className}
-      initial={reduceMotion ? false : { opacity: 0, y }}
-      whileInView={{ opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: '-8% 0px -6% 0px', amount: 0.12 }}
-      transition={{ duration: 0.7, delay, ease: EASE }}
-    >
+    <div ref={ref} className={className}>
       {children}
-    </motion.div>
+    </div>
   );
 }
 
@@ -270,20 +286,18 @@ type MobileHeroSublineProps = {
 
 /** Intro line rises toward the headline after the letter reveal. */
 export function MobileHeroSubline({ play, className, children }: MobileHeroSublineProps) {
-  const reduceMotion = useReducedMotion();
-
-  if (reduceMotion) {
-    return <p className={className}>{children}</p>;
-  }
+  const reduceMotion = usePrefersReducedMotion();
 
   return (
     <motion.p
       className={className}
-      initial={{ opacity: 0, y: 22, marginTop: '2.25rem' }}
+      initial={false}
       animate={
-        play ? { opacity: 1, y: 0, marginTop: '1rem' } : { opacity: 0, y: 22, marginTop: '2.25rem' }
+        reduceMotion || play
+          ? { opacity: 1, y: 0, marginTop: '1rem' }
+          : { opacity: 0, y: 22, marginTop: '2.25rem' }
       }
-      transition={{ duration: 0.9, delay: 0.12, ease: EASE }}
+      transition={{ duration: reduceMotion ? 0 : 0.9, delay: reduceMotion ? 0 : 0.12, ease: EASE }}
     >
       {children}
     </motion.p>
