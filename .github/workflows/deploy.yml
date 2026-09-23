@@ -31,7 +31,7 @@ jobs:
           if [ -f public/.htaccess ]; then cp public/.htaccess out/.htaccess; fi
 
       - name: Deploy via SSH (rsync)
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USER }}
@@ -51,7 +51,7 @@ jobs:
           target: "~/deploy_tmp"
 
       - name: Swap into public_html
-        uses: appleboy/ssh-action@v1.0.3
+        uses: appleboy/ssh-action@v1.2.5
         with:
           host: ${{ secrets.HOSTINGER_HOST }}
           username: ${{ secrets.HOSTINGER_USER }}
