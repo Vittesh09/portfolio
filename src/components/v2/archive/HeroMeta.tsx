@@ -27,7 +27,7 @@ export function HeroMeta({ workHrefClassName }: HeroMetaProps) {
         </p>
       </div>
       <div className="md:col-span-3">
-        <Label>Industries I have worked on</Label>
+        <Label>Industries</Label>
         <p className="mt-2 text-sm">{siteConfig.industries}</p>
       </div>
       <div className="md:col-span-3">

@@ -7,7 +7,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
-import { captureWarpSource } from '../lib/captureWarp';
+import { captureWarpSource, measureWarpBox } from '../lib/captureWarp';
 import { OverlayScenePass } from '../lib/OverlayScenePass';
 import {
   BLACK_HOLE_RADIUS,
@@ -77,7 +77,7 @@ export function useBlackHole(
     // HOME = singularity + orbit/spring anchor (world center of the void).
     // Screen placement on the RIGHT is done via setViewOffset — lookAt always
     // centers the target, so world X alone cannot push it right.
-    const HOME = new THREE.Vector3(0, isLab ? 0 : mobile ? 0.28 : 0.14, 0);
+    const HOME = new THREE.Vector3(0, isLab ? 0 : mobile ? 0.55 : 0.48, 0);
 
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(
@@ -91,7 +91,7 @@ export function useBlackHole(
       if (isLab) {
         camera.position.set(HOME.x - 0.4, HOME.y + 2.8, HOME.z + 12.5);
       } else {
-        camera.position.set(HOME.x - 3.1, HOME.y + 3.25, HOME.z + 11.0);
+        camera.position.set(HOME.x - 2.6, HOME.y + 3.85, HOME.z + 10.6);
       }
       camera.lookAt(HOME);
     };
@@ -130,14 +130,24 @@ export function useBlackHole(
     const homeCamPos = camera.position.clone();
     controls.saveState();
 
-    /** Shift frustum so the orbit anchor reads on the right (~75–80%). Lab stays centered. */
+    /** Shift frustum so the orbit anchor reads on the right. Lab stays centered. */
     const applyRightFrame = (width: number, height: number) => {
       if (isLab) {
         camera.clearViewOffset();
         return;
       }
-      const shift = mobile ? 0.3 : 0.46;
-      camera.setViewOffset(width, height, -Math.floor(width * shift), 0, width, height);
+      // Was 0.46 — parked the void against the right crop. Lower shift leaves
+      // outbound travel so drag isn't clipped by the frame.
+      const shift = mobile ? 0.22 : 0.3;
+      const lift = mobile ? 0.06 : 0.08;
+      camera.setViewOffset(
+        width,
+        height,
+        -Math.floor(width * shift),
+        Math.floor(height * lift),
+        width,
+        height
+      );
     };
 
     let holding = false;
@@ -152,6 +162,7 @@ export function useBlackHole(
     let returnStartedAt = 0;
     /** Home glide duration after release. */
     const RETURN_MS = 1600;
+    const spawnFrom = new THREE.Vector3();
     const ORBIT_COAST_MS = 1100;
     const orbitSpherical = new THREE.Spherical();
     const orbitOffset = new THREE.Vector3();
@@ -511,25 +522,6 @@ export function useBlackHole(
     grabProxy.setAttribute('role', 'presentation');
     overlayHost.appendChild(grabProxy);
 
-    // Fake cursor (CSS url() cursors are unreliable for text on Windows)
-    const grabCursor = document.createElement('div');
-    grabCursor.className = 'bh-cursor';
-    grabCursor.innerHTML =
-      '<span class="bh-cursor-dot" aria-hidden="true"></span>' +
-      '<span class="bh-cursor-label">Hold &amp; drag</span>';
-    grabCursor.setAttribute('aria-hidden', 'true');
-    overlayHost.appendChild(grabCursor);
-
-    let cursorOn = false;
-    const setGrabCursor = (on: boolean, clientX?: number, clientY?: number) => {
-      if (on && typeof clientX === 'number' && typeof clientY === 'number') {
-        grabCursor.style.transform = `translate(${clientX + 16}px, ${clientY + 14}px)`;
-      }
-      if (cursorOn === on) return;
-      cursorOn = on;
-      grabCursor.classList.toggle('is-on', on);
-    };
-
     let disposed = false;
     let raf = 0;
     let running = true;
@@ -541,13 +533,15 @@ export function useBlackHole(
     let textReady = false;
     /** First frame text became ready — drives opacity fade instead of a hard cut. */
     let textRevealStartedAt = 0;
-    const TEXT_CAPTURE_AFTER_COPY_MS = 450;
-    const TEXT_CAPTURE_FALLBACK_MS = 2200;
-    const TEXT_REVEAL_MS = 1100;
+    const TEXT_CAPTURE_AFTER_COPY_MS = 0;
+    const TEXT_CAPTURE_FALLBACK_MS = 2800;
+    const TEXT_REVEAL_MS = 180;
+    const INTRO_TRAVEL_MS = 3800;
+    const INTRO_SPIN_Z = 0.95;
 
     /** Keep a hole near its home without forcing world-Z (that changed depth/size). */
     const clampToPlayArea = (target = activeHole.core, home = activeHole.home) => {
-      const maxDist = 14;
+      const maxDist = 24;
       const dist = target.position.distanceTo(home);
       if (dist > maxDist) {
         target.position.sub(home).multiplyScalar(maxDist / dist).add(home);
@@ -654,25 +648,16 @@ export function useBlackHole(
       return hits[0].hole;
     };
 
-    const isGrabOnCenter = (clientX: number, clientY: number) => {
-      updateHoleScreen();
-      return Boolean(pickHoleAt(clientX, clientY));
-    };
-
     const placeTextPlane = () => {
       if (!warpNode) return;
 
       const mountRect = mount.getBoundingClientRect();
-      const rect = warpNode.getBoundingClientRect();
-      if (mountRect.width < 1 || mountRect.height < 1 || rect.width < 1) return;
+      const box = measureWarpBox(warpNode);
+      if (mountRect.width < 1 || mountRect.height < 1 || box.width < 1) return;
 
-      // Exact DOM box — same basis as captureWarpSource
-      const width = rect.width;
-      const height = rect.height;
-      const cx = rect.left + width * 0.5;
-      // html-to-image / GL quad sits ~4–6px low vs crisp DOM — nudge up
-      const TEXT_PLANE_NUDGE_Y = -5;
-      const cy = rect.top + height * 0.5 + TEXT_PLANE_NUDGE_Y;
+      const { width, height } = box;
+      const cx = box.left + width * 0.5;
+      const cy = box.top + height * 0.5;
 
       const nx = ((cx - mountRect.left) / mountRect.width) * 2 - 1;
       const ny = -(((cy - mountRect.top) / mountRect.height) * 2 - 1);
@@ -699,9 +684,17 @@ export function useBlackHole(
       }
 
       textMesh.visible = true;
+      if (!introDone) {
+        textMaterial.uniforms.uOpacity.value = 1;
+        textRevealStartedAt = performance.now();
+        return;
+      }
       if (!textRevealStartedAt) textRevealStartedAt = performance.now();
       const t = Math.min(1, (performance.now() - textRevealStartedAt) / TEXT_REVEAL_MS);
-      textMaterial.uniforms.uOpacity.value = easeOutCubic(t);
+      textMaterial.uniforms.uOpacity.value = Math.max(
+        textMaterial.uniforms.uOpacity.value as number,
+        easeOutCubic(t)
+      );
     };
 
     const enableCopyFallback = () => {
@@ -779,7 +772,7 @@ export function useBlackHole(
       homeCamPos.copy(camera.position);
       controls.saveState();
       controls.update();
-      if (!holding) {
+      if (!holding && introDone) {
         holeA.core.position.copy(holeA.home);
         holeA.core.rotation.set(0, 0, 0);
         if (holeB) {
@@ -823,9 +816,9 @@ export function useBlackHole(
     let introDone = isLab || reduceMotion;
     let introStartedAt = 0;
     let introBootAt = 0;
+    let introTravelAt = 0;
     /** Text gets a tiny head start; singularity begins right after. */
     const INTRO_BH_DELAY_MS = 140;
-    const INTRO_MS = 2000;
     const prevPos = new THREE.Vector3();
     const sampleVel = new THREE.Vector3();
     const DRAG_THRESHOLD_PX = 3;
@@ -856,14 +849,43 @@ export function useBlackHole(
       controls.update();
     };
 
-    const finishIntro = () => {
+    const hitOnHomePlane = (clientX: number, clientY: number, out: THREE.Vector3) => {
+      const ndc = clientToNdc(clientX, clientY);
+      if (!ndc) return false;
+      camera.getWorldDirection(camForward);
+      dragPlanePoint.copy(HOME);
+      dragPlane.setFromNormalAndCoplanarPoint(camForward, dragPlanePoint);
+      pointerNdc.set(ndc.x, ndc.y);
+      raycaster.setFromCamera(pointerNdc, camera);
+      return Boolean(raycaster.ray.intersectPlane(dragPlane, out));
+    };
+
+    const prepareIntroSpawn = () => {
+      spawnFrom.copy(holeA.home);
+      if (isLab || mobile || reduceMotion) return;
+      const box = mount.getBoundingClientRect();
+      const copyBox = hero?.querySelector<HTMLElement>('.bh-copy')?.getBoundingClientRect();
+      const spawnX = (copyBox?.left ?? box.left) + 24;
+      const spawnY = copyBox
+        ? copyBox.top - Math.min(120, box.height * 0.12)
+        : box.top + box.height * 0.12;
+      hitOnHomePlane(spawnX, spawnY, spawnFrom);
+    };
+
+    const completeIntroVisuals = () => {
       introDone = true;
       holeA.core.scale.set(1, 1, 1);
+      holeA.core.rotation.z = 0;
       bloomPass.strength = BLOOM_TARGET;
       diskMaterial.uniforms.uDensity.value = DISK_DENSITY_TARGET;
       grabProxy.style.pointerEvents = '';
       hero?.classList.add('is-intro-done');
       mount.classList.add('is-intro-done');
+    };
+
+    const finishIntro = () => {
+      completeIntroVisuals();
+      holeA.core.position.copy(holeA.home);
       if (!holding && !returning) enableOrbitIfAllowed();
     };
 
@@ -895,6 +917,8 @@ export function useBlackHole(
       drag.pointerId = -1;
       mount.classList.remove('is-dragging');
       mount.classList.remove('is-grabbing');
+      grabProxy.classList.remove('is-dragging');
+      grabProxy.classList.remove('is-grabbing');
       hero?.classList.remove('is-bh-dragging');
       if (pointerId >= 0) {
         try {
@@ -958,21 +982,9 @@ export function useBlackHole(
       }
     };
 
-    const onGrabEnter = (event: PointerEvent) => {
-      if (!introDone || reduceMotion) return;
-      setGrabCursor(true, event.clientX, event.clientY);
-    };
-
-    const onGrabLeave = () => {
-      if (holding) return;
-      setGrabCursor(false);
-    };
-
     const onPointerMove = (event: PointerEvent) => {
       if (!holding) return;
       if (drag.pointerId >= 0 && event.pointerId !== drag.pointerId) return;
-
-      setGrabCursor(true, event.clientX, event.clientY);
 
       const dist = Math.hypot(event.clientX - drag.startX, event.clientY - drag.startY);
       if (!drag.dragging) {
@@ -980,6 +992,8 @@ export function useBlackHole(
         drag.dragging = true;
         mount.classList.add('is-dragging');
         mount.classList.remove('is-grabbing');
+        grabProxy.classList.add('is-dragging');
+        grabProxy.classList.remove('is-grabbing');
       }
 
       prevPos.copy(activeHole.core.position);
@@ -1000,11 +1014,11 @@ export function useBlackHole(
         event.stopPropagation();
         return;
       }
-      setGrabCursor(true, event.clientX, event.clientY);
     };
 
     const onPointerDown = (event: PointerEvent) => {
-      if (!introDone || reduceMotion || event.button !== 0) return;
+      if (reduceMotion || event.button !== 0) return;
+      if (!introDone && !introStartedAt) return;
 
       const fromProxy = event.currentTarget === grabProxy || event.target === grabProxy;
       if (!fromProxy && isInteractiveTarget(event.target)) return;
@@ -1013,7 +1027,7 @@ export function useBlackHole(
       if (!fromProxy && !picked) return;
       activeHole = picked ?? holeA;
 
-      // New grab cancels an in-flight return; keep the current camera pose
+      if (!introDone) completeIntroVisuals();
       if (returning) {
         returning = false;
         returnMom.set(0, 0, 0);
@@ -1028,7 +1042,6 @@ export function useBlackHole(
       orbitCoasting = false;
       throwVel.set(0, 0, 0);
       freezeCamera();
-      setGrabCursor(true, event.clientX, event.clientY);
 
       drag.armed = true;
       drag.dragging = false;
@@ -1041,6 +1054,8 @@ export function useBlackHole(
       prevPos.copy(activeHole.core.position);
       beginDragPlane(event.clientX, event.clientY);
       mount.classList.add('is-grabbing');
+      grabProxy.classList.add('is-grabbing');
+      grabProxy.classList.remove('is-dragging');
       hero?.classList.add('is-bh-dragging');
       try {
         grabProxy.setPointerCapture(event.pointerId);
@@ -1061,16 +1076,10 @@ export function useBlackHole(
         return;
       }
       beginReturnHome();
-      if (event && isGrabOnCenter(event.clientX, event.clientY)) {
-        setGrabCursor(true, event.clientX, event.clientY);
-      } else {
-        setGrabCursor(false);
-      }
     };
 
     const onLostCapture = () => {
       if (holding) beginReturnHome();
-      setGrabCursor(false);
     };
 
     const onWindowBlur = () => {
@@ -1143,21 +1152,46 @@ export function useBlackHole(
 
           // Hold the void collapsed until copy has started (~140ms)
           if (sinceBoot < INTRO_BH_DELAY_MS) {
+            if (!introStartedAt) {
+              prepareIntroSpawn();
+              holeA.core.position.copy(spawnFrom);
+            }
             holeA.core.scale.setScalar(0.001);
             bloomPass.strength = 0;
             diskMaterial.uniforms.uDensity.value = 0;
             lensingPass.uniforms.lensingStrength.value = 0;
             controls.enabled = false;
           } else {
-            if (!introStartedAt) introStartedAt = performance.now();
-            const t = Math.min(1, (performance.now() - introStartedAt) / INTRO_MS);
-            const e = easeInOutCubic(t);
-            holeA.core.scale.setScalar(Math.max(0.001, e));
-            bloomPass.strength = BLOOM_TARGET * e;
-            diskMaterial.uniforms.uDensity.value = DISK_DENSITY_TARGET * e;
-            lensingPass.uniforms.lensingStrength.value = lensIdle * e;
+            if (!introStartedAt) {
+              introStartedAt = performance.now();
+              prepareIntroSpawn();
+              holeA.core.position.copy(spawnFrom);
+              grabProxy.style.pointerEvents = '';
+            }
+
+            const typeIsUp =
+              textReady || Boolean(hero?.classList.contains('bh-copy-fallback'));
             controls.enabled = false;
-            if (t >= 1) finishIntro();
+
+            if (!typeIsUp) {
+              holeA.core.position.copy(spawnFrom);
+              holeA.core.scale.setScalar(0.001);
+              bloomPass.strength = 0;
+              diskMaterial.uniforms.uDensity.value = 0;
+              lensingPass.uniforms.lensingStrength.value = 0;
+              if (!captureQueued) void refreshWarpTexture(true);
+            } else {
+              if (!introTravelAt) introTravelAt = performance.now();
+              const t = Math.min(1, (performance.now() - introTravelAt) / INTRO_TRAVEL_MS);
+              const e = easeOutCubic(t);
+              holeA.core.scale.setScalar(Math.max(0.001, e));
+              bloomPass.strength = BLOOM_TARGET * e;
+              diskMaterial.uniforms.uDensity.value = DISK_DENSITY_TARGET * e;
+              lensingPass.uniforms.lensingStrength.value = lensIdle * e;
+              holeA.core.position.lerpVectors(spawnFrom, holeA.home, e);
+              holeA.core.rotation.z = (1 - e) * INTRO_SPIN_Z;
+              if (t >= 1) finishIntro();
+            }
           }
         } else if (holding) {
           // Keep the orbited (or current) camera frozen while dragging the void
@@ -1286,7 +1320,6 @@ export function useBlackHole(
       ([entry]) => {
         inViewport = entry.isIntersecting;
         grabProxy.style.display = inViewport && !reduceMotion ? 'block' : 'none';
-        if (!inViewport) setGrabCursor(false);
         if (inViewport && !document.hidden) start();
         else stop();
       },
@@ -1320,8 +1353,6 @@ export function useBlackHole(
     grabProxy.addEventListener('pointerdown', onPointerDown);
     grabProxy.addEventListener('pointerup', onPointerUp);
     grabProxy.addEventListener('pointercancel', onPointerUp);
-    grabProxy.addEventListener('pointerenter', onGrabEnter);
-    grabProxy.addEventListener('pointerleave', onGrabLeave);
     grabProxy.addEventListener('pointermove', onGrabMove);
     grabProxy.addEventListener('lostpointercapture', onLostCapture);
     mount.addEventListener('pointerdown', onPointerDown, true);
@@ -1365,8 +1396,6 @@ export function useBlackHole(
       grabProxy.removeEventListener('pointerdown', onPointerDown);
       grabProxy.removeEventListener('pointerup', onPointerUp);
       grabProxy.removeEventListener('pointercancel', onPointerUp);
-      grabProxy.removeEventListener('pointerenter', onGrabEnter);
-      grabProxy.removeEventListener('pointerleave', onGrabLeave);
       grabProxy.removeEventListener('pointermove', onGrabMove);
       grabProxy.removeEventListener('lostpointercapture', onLostCapture);
       window.removeEventListener('pointermove', onPointerMove);
@@ -1381,7 +1410,6 @@ export function useBlackHole(
       hero?.classList.remove('bh-copy-fallback');
       mount.classList.remove('is-intro-done');
       if (grabProxy.parentNode) grabProxy.parentNode.removeChild(grabProxy);
-      if (grabCursor.parentNode) grabCursor.parentNode.removeChild(grabCursor);
 
       starGeometry.dispose();
       starMaterial.dispose();

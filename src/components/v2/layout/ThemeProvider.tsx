@@ -20,7 +20,7 @@ type ThemeContextValue = {
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
-export const V2_THEME_KEY = 'v2-theme';
+export const V2_THEME_KEY = 'v2-appearance';
 
 const PREFERENCE_ORDER: V2ThemePreference[] = ['system', 'light', 'dark'];
 
@@ -35,6 +35,18 @@ function parsePreference(value: string | null): V2ThemePreference {
 
 function resolveTheme(preference: V2ThemePreference): V2Theme {
   return preference === 'system' ? systemTheme() : preference;
+}
+
+function persistPreference(preference: V2ThemePreference) {
+  try {
+    if (preference === 'system') {
+      window.localStorage.removeItem(V2_THEME_KEY);
+      return;
+    }
+    window.localStorage.setItem(V2_THEME_KEY, preference);
+  } catch {
+    /* ignore */
+  }
 }
 
 function applyTheme(theme: V2Theme) {
@@ -76,11 +88,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       const nextTheme = resolveTheme(next);
       setTheme(nextTheme);
       applyTheme(nextTheme);
-      try {
-        window.localStorage.setItem(V2_THEME_KEY, next);
-      } catch {
-        /* ignore */
-      }
+      persistPreference(next);
       return next;
     });
   }, []);

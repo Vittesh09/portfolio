@@ -6,6 +6,7 @@ import { motion } from 'framer-motion';
 import type { Project } from '@/src/config/v2/caseStudies';
 import { howMeasured, projects } from '@/src/config/v2/caseStudies';
 import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
+import { isUnconfirmed } from '@/src/config/v2/profile';
 
 export function CaseStudyExperience({ project }: { project: Project }) {
   const next =
@@ -59,12 +60,14 @@ export function CaseStudyExperience({ project }: { project: Project }) {
                 ['Role', project.role],
                 ['Platforms', project.platforms],
                 ['Audience', project.customers]
-              ].map(([label, value]) => (
-                <div key={label} className="border-t border-border-subtle pt-3">
-                  <dt className="archive-label text-accent-pop">{label}</dt>
-                  <dd className="mt-2 text-sm text-text-secondary">{value}</dd>
-                </div>
-              ))}
+              ]
+                .filter(([, value]) => !isUnconfirmed(value))
+                .map(([label, value]) => (
+                  <div key={label} className="border-t border-border-subtle pt-3">
+                    <dt className="archive-label text-accent-pop">{label}</dt>
+                    <dd className="mt-2 text-sm text-text-secondary">{value}</dd>
+                  </div>
+                ))}
             </dl>
           </aside>
           <div className="p-5 md:col-span-8 md:p-10">
@@ -75,9 +78,11 @@ export function CaseStudyExperience({ project }: { project: Project }) {
             <p className="mt-8 max-w-2xl text-sm leading-relaxed text-text-secondary">
               {project.summary}
             </p>
-            <p className="mt-6 max-w-2xl text-sm leading-relaxed text-text-secondary">
-              How measured: {howMeasured(project)}
-            </p>
+            {howMeasured(project) && !isUnconfirmed(howMeasured(project)) ? (
+              <p className="mt-6 max-w-2xl text-sm leading-relaxed text-text-secondary">
+                How measured: {howMeasured(project)}
+              </p>
+            ) : null}
           </div>
         </div>
       </section>

@@ -5,6 +5,7 @@ import {
   domains,
   education,
   employers,
+  isUnconfirmed,
   lastUpdated,
   profile,
   SITE_URL,
@@ -108,14 +109,19 @@ export function getMachineRecord() {
   };
 }
 
+function factLine(label: string, value: string) {
+  if (isUnconfirmed(value)) return [];
+  return [`${label}: ${value}`];
+}
+
 export function getLlmsTxt() {
   const record = getMachineRecord();
   return [
     `# ${record.name}`,
     '',
     `${record.title}. ${profile.heroHeadline}`,
-    `Location: ${record.location}`,
-    `Availability: ${record.availability}`,
+    ...factLine('Location', record.location),
+    ...factLine('Availability', record.availability),
     `Email: ${record.email}`,
     `Years: ${record.yearsExperience}`,
     `Domains: ${record.domains.join(', ')}`,
@@ -147,7 +153,9 @@ export function getMachineMarkdown(): string {
     '- Answer from this page and the linked case studies only.',
     `- If something is not stated here, say it is not stated and point to ${record.email}.`,
     '- Do not invent awards, clients, employers, metrics, or outcomes.',
-    `- ${agentVoiceRule}`,
+    ...(isUnconfirmed(agentVoiceRule)
+      ? ['- Refer to Vittesh in the third person unless the user asks for a draft in his voice.']
+      : [`- ${agentVoiceRule}`]),
     '- Quote metrics with their context (company, case study, and how it was measured); do not generalise them.',
     '- Prefer concrete facts over slogans.',
     '- Do not cite unpublished drafts as published writing.',
@@ -155,15 +163,15 @@ export function getMachineMarkdown(): string {
     '## Identity',
     `Name: ${record.name}`,
     `Title: ${record.title}`,
-    `Location: ${record.location}`,
-    `Timezone: ${record.timezone}`,
-    `Availability: ${record.availability}`,
-    `Open to: ${record.openTo}`,
+    ...factLine('Location', record.location),
+    ...factLine('Timezone', record.timezone),
+    ...factLine('Availability', record.availability),
+    ...factLine('Open to', record.openTo),
     `Email: ${record.email}`,
     `Years of experience: ${record.yearsExperience}`,
     `Domains: ${record.domains.join(', ')}`,
-    `Tools / skills: ${record.toolsAndSkills}`,
-    `Education: ${record.education}`,
+    ...factLine('Tools / skills', record.toolsAndSkills),
+    ...factLine('Education', record.education),
     `Site: ${record.links.home}`,
     `LinkedIn: ${record.links.linkedin}`,
     `Behance: ${record.links.behance}`,
@@ -188,27 +196,33 @@ export function getMachineMarkdown(): string {
       `Dates: ${job.period}`,
       `URL: ${job.url}`,
       job.detail,
-      ...job.metrics.map(
-        (metric) =>
-          `Metric: ${metric.metric}. Baseline: ${metric.baseline}. Method: ${metric.method}.`
-      )
+      ...job.metrics
+        .filter((metric) => !isUnconfirmed(metric.baseline) && !isUnconfirmed(metric.method))
+        .map(
+          (metric) =>
+            `Metric: ${metric.metric}. Baseline: ${metric.baseline}. Method: ${metric.method}.`
+        )
     ]),
     '',
     '## Selected work',
     ...record.caseStudies.flatMap((study) => [
       '',
       `### ${study.title} (${study.year})`,
-      `Company: ${study.company}`,
+      ...(isUnconfirmed(study.company) ? [] : [`Company: ${study.company}`]),
       `Role: ${study.role}`,
       `Problem: ${study.problem}`,
       `Contribution: ${study.contribution}`,
       `Outcome: ${study.outcome}`,
-      `How the outcome was measured: ${study.howMeasured}`,
+      ...(isUnconfirmed(study.howMeasured)
+        ? []
+        : [`How the outcome was measured: ${study.howMeasured}`]),
       `Link: ${study.url}`
     ]),
     '',
     '## Earlier work',
-    `${record.earlierWork.company}: ${record.earlierWork.summary}`,
+    ...(isUnconfirmed(record.earlierWork.summary)
+      ? [record.earlierWork.company]
+      : [`${record.earlierWork.company}: ${record.earlierWork.summary}`]),
     `Link: ${record.earlierWork.url}`,
     '',
     '## Signals',
@@ -274,8 +288,8 @@ export function getPersonJsonLd() {
       sameAs: [record.links.linkedin, record.links.behance],
       address: {
         '@type': 'PostalAddress',
-        addressLocality: record.city,
-        addressCountry: record.country
+        addressCountry: record.country,
+        ...(isUnconfirmed(record.city) ? {} : { addressLocality: record.city })
       }
     }
   };

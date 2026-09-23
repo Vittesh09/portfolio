@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { type Project } from '@/src/config/v2/caseStudies';
+import { isUnconfirmed } from '@/src/config/v2/profile';
 
 type ProjectCardProps = {
   project: Project;
@@ -39,7 +40,9 @@ export function ProjectCard({ project, index }: ProjectCardProps) {
         <div className="min-w-0 md:col-span-7">
           <h3 className="text-2xl font-semibold tracking-tight md:text-3xl">{project.title}</h3>
           <p className="mt-2 break-words text-sm text-text-secondary">
-            {project.company} · {project.role}
+            {isUnconfirmed(project.company)
+              ? project.role
+              : `${project.company} · ${project.role}`}
           </p>
           <p className="mt-2 text-sm text-text-secondary">{project.summary}</p>
         </div>

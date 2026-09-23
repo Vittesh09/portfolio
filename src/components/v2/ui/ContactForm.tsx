@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useRef, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { siteConfig } from '@/src/config/v2/site';
 
 type Status = 'idle' | 'sending' | 'sent' | 'error';
@@ -12,6 +12,17 @@ function headerSafe(value: string, max: number) {
   return value.replace(/[\r\n\0]+/g, ' ').trim().slice(0, max);
 }
 
+const FORM_ID = 'v2-contact-form';
+const NAME_ID = `${FORM_ID}-name`;
+const EMAIL_ID = `${FORM_ID}-email`;
+const MESSAGE_ID = `${FORM_ID}-message`;
+const HONEYPOT_ID = `${FORM_ID}-company-website`;
+const SUMMARY_ID = `${FORM_ID}-summary`;
+const SUCCESS_ID = `${FORM_ID}-success`;
+const NAME_ERROR_ID = `${FORM_ID}-name-error`;
+const EMAIL_ERROR_ID = `${FORM_ID}-email-error`;
+const MESSAGE_ERROR_ID = `${FORM_ID}-message-error`;
+
 type ContactFormProps = {
   className?: string;
   /** Heading id that names this form (WCAG 1.3.1 / 4.1.2) */
@@ -19,8 +30,6 @@ type ContactFormProps = {
 };
 
 export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
-  const reactId = useId();
-  const formId = `contact-${reactId.replace(/:/g, '')}`;
   const nameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const messageRef = useRef<HTMLTextAreaElement>(null);
@@ -30,12 +39,6 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState('');
   const [invalid, setInvalid] = useState<Partial<Record<FieldName, string>>>({});
-
-  const summaryId = `${formId}-summary`;
-  const successId = `${formId}-success`;
-  const nameErrorId = `${formId}-name-error`;
-  const emailErrorId = `${formId}-email-error`;
-  const messageErrorId = `${formId}-message-error`;
 
   useEffect(() => {
     if (status === 'error' && error) {
@@ -136,7 +139,7 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
 
   return (
     <form
-      id={formId}
+      id={FORM_ID}
       onSubmit={onSubmit}
       className={`v2-contact-form relative ${className}`.trim()}
       noValidate
@@ -146,7 +149,7 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
       {status === 'error' && error ? (
         <div
           ref={summaryRef}
-          id={summaryId}
+          id={SUMMARY_ID}
           tabIndex={-1}
           role="alert"
           aria-live="assertive"
@@ -159,7 +162,7 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
               {invalid.name ? (
                 <li>
                   <a
-                    href={`#${formId}-name`}
+                    href={`#${NAME_ID}`}
                     className="underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-pop"
                     onClick={(event) => {
                       event.preventDefault();
@@ -173,7 +176,7 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
               {invalid.email ? (
                 <li>
                   <a
-                    href={`#${formId}-email`}
+                    href={`#${EMAIL_ID}`}
                     className="underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-pop"
                     onClick={(event) => {
                       event.preventDefault();
@@ -187,7 +190,7 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
               {invalid.message ? (
                 <li>
                   <a
-                    href={`#${formId}-message`}
+                    href={`#${MESSAGE_ID}`}
                     className="underline underline-offset-2 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-pop"
                     onClick={(event) => {
                       event.preventDefault();
@@ -204,9 +207,9 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
       ) : null}
 
       <div className="v2-visually-hidden" aria-hidden="true">
-        <label htmlFor={`${formId}-company-website`}>Company website</label>
+        <label htmlFor={HONEYPOT_ID}>Company website</label>
         <input
-          id={`${formId}-company-website`}
+          id={HONEYPOT_ID}
           name="company_website"
           type="text"
           tabIndex={-1}
@@ -216,38 +219,38 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
 
       <div className="v2-contact-fields">
         <div className="v2-contact-field-group">
-          <label htmlFor={`${formId}-name`} className="v2-contact-label">
+          <label htmlFor={NAME_ID} className="v2-contact-label">
             Name <span aria-hidden="true">*</span>
             <span className="v2-visually-hidden"> (required)</span>
           </label>
           <input
             ref={nameRef}
-            id={`${formId}-name`}
+            id={NAME_ID}
             name="name"
             type="text"
             autoComplete="name"
             required
             aria-required="true"
             aria-invalid={invalid.name ? true : undefined}
-            aria-describedby={fieldDescribedBy('name', nameErrorId)}
+            aria-describedby={fieldDescribedBy('name', NAME_ERROR_ID)}
             className={`v2-contact-field ${invalid.name ? 'is-invalid' : ''}`}
             maxLength={120}
           />
           {invalid.name ? (
-            <p id={nameErrorId} className="v2-contact-field-error">
+            <p id={NAME_ERROR_ID} className="v2-contact-field-error">
               <span className="font-semibold">Error:</span> {invalid.name}
             </p>
           ) : null}
         </div>
 
         <div className="v2-contact-field-group">
-          <label htmlFor={`${formId}-email`} className="v2-contact-label">
+          <label htmlFor={EMAIL_ID} className="v2-contact-label">
             Email <span aria-hidden="true">*</span>
             <span className="v2-visually-hidden"> (required)</span>
           </label>
           <input
             ref={emailRef}
-            id={`${formId}-email`}
+            id={EMAIL_ID}
             name="email"
             type="email"
             autoComplete="email"
@@ -256,38 +259,38 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
             required
             aria-required="true"
             aria-invalid={invalid.email ? true : undefined}
-            aria-describedby={fieldDescribedBy('email', emailErrorId)}
+            aria-describedby={fieldDescribedBy('email', EMAIL_ERROR_ID)}
             className={`v2-contact-field ${invalid.email ? 'is-invalid' : ''}`}
             maxLength={254}
           />
           {invalid.email ? (
-            <p id={emailErrorId} className="v2-contact-field-error">
+            <p id={EMAIL_ERROR_ID} className="v2-contact-field-error">
               <span className="font-semibold">Error:</span> {invalid.email}
             </p>
           ) : null}
         </div>
 
         <div className="v2-contact-field-group v2-contact-field-group--full">
-          <label htmlFor={`${formId}-message`} className="v2-contact-label">
+          <label htmlFor={MESSAGE_ID} className="v2-contact-label">
             Message <span aria-hidden="true">*</span>
             <span className="v2-visually-hidden"> (required)</span>
           </label>
           <textarea
             ref={messageRef}
-            id={`${formId}-message`}
+            id={MESSAGE_ID}
             name="message"
             required
             rows={3}
             aria-required="true"
             aria-invalid={invalid.message ? true : undefined}
-            aria-describedby={fieldDescribedBy('message', messageErrorId)}
+            aria-describedby={fieldDescribedBy('message', MESSAGE_ERROR_ID)}
             className={`v2-contact-field v2-contact-field--area ${
               invalid.message ? 'is-invalid' : ''
             }`}
             maxLength={5000}
           />
           {invalid.message ? (
-            <p id={messageErrorId} className="v2-contact-field-error">
+            <p id={MESSAGE_ERROR_ID} className="v2-contact-field-error">
               <span className="font-semibold">Error:</span> {invalid.message}
             </p>
           ) : null}
@@ -309,7 +312,7 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
         {status === 'sent' ? (
           <p
             ref={successRef}
-            id={successId}
+            id={SUCCESS_ID}
             tabIndex={-1}
             role="status"
             className="v2-contact-alert outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-pop"

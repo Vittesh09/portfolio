@@ -1,5 +1,4 @@
 import type { MetricEvidence } from '@/src/config/v2/profile';
-import { fleetToolsCountNote } from '@/src/config/v2/profile';
 
 const unconfirmedMethod = 'TODO: [FILL: baseline and method for this metric]';
 
@@ -127,7 +126,7 @@ export const projects: Project[] = [
     client: 'Enterprise fleet operations',
     customers: 'Dispatchers and operators managing fleets of 500+ vehicles',
     challenge:
-      `Stop forcing dispatchers to monitor a fleet across seven separate apps when every second of an incident counts. ${fleetToolsCountNote}`,
+      'Stop forcing dispatchers to monitor a fleet across seven separate apps when every second of an incident counts.',
     role: 'Senior Product Designer',
     platforms: 'Responsive web command center',
     year: '2024',

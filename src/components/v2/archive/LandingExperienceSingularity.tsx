@@ -13,7 +13,8 @@ import { CopyEmail } from '@/src/components/v2/ui/CopyEmail';
 import { ResumeDownload } from '@/src/components/v2/ui/ResumeDownload';
 import { useMobileLanding } from '@/src/components/v2/ui/useMobileLanding';
 import { EarlierWorkRow } from '@/src/components/v2/archive/EarlierWorkRow';
-import { HeroIntroCopy } from '@/src/components/v2/archive/HeroIntroCopy';
+import { HeroHeadlineLines, HeroIntroCopy } from '@/src/components/v2/archive/HeroIntroCopy';
+import { HeroPortrait } from '@/src/components/v2/archive/HeroPortrait';
 import { HeroMeta } from '@/src/components/v2/archive/HeroMeta';
 import { ProjectCard } from '@/src/components/v2/archive/ProjectCard';
 import { projects } from '@/src/config/v2/caseStudies';
@@ -74,13 +75,14 @@ export function LandingExperienceSingularity() {
 
         <div className="relative z-10 mx-auto flex max-w-[1600px] flex-col px-4 md:min-h-[calc(100svh-57px)] md:px-8 md:py-8">
           <div className="archive-hero relative flex min-h-[calc(100svh-57px)] flex-1 flex-col justify-center py-10 md:min-h-0 md:py-6">
-            <div className="relative z-10 max-w-[760px] md:w-[58%]">
+            <div className="relative z-10 max-w-[52rem] md:w-[68%]">
               <h1 className="bh-sr-only">{heroHeadline}</h1>
               <div className="bh-copy bh-copy-source" data-bh-warp aria-hidden="true">
-                <p className="archive-display archive-display--hero text-[clamp(2.6rem,4.5vw,4.75rem)]">
-                  <span className="v2-hero-line">{heroHeadline}</span>
+                <HeroPortrait className="mb-5" />
+                <p className="archive-display archive-display--hero text-[clamp(2.35rem,4.1vw,4.15rem)]">
+                  <HeroHeadlineLines />
                 </p>
-                <div className="bh-copy-sub mt-8 max-w-xl text-base leading-relaxed text-text-secondary md:mt-10 md:text-lg">
+                <div className="bh-copy-sub max-w-xl text-[0.95rem] leading-snug text-text-secondary md:text-base">
                   <HeroIntroCopy />
                 </div>
               </div>

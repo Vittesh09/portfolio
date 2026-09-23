@@ -28,6 +28,10 @@ function grabTitles(src) {
   return [...src.matchAll(/title: '([^']+)'/g)].map((match) => match[1]);
 }
 
+function pending(value) {
+  return /TODO|\[FILL:/.test(value);
+}
+
 export function collectFacts() {
   const profile = read('src/config/v2/profile.ts');
   const studies = read('src/config/v2/caseStudies.ts');
@@ -35,9 +39,6 @@ export function collectFacts() {
     ['Future City VR + EEG', 'Fleet Command Center', 'Cloud Cost Optimization'].includes(title)
   );
   const profileBlock = /export const profile = \{([\s\S]*?)\n\} as const/.exec(profile)?.[1] ?? '';
-  const city = grabExport(profile, 'city');
-  const timezone = grabExport(profile, 'timezone');
-  const openTo = grabExport(profile, 'openTo');
 
   return {
     lastUpdated: grabExport(profile, 'lastUpdated'),
@@ -46,7 +47,7 @@ export function collectFacts() {
     yearsExperience: grabExport(profile, 'yearsExperience'),
     email: /email: '([^']+)'/.exec(profileBlock)?.[1] ?? '',
     availability: grabExport(profile, 'availability'),
-    locationLine: `Based in ${city}, India · ${timezone} · ${openTo}`,
+    locationLine: /locationLine: '([^']+)'/.exec(profileBlock)?.[1] ?? 'India',
     heroHeadline: grabExport(profile, 'heroHeadline'),
     linkedin: /linkedin: '([^']+)'/.exec(profile)?.[1] ?? '',
     behance: /behance: '([^']+)'/.exec(profile)?.[1] ?? '',
@@ -63,7 +64,7 @@ export function buildAgentDocs(facts) {
     '',
     `${facts.title}. ${facts.heroHeadline}`,
     `Location: ${facts.locationLine}`,
-    `Availability: ${facts.availability}`,
+    ...(pending(facts.availability) ? [] : [`Availability: ${facts.availability}`]),
     `Email: ${facts.email}`,
     `Years: ${facts.yearsExperience}`,
     '',
@@ -107,7 +108,7 @@ if (process.argv[1] && process.argv[1].endsWith('sync-v2-agent-docs.mjs')) {
       `Title: ${facts.title}`,
       `Email: ${facts.email}`,
       `Years: ${facts.yearsExperience}`,
-      `Availability: ${facts.availability}`,
+      ...(pending(facts.availability) ? [] : [`Availability: ${facts.availability}`]),
       `Location: ${facts.locationLine}`,
       '',
       'Employers:',
@@ -130,7 +131,6 @@ if (process.argv[1] && process.argv[1].endsWith('sync-v2-agent-docs.mjs')) {
         title: facts.title,
         email: facts.email,
         yearsExperience: facts.yearsExperience,
-        availability: facts.availability,
         location: facts.locationLine,
         employers: facts.employers,
         caseStudies: facts.caseTitles,

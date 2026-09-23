@@ -1,7 +1,6 @@
 import { MachinePageView } from '@/src/components/v2/sections/MachinePageView';
 import {
   assertAgentFactsMatchPages,
-  getMachineJsonLd,
   getMachinePlainText,
   machineMeta
 } from '@/src/config/v2/agentDocuments';
@@ -19,13 +18,5 @@ export const metadata = {
 
 export default function V2MachinePage() {
   const text = getMachinePlainText();
-  return (
-    <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(getMachineJsonLd()) }}
-      />
-      <MachinePageView text={text} />
-    </>
-  );
+  return <MachinePageView text={text} />;
 }

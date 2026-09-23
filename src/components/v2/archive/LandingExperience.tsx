@@ -11,11 +11,10 @@ import { CopyEmail } from '@/src/components/v2/ui/CopyEmail';
 import { ContactPanel } from '@/src/components/v2/ui/ContactPanel';
 import { ResumeDownload } from '@/src/components/v2/ui/ResumeDownload';
 import { EarlierWorkRow } from '@/src/components/v2/archive/EarlierWorkRow';
-import { HeroIntroCopy } from '@/src/components/v2/archive/HeroIntroCopy';
+import { HeroHeadlineLines, HeroIntroCopy } from '@/src/components/v2/archive/HeroIntroCopy';
 import { HeroMeta } from '@/src/components/v2/archive/HeroMeta';
 import { ProjectCard } from '@/src/components/v2/archive/ProjectCard';
 import { projects } from '@/src/config/v2/caseStudies';
-import { heroHeadline } from '@/src/config/v2/profile';
 import {
   processSteps,
   siteConfig,
@@ -109,13 +108,13 @@ function LandingExperienceArchive() {
               initial={false}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.75 }}
-              className="relative z-10 max-w-[760px] md:w-[58%]"
+              className="relative z-10 max-w-[52rem] md:w-[68%]"
             >
               <Label>Available for work</Label>
-              <h1 className="archive-display archive-display--hero mt-4 text-[clamp(2.6rem,4.5vw,4.75rem)]">
-                <span className="v2-hero-line">{heroHeadline}</span>
+              <h1 className="archive-display archive-display--hero mt-4 text-[clamp(2.35rem,4.1vw,4.15rem)]">
+                <HeroHeadlineLines />
               </h1>
-              <HeroIntroCopy className="mt-8 max-w-xl text-base leading-relaxed text-text-secondary md:mt-10 md:text-lg" />
+              <HeroIntroCopy className="mt-2 max-w-xl text-[0.95rem] leading-snug text-text-secondary md:text-base" />
               <div className="mt-8 flex max-w-xl flex-col gap-3 sm:flex-row sm:flex-wrap md:mt-10">
                 <CopyEmail variant="hero" className="sm:min-w-[min(100%,20rem)] sm:flex-1" />
                 <ResumeDownload variant="hero" className="sm:w-auto" />

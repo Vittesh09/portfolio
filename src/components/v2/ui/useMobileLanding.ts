@@ -1,32 +1,33 @@
 'use client';
 
-import { useSyncExternalStore } from 'react';
+import { useEffect, useState } from 'react';
 
-function subscribeMobile(onStoreChange: () => void) {
-  const widthQuery = window.matchMedia('(max-width: 768px)');
-  const coarseQuery = window.matchMedia('(pointer: coarse)');
-  const onChange = () => onStoreChange();
-  widthQuery.addEventListener('change', onChange);
-  coarseQuery.addEventListener('change', onChange);
-  return () => {
-    widthQuery.removeEventListener('change', onChange);
-    coarseQuery.removeEventListener('change', onChange);
-  };
-}
-
-function getMobileSnapshot() {
+function readMobile() {
   return (
     window.matchMedia('(max-width: 768px)').matches ||
     window.matchMedia('(pointer: coarse)').matches
   );
 }
 
-/** SSR / hydration assume desktop so the singularity tree matches the HTML. */
-function getServerMobileSnapshot() {
-  return false;
-}
-
-/** True for narrow viewports or coarse pointers (phones / tablets). */
+/**
+ * True for narrow viewports or coarse pointers.
+ * Always false on the server and the first client render so SSR HTML matches.
+ */
 export function useMobileLanding() {
-  return useSyncExternalStore(subscribeMobile, getMobileSnapshot, getServerMobileSnapshot);
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const sync = () => setIsMobile(readMobile());
+    sync();
+    const widthQuery = window.matchMedia('(max-width: 768px)');
+    const coarseQuery = window.matchMedia('(pointer: coarse)');
+    widthQuery.addEventListener('change', sync);
+    coarseQuery.addEventListener('change', sync);
+    return () => {
+      widthQuery.removeEventListener('change', sync);
+      coarseQuery.removeEventListener('change', sync);
+    };
+  }, []);
+
+  return isMobile;
 }

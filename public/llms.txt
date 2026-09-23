@@ -1,10 +1,9 @@
 # Vittesh Sinha
 
 Senior Product Designer. I make powerful products easier to use.
-Location: Based in TODO: [FILL: city], India · TODO: [FILL: timezone] · TODO: [FILL: open to remote / relocation]
-Availability: TODO: [FILL: full-time / freelance / both / not looking]
+Location: India
 Email: hello@vittesh.com
-Years: TODO: [FILL: 7+ or 8+]
+Years: 7+
 
 Case studies:
 - Future City VR + EEG: https://www.vittesh.com/v2/work/vr-eeg-analytics/

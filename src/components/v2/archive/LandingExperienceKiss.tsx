@@ -1,6 +1,5 @@
 'use client';
 
-import Image from 'next/image';
 import Link from 'next/link';
 import { CopyEmail } from '@/src/components/v2/ui/CopyEmail';
 import { ContactPanel } from '@/src/components/v2/ui/ContactPanel';
@@ -12,35 +11,15 @@ import {
   useKissHeroIntro
 } from '@/src/components/v2/motion/landingMotion';
 import { EarlierWorkRow } from '@/src/components/v2/archive/EarlierWorkRow';
-import { HeroIntroCopy } from '@/src/components/v2/archive/HeroIntroCopy';
+import { HeroHeadlineLines, HeroIntroCopy } from '@/src/components/v2/archive/HeroIntroCopy';
+import { HeroPortrait } from '@/src/components/v2/archive/HeroPortrait';
 import { HeroMeta } from '@/src/components/v2/archive/HeroMeta';
 import { ProjectCard } from '@/src/components/v2/archive/ProjectCard';
 import { projects } from '@/src/config/v2/caseStudies';
-import { heroHeadline } from '@/src/config/v2/profile';
 import { siteConfig, trustLogos, trustSignals } from '@/src/config/v2/site';
 
 function Label({ children }: { children: React.ReactNode }) {
   return <p className="archive-label text-text-muted">{children}</p>;
-}
-
-function HeroPortrait({ className = '' }: { className?: string }) {
-  return (
-    <div className={`v2-kiss-fade v2-hero-portrait ${className}`.trim()}>
-      <div className="v2-hero-portrait-ring">
-        <div className="v2-hero-portrait-inner">
-          <Image
-            src="/assets/images/profile.png"
-            alt={`Portrait of ${siteConfig.name}`}
-            width={96}
-            height={96}
-            priority
-            className="v2-hero-portrait-img"
-            sizes="96px"
-          />
-        </div>
-      </div>
-    </div>
-  );
 }
 
 /** Simple mode — workbench-style grids, light motion on load + scroll. */
@@ -56,15 +35,15 @@ export function LandingExperienceKiss() {
         <div className="mx-auto flex min-h-[calc(100svh-57px)] max-w-[1600px] flex-col px-4 pb-6 pt-12 md:block md:min-h-0 md:px-8 md:py-24">
           {/* Mobile */}
           <div className="v2-kiss-copy md:hidden">
-            <HeroPortrait className="mb-1" />
+            <HeroPortrait className="v2-kiss-fade mb-1" />
             <h1
               className="v2-kiss-fade archive-display archive-display--hero text-[clamp(1.85rem,8vw,2.5rem)]"
               style={{ transitionDelay: '0.06s' }}
             >
-              <span className="v2-hero-line">{heroHeadline}</span>
+              <HeroHeadlineLines />
             </h1>
             <HeroIntroCopy
-              className="v2-kiss-fade mt-6 max-w-xl text-base leading-relaxed text-text-secondary"
+              className="v2-kiss-fade mt-2 max-w-xl text-[0.95rem] leading-snug text-text-secondary"
             />
           </div>
 
@@ -90,27 +69,23 @@ export function LandingExperienceKiss() {
 
           {/* Desktop kiss (SM mode) */}
           <div className="hidden md:block">
-            <HeroPortrait className="mb-2" />
+            <HeroPortrait className="v2-kiss-fade mb-2" />
             <h1
               className="v2-kiss-fade archive-display archive-display--hero text-[clamp(2.75rem,10vw,6.5rem)]"
               style={{ transitionDelay: '0.06s' }}
             >
-              <span className="v2-hero-line">{heroHeadline}</span>
+              <HeroHeadlineLines />
             </h1>
+            <HeroIntroCopy
+              className="v2-kiss-fade mt-2 max-w-xl text-[0.95rem] leading-snug text-text-secondary md:text-base"
+              style={{ transitionDelay: '0.1s' }}
+            />
             <div
-              className="v2-kiss-fade mt-12 grid gap-6 border-t border-border-subtle pt-6 md:grid-cols-12"
+              className="v2-kiss-fade mt-8 flex flex-col gap-3 border-t border-border-subtle pt-6 sm:flex-row sm:flex-wrap"
               style={{ transitionDelay: '0.14s' }}
             >
-              <HeroIntroCopy className="text-base leading-relaxed text-text-secondary md:col-span-7 md:text-lg" />
-              <div className="md:col-span-4 md:col-start-9">
-                <p className="text-sm leading-relaxed text-text-secondary">
-                  {siteConfig.valueProposition}
-                </p>
-                <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-                  <CopyEmail variant="surface" className="sm:min-w-[min(100%,16rem)] sm:flex-1" />
-                  <ResumeDownload variant="surface" />
-                </div>
-              </div>
+              <CopyEmail variant="surface" className="sm:min-w-[min(100%,16rem)] sm:flex-1" />
+              <ResumeDownload variant="surface" />
             </div>
           </div>
 

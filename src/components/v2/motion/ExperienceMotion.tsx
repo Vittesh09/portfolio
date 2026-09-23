@@ -116,6 +116,12 @@ function AmbientCursor({ enabled }: { enabled: boolean }) {
   const smoothY = useSpring(y, { stiffness: 260, damping: 28, mass: 0.35 });
   const [pressed, setPressed] = useState(false);
   const [interactive, setInteractive] = useState(false);
+  const [nativeGrab, setNativeGrab] = useState(false);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     if (!enabled || window.matchMedia('(pointer: coarse)').matches) return;
@@ -123,8 +129,16 @@ function AmbientCursor({ enabled }: { enabled: boolean }) {
       x.set(event.clientX - 18);
       y.set(event.clientY - 18);
       const target = event.target;
-      setInteractive(
+      const overHole =
         target instanceof Element &&
+        Boolean(
+          target.closest('.bh-grab') ||
+            document.querySelector('.bh-hero.is-bh-dragging')
+        );
+      setNativeGrab(overHole);
+      setInteractive(
+        !overHole &&
+          target instanceof Element &&
           Boolean(
             target.closest('a, button, [role="button"], input, textarea, select, label')
           )
@@ -142,20 +156,25 @@ function AmbientCursor({ enabled }: { enabled: boolean }) {
     };
   }, [enabled, x, y]);
 
-  if (!enabled) return null;
+  if (!mounted || !enabled) return null;
 
   /* Orbit only while pressed and not over a CTA */
-  const orbit = pressed && !interactive;
+  const orbit = pressed && !interactive && !nativeGrab;
 
   return (
     <motion.div
       aria-hidden
       className="v2-ambient-cursor"
       data-interactive={interactive}
+      data-native-grab={nativeGrab}
       data-pressed={pressed}
       data-orbit={orbit}
+      initial={false}
       style={{ x: smoothX, y: smoothY }}
-      animate={{ scale: pressed ? 0.88 : interactive ? 1.55 : 1 }}
+      animate={{
+        scale: nativeGrab ? 1 : pressed ? 0.88 : interactive ? 1.55 : 1,
+        opacity: nativeGrab ? 0 : 1
+      }}
       transition={{ duration: 0.18 }}
     >
       <span className="v2-ambient-cursor-orbit" aria-hidden>

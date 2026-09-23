@@ -74,7 +74,7 @@
   background: transparent;
   border: 0;
   border-radius: 50%;
-  cursor: none;
+  cursor: grab;
   padding: 0;
   pointer-events: auto;
   position: fixed;
@@ -82,46 +82,9 @@
   z-index: 80;
 }
 
-/* Custom cursor chip — orange bar, white type for contrast on the void */
-.v2-root .bh-cursor {
-  align-items: center;
-  background: #f23828;
-  border: 2px solid #101010;
-  box-shadow:
-    0 0 0 1px rgba(242, 239, 230, 0.35),
-    0 6px 18px rgba(0, 0, 0, 0.5);
-  color: #f2efe6;
-  display: none;
-  font-family: var(--font-jetbrains), ui-monospace, monospace;
-  font-size: 12px;
-  font-weight: 700;
-  gap: 0.55rem;
-  letter-spacing: 0.06em;
-  line-height: 1;
-  padding: 0.5rem 0.75rem 0.5rem 0.55rem;
-  pointer-events: none;
-  position: fixed;
-  text-transform: uppercase;
-  top: 0;
-  left: 0;
-  white-space: nowrap;
-  z-index: 90;
-}
-
-.v2-root .bh-cursor.is-on {
-  display: inline-flex;
-}
-
-.v2-root .bh-cursor-dot {
-  background: #f2efe6;
-  border-radius: 50%;
-  flex: 0 0 auto;
-  height: 9px;
-  width: 9px;
-}
-
-.v2-root .bh-cursor-label {
-  color: #f2efe6;
+.v2-root .bh-grab.is-grabbing,
+.v2-root .bh-grab.is-dragging {
+  cursor: grabbing;
 }
 
 .v2-root .bh-hero > .relative {
@@ -151,8 +114,8 @@
 
 .v2-root .bh-copy {
   overflow: visible;
-  padding-bottom: 1.25rem;
-  padding-right: 0.75rem;
+  padding-bottom: 2rem;
+  padding-right: 1rem;
   position: relative;
   z-index: 2;
   -webkit-font-smoothing: antialiased;
@@ -191,6 +154,7 @@
 
 .v2-root .bh-copy .archive-display--hero,
 .v2-root .bh-copy p {
+  margin: 0;
   overflow: visible;
   text-shadow: none;
   filter: none;
@@ -205,7 +169,13 @@
 }
 
 .v2-root .bh-copy .bh-copy-sub {
-  padding-bottom: 0.45em;
+  margin-top: 0.35rem;
+  max-width: 36rem;
+  padding-bottom: 0.15em;
+}
+
+.v2-root .bh-copy .bh-copy-sub p {
+  margin: 0;
 }
 
 .v2-root .bh-hero .text-text-muted {
@@ -218,6 +188,7 @@
   text-shadow: none;
 }
 
+.v2-root .bh-hero .v2-hero-emphasis-hot,
 .v2-root .bh-hero .text-accent-pop {
   color: #f23828;
   text-shadow: none;
@@ -263,7 +234,8 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .v2-root .bh-mount {
+  .v2-root .bh-mount,
+  .v2-root .bh-grab {
     cursor: default;
   }
 

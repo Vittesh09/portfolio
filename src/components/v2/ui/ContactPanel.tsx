@@ -1,4 +1,3 @@
-import { availability, replyTime } from '@/src/config/v2/profile';
 import { ContactForm } from '@/src/components/v2/ui/ContactForm';
 import { CopyEmail } from '@/src/components/v2/ui/CopyEmail';
 
@@ -24,8 +23,7 @@ export function ContactPanel({
               Let&apos;s talk
             </h2>
             <p className="mt-5 max-w-md text-base leading-relaxed text-text-secondary">
-              I&apos;m open to {availability}. Tell me what you&apos;re building and where the
-              design is stuck. I reply within {replyTime}.
+              Tell me what you&apos;re building and where the design is stuck.
             </p>
             <div className="mt-6 max-w-md">
               <CopyEmail variant="surface" className="w-full" />

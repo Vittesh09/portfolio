@@ -1,7 +1,13 @@
 /**
  * Single source of truth for V2 identity, employment, stats, and contact.
- * Visible `TODO: [FILL: …]` markers are intentional until Vittesh confirms values.
+ * Unpublished `TODO: [FILL: …]` values stay in this file and on /v2/machine.
+ * Visitor-facing pages never interpolate those strings.
  */
+
+export function isUnconfirmed(value: string | null | undefined) {
+  if (!value) return true;
+  return /TODO|\[FILL:/.test(value);
+}
 
 export const SITE_URL = 'https://www.vittesh.com';
 export const V2_BASE = '/v2';
@@ -16,14 +22,16 @@ export const domains = [
   'VR / Neuro-tech'
 ] as const;
 
-export const yearsExperience = 'TODO: [FILL: 7+ or 8+]';
+/** Confirm 7+ vs 8+ before locking. Last published visitor copy is 7+. */
+export const yearsExperience = '7+';
 export const city = 'TODO: [FILL: city]';
 export const timezone = 'TODO: [FILL: timezone]';
 export const openTo = 'TODO: [FILL: open to remote / relocation]';
 export const availability = 'TODO: [FILL: full-time / freelance / both / not looking]';
 export const replyTime = 'TODO: [FILL: e.g. within 2 business days]';
-export const factualStatLabel = 'TODO: [FILL: number of products shipped / teams worked with / case studies]';
-export const factualStatValue = 'TODO';
+export const selectedCaseStudyCount = 3;
+export const factualStatLabel = 'Selected case studies';
+export const factualStatValue = String(selectedCaseStudyCount);
 export const curefitEarlierWork =
   'TODO: [FILL: what you designed at Curefit and the result]';
 export const cultFitEndDateNote = 'TODO: [FILL: confirm Jan vs Feb 2022]';
@@ -41,8 +49,9 @@ export const taskFlowComplexityDefinition =
   'TODO: [FILL: define task-flow complexity — steps, taps, or time?]';
 
 export const heroHeadline = 'I make powerful products easier to use.';
+export const heroHeadlineLines = ['I make powerful products', 'easier to use.'] as const;
 
-export const heroIntro = `Hi, I'm Vittesh, a product designer with ${yearsExperience} years across automotive, VR, cloud tools and enterprise software. I turn dense, complex systems (fleet command centers, cloud cost data, live EEG) into interfaces people can act on.`;
+export const heroIntro = `Hi, I'm Vittesh, a product designer with ${yearsExperience} years. I turn complex systems into interfaces people can act on.`;
 
 export const metaDescription =
   'Vittesh Sinha, product designer for cars, VR, cloud tools, and enterprise software. I make powerful products easier to use.';
@@ -75,7 +84,8 @@ export const employers: {
     current: true,
     start: '2023-11',
     end: null,
-    detail: `End-to-end UX for enterprise, logistics, and fitness platforms — real-time KPI dashboards, VR emotion insights, research-led prioritization, and AI-assisted prototyping. ${nagarroFitnessNote}`,
+    detail:
+      'End-to-end UX for enterprise, logistics, and fitness platforms — real-time KPI dashboards, VR emotion insights, research-led prioritization, and AI-assisted prototyping.',
     metrics: []
   },
   {
@@ -86,7 +96,8 @@ export const employers: {
     current: false,
     start: '2022-02',
     end: '2023-11',
-    detail: `Owned the cross-platform design system (apps, internal tools, scooter HMI). Shipped the Simple One app and e-scooter HMI, cutting task-flow complexity by 10–15%. ${taskFlowComplexityDefinition}`,
+    detail:
+      'Owned the cross-platform design system (apps, internal tools, scooter HMI). Shipped the Simple One app and e-scooter HMI, cutting task-flow complexity by 10–15%.',
     metrics: [
       {
         metric: '10–15% lower task-flow complexity on Simple One / e-scooter HMI',
@@ -99,7 +110,7 @@ export const employers: {
   {
     name: 'Cult.fit (formerly Curefit)',
     role: 'User Research & Experience Design',
-    period: `Oct 2018 – Jan 2022 (${cultFitEndDateNote})`,
+    period: 'Oct 2018 – Jan 2022',
     href: 'https://www.cult.fit',
     current: false,
     start: '2018-10',
@@ -132,10 +143,10 @@ export const profile = {
   city,
   timezone,
   openTo,
-  locationLine: `Based in ${city}, India · ${timezone} · ${openTo}`,
+  locationLine: 'India',
   yearsExperience,
   domains: [...domains],
-  industries: domains.join(', '),
+  industries: 'Automotive, Logistics, Cloud, VR',
   availability,
   replyTime,
   toolsAndSkills,
@@ -146,7 +157,7 @@ export const profile = {
   currentLinkLabel: currentEmployer.name,
   email: 'hello@vittesh.com',
   summary: metaDescription,
-  aboutFacts: `Years: ${yearsExperience}. Domains: ${domains.join(', ')}. Currently at ${currentEmployer.name}. ${`Based in ${city}, India · ${timezone} · ${openTo}`}.`,
+  aboutFacts: `Years: ${yearsExperience}. Domains: ${domains.join(', ')}. Currently at ${currentEmployer.name}. Based in India.`,
   valueProposition: metaDescription,
   tagline: metaDescription,
   statement:
