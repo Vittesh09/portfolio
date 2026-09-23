@@ -1,0 +1,46 @@
+---
+description: Portfolio visual system from design/ — apply when changing v2 UI, styles, or design docs
+globs: app/v2/**/*,src/components/v2/**/*,src/styles/v2*,src/styles/singularity*,src/config/v2/**/*,design/**/*
+alwaysApply: false
+---
+
+# Design system (`design/`)
+
+## Sources of truth (read before inventing UI)
+
+1. `design/design.md` — stack, visual DNA, component instructions
+2. `design/Design Portfolio Handbook - FLUX.md` — homepage section order and trust strategy
+3. `design/Reference1–16` — layout / typography / density references
+4. Implemented tokens live in `src/styles/v2.css` (prefer these over outdated hex in older docs)
+
+Do **not** restyle from `vittesh_portfolio_amaterasu_style.md` (sage/emerald) unless the user explicitly asks. Current direction is the red research archive.
+
+## Current visual direction
+
+- Cool gray-blue light surfaces + ink dark; accent `#F23828` / dark `#FF5447`
+- Oversized geometric display (Jakarta), Instrument serif for quotes, JetBrains Mono labels (`archive-label`)
+- Type floor: never below **11px** (0.6875rem) on mobile; at 11px use **uppercase** (`archive-label`)
+- Exception: Quick facts captions (`Years shipping`, etc.) stay **11px sentence case** (`.v2-trust-fact-label`)
+- Hairline `border-subtle` rules, four-column research grid, mono indexes (`01`, `↗`, `→`)
+- Theme: system default + paper / ink; CSS vars on `.v2-root` / `.v2-root.dark`
+
+## Flux homepage order
+
+Hero → Trust → Why → Work → About → CTA
+
+Prospects must answer quickly: who is this, can I see work, how do I contact.
+
+## When building UI
+
+- Preserve established v2 patterns in `src/components/v2/archive/` and singularity styles
+- Use `bg-accent-pop`, `border-border-subtle`, `archive-display` / `archive-serif` / `archive-label` — don’t invent a parallel type scale
+- Prefer asymmetrical whitespace and grid lines over card-heavy dashboards
+- Case studies: clear problem → approach → outcome; metrics in brackets or bordered blocks
+- About portrait: `/assets/images/profile.png` only — never `about.png`
+- Live production routes (`/`, `/about`, `/work`) stay untouched; ship preview under `/v2`
+
+## References for craft (not copy-paste themes)
+
+- Amaterasu-level motion craft (scroll reveal, precision cursor) — keep red archive palette
+- 21st.dev for primitives when needed
+- Niccolò Miranda 404 for playful error/interaction references

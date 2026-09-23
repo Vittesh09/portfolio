@@ -1,0 +1,248 @@
+/* Singularity hero — bloom + lensing; sharp DOM copy above */
+
+.v2-root .bh-hero {
+  background: #000002;
+  color: #f2efe6;
+  isolation: isolate;
+  min-height: calc(100svh - 57px);
+  overflow: visible;
+  position: relative;
+}
+
+@media (max-width: 767px), (pointer: coarse) {
+  .v2-root .bh-hero {
+    touch-action: pan-y;
+  }
+}
+
+.v2-root .bh-hero::after {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.42) 0%,
+    rgba(0, 0, 0, 0.14) 36%,
+    transparent 58%
+  );
+  content: '';
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  z-index: 1;
+}
+
+.v2-root .bh-lab {
+  min-height: calc(100svh - 57px);
+  height: calc(100svh - 57px);
+}
+
+.v2-root .bh-lab::after {
+  display: none;
+}
+
+@media (max-width: 767px) {
+  .v2-root .bh-hero::after {
+    background:
+      linear-gradient(180deg, rgba(0, 0, 0, 0.14), transparent 40%),
+      linear-gradient(90deg, rgba(0, 0, 0, 0.55) 0%, rgba(0, 0, 0, 0.22) 48%, transparent 75%);
+  }
+}
+
+.v2-root .bh-mount {
+  cursor: grab;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: auto;
+  position: absolute;
+  touch-action: none;
+  z-index: 2;
+}
+
+.v2-root .bh-mount.is-grabbing,
+.v2-root .bh-mount.is-dragging {
+  cursor: grabbing;
+}
+
+.v2-root .bh-canvas {
+  display: block;
+  height: 100%;
+  pointer-events: auto;
+  touch-action: none;
+  width: 100%;
+}
+
+/* Floats above hero copy so the void stays draggable */
+.v2-root .bh-grab {
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  cursor: grab;
+  padding: 0;
+  pointer-events: auto;
+  position: fixed;
+  touch-action: none;
+  z-index: 80;
+}
+
+.v2-root .bh-grab.is-grabbing,
+.v2-root .bh-grab.is-dragging {
+  cursor: grabbing;
+}
+
+.v2-root .bh-hero > .relative {
+  pointer-events: none;
+  position: relative;
+  z-index: 4;
+}
+
+.v2-root .bh-hero a,
+.v2-root .bh-hero button,
+.v2-root .bh-hero [role='button'] {
+  pointer-events: auto;
+}
+
+/* Hero copy — capture source only; headline renders in WebGL */
+.v2-root .bh-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.v2-root .bh-copy {
+  overflow: visible;
+  padding-bottom: 2rem;
+  padding-right: 1rem;
+  position: relative;
+  z-index: 2;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: geometricPrecision;
+}
+
+/* Capture source — invisible to user but still laid out for positioning */
+.v2-root .bh-hero .bh-copy-source {
+  opacity: 0 !important;
+  pointer-events: none !important;
+  user-select: none;
+  z-index: 0;
+}
+
+/* If WebGL capture fails, show DOM copy as fallback with a soft fade-in */
+.v2-root .bh-hero.bh-copy-fallback .bh-copy-source {
+  opacity: 0 !important;
+  pointer-events: auto;
+  z-index: 2;
+  animation: bh-copy-fallback-in 1s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards;
+}
+
+@keyframes bh-copy-fallback-in {
+  from {
+    opacity: 0;
+    filter: blur(6px);
+    transform: translate3d(0, 0.85rem, 0);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translate3d(0, 0, 0);
+  }
+}
+
+.v2-root .bh-copy .archive-display--hero,
+.v2-root .bh-copy p {
+  margin: 0;
+  overflow: visible;
+  text-shadow: none;
+  filter: none;
+}
+
+.v2-root .bh-copy .archive-display--hero {
+  color: #f2efe6;
+}
+
+.v2-root .bh-copy .archive-display.text-white {
+  color: #ffffff;
+}
+
+.v2-root .bh-copy .bh-copy-sub {
+  margin-top: 0.35rem;
+  max-width: 36rem;
+  padding-bottom: 0.15em;
+}
+
+.v2-root .bh-copy .bh-copy-sub p {
+  margin: 0;
+}
+
+.v2-root .bh-hero .text-text-muted {
+  color: rgba(242, 239, 230, 0.55);
+  text-shadow: none;
+}
+
+.v2-root .bh-hero .text-text-secondary {
+  color: rgba(242, 239, 230, 0.82);
+  text-shadow: none;
+}
+
+.v2-root .bh-hero .v2-hero-emphasis-hot,
+.v2-root .bh-hero .text-accent-pop {
+  color: #f23828;
+  text-shadow: none;
+  filter: none;
+}
+
+/* First-load intro — text starts first (is-copy-in), singularity follows ~150ms later */
+.v2-root .bh-hero.is-intro:not(.is-copy-in) .bh-intro-fade {
+  filter: blur(6px);
+  opacity: 0;
+  transform: translate3d(0, 1rem, 0);
+}
+
+.v2-root .bh-hero.is-intro.is-copy-in .bh-intro-fade {
+  filter: blur(0);
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
+  transition:
+    opacity 0.85s cubic-bezier(0.42, 0, 0.58, 1),
+    transform 0.85s cubic-bezier(0.42, 0, 0.58, 1),
+    filter 0.85s cubic-bezier(0.42, 0, 0.58, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v2-root .bh-hero.is-intro:not(.is-copy-in) .bh-intro-fade,
+  .v2-root .bh-hero.is-intro.is-copy-in .bh-intro-fade {
+    filter: none;
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+
+  .v2-root .bh-hero.bh-copy-fallback .bh-copy-source {
+    animation: none;
+    opacity: 1 !important;
+    filter: none;
+    transform: none;
+  }
+}
+
+.v2-root .bh-hero .v2-hero-meta {
+  background: transparent;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v2-root .bh-mount,
+  .v2-root .bh-grab {
+    cursor: default;
+  }
+
+  .v2-root .bh-hero .bh-copy-source {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto;
+    z-index: 2;
+  }
+}

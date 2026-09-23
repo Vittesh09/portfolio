@@ -1,0 +1,18 @@
+# Vittesh Sinha
+
+Senior Product Designer. I make powerful products easier to use.
+Location: India
+Email: hello@vittesh.com
+Years: 7+
+
+Case studies:
+- Future City VR + EEG: https://www.vittesh.com/v2/work/vr-eeg-analytics/
+- Fleet Command Center: https://www.vittesh.com/v2/work/fleet-command-center/
+- Cloud Cost Optimization: https://www.vittesh.com/v2/work/cloud-cost-optimization/
+
+Machine-readable profile: https://www.vittesh.com/v2/machine/
+Full markdown: https://www.vittesh.com/machine.md
+JSON: https://www.vittesh.com/machine.json
+LinkedIn: https://www.linkedin.com/in/vitteshsinha/
+Behance: https://www.behance.net/vitteshsinha
+Last updated: 2026-09-21

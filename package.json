@@ -3,13 +3,32 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "npm run sync:v2-agent && npm run check:v2 && next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "check:v2": "node scripts/check-v2-consistency.mjs",
+    "sync:v2-agent": "node scripts/sync-v2-agent-docs.mjs",
+    "test:v2-viewport": "playwright test"
   },
   "dependencies": {
+    "framer-motion": "^12.42.2",
+    "gsap": "^3.15.0",
+    "html-to-image": "^1.11.13",
+    "lenis": "^1.3.25",
+    "lucide-react": "^1.26.0",
     "next": "^16.1.6",
     "react": "18.3.1",
-    "react-dom": "18.3.1"
+    "react-dom": "18.3.1",
+    "three": "^0.185.1"
+  },
+  "devDependencies": {
+    "@types/node": "^26.1.1",
+    "@types/react": "^18.3.18",
+    "@types/react-dom": "^18.3.5",
+    "@types/three": "^0.185.1",
+    "autoprefixer": "^10.5.4",
+    "postcss": "^8.5.23",
+    "tailwindcss": "^3.4.19",
+    "typescript": "^5.7.3"
   }
 }
