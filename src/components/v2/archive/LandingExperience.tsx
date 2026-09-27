@@ -10,8 +10,7 @@ import { useKissMode } from '@/src/components/v2/layout/KissModeProvider';
 import { CopyEmail } from '@/src/components/v2/ui/CopyEmail';
 import { ContactPanel } from '@/src/components/v2/ui/ContactPanel';
 import { ResumeDownload } from '@/src/components/v2/ui/ResumeDownload';
-import { EarlierWorkRow } from '@/src/components/v2/archive/EarlierWorkRow';
-import { HeroHeadlineLines, HeroIntroCopy } from '@/src/components/v2/archive/HeroIntroCopy';
+import { HeroCloser, HeroHeadlineLines, HeroKicker } from '@/src/components/v2/archive/HeroIntroCopy';
 import { HeroMeta } from '@/src/components/v2/archive/HeroMeta';
 import { ProjectCard } from '@/src/components/v2/archive/ProjectCard';
 import { projects } from '@/src/config/v2/caseStudies';
@@ -111,10 +110,11 @@ function LandingExperienceArchive() {
               className="relative z-10 max-w-[52rem] md:w-[68%]"
             >
               <Label>Available for work</Label>
-              <h1 className="archive-display archive-display--hero mt-4 text-[clamp(2.35rem,4.1vw,4.15rem)]">
+              <HeroKicker className="mt-4" />
+              <h1 className="archive-display archive-display--hero text-[clamp(2.35rem,4.1vw,4.15rem)]">
                 <HeroHeadlineLines />
               </h1>
-              <HeroIntroCopy className="mt-2 max-w-xl text-[0.95rem] leading-snug text-text-secondary md:text-base" />
+              <HeroCloser />
               <div className="mt-8 flex max-w-xl flex-col gap-3 sm:flex-row sm:flex-wrap md:mt-10">
                 <CopyEmail variant="hero" className="sm:min-w-[min(100%,20rem)] sm:flex-1" />
                 <ResumeDownload variant="hero" className="sm:w-auto" />
@@ -246,21 +246,20 @@ function LandingExperienceArchive() {
             </p>
           </div>
 
-          <div className="mt-14 grid gap-5 md:grid-cols-2">
+          <div className="mt-14 grid gap-x-8 gap-y-14 md:grid-cols-2">
             {projects.map((project, index) => (
               <motion.article
                 key={project.slug}
+                className="h-full"
                 initial={false}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-50px' }}
                 transition={{ delay: (index % 2) * 0.08 }}
-                className={index === 0 ? 'md:col-span-2' : ''}
               >
-                <ProjectCard project={project} index={index} />
+                <ProjectCard project={project} />
               </motion.article>
             ))}
           </div>
-          <EarlierWorkRow />
         </div>
       </section>
 

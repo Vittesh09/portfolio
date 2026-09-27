@@ -2,6 +2,19 @@ import type { MetricEvidence } from '@/src/config/v2/profile';
 
 const unconfirmedMethod = 'TODO: [FILL: baseline and method for this metric]';
 
+export type CaseStory = {
+  facts: { label: string; value: string }[];
+  takeaways: string[];
+  challenge: string[];
+  pains: string[];
+  brief: string;
+  approach: string;
+  decisions: { title: string; body: string }[];
+  features: { title: string; body: string; image: { src: string; alt: string } }[];
+  results: { value: string; label: string }[];
+  closing: string;
+};
+
 export type Project = {
   slug: string;
   index: string;
@@ -24,17 +37,189 @@ export type Project = {
   goal: string[];
   process: { title: string; body: string }[];
   solution: string[];
+  sections?: { title: string; body: string }[];
+  story?: CaseStory;
   outcomes: string[];
+  measurementNote?: string;
   image: string;
+  imageAlt?: string;
   images: { src: string; alt: string }[];
 };
 
 const asset = (name: string) => `/assets/case-studies/${name}`;
 
 export const projects: Project[] = [
-  {
-    slug: 'vr-eeg-analytics',
+{
+    slug: 'fleet-command-center',
     index: '01',
+    title: 'FleetTrack',
+    summary:
+      'I redesigned the FleetTrack dashboard so a fleet manager can see trucks and dumpsters, open a trip, and act on an event in one workspace.',
+    company: 'LB Technology',
+    cardRole: 'Product Designer',
+    outcomeLine:
+      'The fleet manager sees the fleet, the trip, and the event in one workspace.',
+    outcomeEvidence: [],
+    tags: ['Fleet', 'Dashboard', 'Telematics'],
+    industry: 'Fleet logistics',
+    client: 'Unnamed operator of trucks and dumpsters',
+    customers: 'Fleet managers',
+    challenge:
+      'A fleet manager starts from the fleet, not from a single truck.',
+    role: 'Product Designer',
+    platforms: 'Web',
+    year: '2024',
+    metrics: [
+      { label: 'Who it is for', value: 'Manager' },
+      { label: 'Timeline', value: '4+ mo' },
+      { label: 'What I redesigned', value: 'Dashboard' }
+    ],
+    problem: [
+      'The morning totals and the live fleet were separate screens.',
+      'An event was a row in a report, not a point on the route where it happened.',
+      'Checking a vehicle meant gathering speed, the limit, and the camera from different places.',
+      'A question the manager asked once could not be kept on the dashboard for the next morning.'
+    ],
+    goal: [
+      'Show the fleet before the vehicle.',
+      'Put the event on the route, next to speed and the posted limit.',
+      'Let the manager compose the dashboard, and turn a report into a tile they keep.'
+    ],
+    process: [
+      {
+        title: 'The fleet comes first',
+        body: 'The first view is the whole operation: who is driving, who is idle, and where the exceptions are. A single truck is what the manager opens next, not where they start.'
+      },
+      {
+        title: 'The event sits on the route',
+        body: 'A harsh stop is more useful when the manager can see where on the trip it happened, next to the speed and the posted limit, with the camera one step away.'
+      },
+      {
+        title: 'The dashboard is composed',
+        body: 'Safety, fuel, maintenance, and asset status are widgets the manager can add or remove. A report they build can be drawn as a chart and published back onto that screen.'
+      }
+    ],
+    solution: [
+      'A morning dashboard of safety, fuel, maintenance, and asset widgets.',
+      'A live map of who is driving and who is idle.',
+      'A trip that pins events on the route, and a vehicle panel that can close the review.',
+      'Reports that can be shared and published back as dashboard tiles.'
+    ],
+    story: {
+      facts: [
+        { label: 'My role', value: 'Product Designer, whole dashboard' },
+        { label: 'Timeline', value: '4+ months' }
+      ],
+      takeaways: [
+        'FleetTrack tracks the trucks and dumpsters of an operator that needs to know, every day, where its vehicles are, how they are being driven, and what they cost to run.',
+        'Over four months, with a project manager, a business analyst, and the developers, I redesigned the whole dashboard around the person who runs the fleet. The fleet, the trip, and the event now sit in one workspace, and a question the manager asks once stays on the dashboard for the next morning.'
+      ],
+      challenge: [
+        'The data was never the problem. GPS positions, harsh-driving events from the vehicles and their cameras, fuel and engine hours, and service intervals were all being collected.',
+        'The problem was the fleet manager’s morning. They answer for safety, fuel spend, maintenance, and the people behind the wheel, so their day starts with a check across the whole fleet, then a closer look at the few vehicles that need one. The product did not follow that day. A harsh stop was a row in one report, the truck’s position was on a map somewhere else, and the clip that explained it was in the camera software. The manager did the joining up.'
+      ],
+      pains: [
+        'Totals and the live fleet on separate screens',
+        'Events as rows, with no place attached',
+        'Speed, limit, and camera in different tools',
+        'The same report rebuilt every morning'
+      ],
+      brief:
+        'The brief was practical: one place where a manager can check the fleet, find what went wrong, see why, deal with it, and come back to the same view tomorrow.',
+      approach:
+        'With the business analyst I walked through how a manager moves through a day, and every point where they had to leave the product became something to fix. The project manager and developers were in those reviews from the start, so each idea was checked early against what the telematics and camera data could support.',
+      decisions: [
+        {
+          title: 'The fleet comes first',
+          body: 'The first screen answers for the whole operation: who is driving, who is idle, and where the exceptions are. A single truck is what the manager opens next, not where they start.'
+        },
+        {
+          title: 'The event sits on the route',
+          body: 'A harsh stop means more on the map than in a table. Where it happened is often the explanation: a junction, a hill, a stretch of road where it keeps happening.'
+        },
+        {
+          title: 'The manager composes the dashboard',
+          body: 'An operator running dumpsters and one running long-haul trucks do not watch the same numbers. Widgets let each manager keep their own morning, and any report can come back as a tile.'
+        }
+      ],
+      features: [
+        {
+          title: 'A morning dashboard',
+          body: 'Safety events, fuel, maintenance due, and asset status as widgets. Any of them can be removed, and new ones are added from a panel grouped the way managers talk about the fleet.',
+          image: {
+            src: asset('fleet-dashboard.png'),
+            alt: 'Dashboard with safety, fuel, maintenance, and asset widgets, and the add-widget panel open'
+          }
+        },
+        {
+          title: 'A live map, and the trip behind each truck',
+          body: 'Every vehicle has a status in the list and the same mark on the map, so a cluster of idle trucks stands out. Opening one draws its trip, with each event pinned where it happened.',
+          image: {
+            src: asset('fleet-trip.jpg'),
+            alt: 'Trip details with events listed and pinned along the route'
+          }
+        },
+        {
+          title: 'A vehicle panel that closes the loop',
+          body: 'Speed above the posted limit, location, and alerts in one column. The manager can message the driver, open the camera, or mark the event resolved without leaving the map.',
+          image: {
+            src: asset('fleet-vehicle.png'),
+            alt: 'Vehicle panel with speed against the limit, camera, and mark as resolved'
+          }
+        },
+        {
+          title: 'Reports that become tiles',
+          body: 'A custom report can be filtered, grouped, and shared, then drawn as a chart and published to the dashboard, so tomorrow’s answer is already there.',
+          image: {
+            src: asset('fleet-tile.png'),
+            alt: 'Create-tile dialog with chart types, variables, and a preview'
+          }
+        }
+      ],
+      results: [
+        { value: 'One', label: 'workspace for the fleet, the trip, and the event' },
+        { value: 'On the route', label: 'every safety event, beside speed and the posted limit' },
+        { value: 'Kept', label: 'custom reports stay on the dashboard as tiles' }
+      ],
+      closing:
+        'The manager no longer does the joining up. They start with the fleet, go straight to the exception, see where and why it happened, act on it, and find the same view waiting the next morning.'
+    },
+    outcomes: [
+      'Safety, fuel, maintenance, and asset status are on one dashboard, instead of a separate report for each question.',
+      'An event is on the route, with speed and the limit, instead of a row with no place attached.',
+      'A report the manager built can stay on the dashboard as a tile for the next morning.'
+    ],
+    measurementNote:
+      'These are changes in the product. I do not have a counted before-and-after for time saved, events caught, or fuel reduced, so none is stated here.',
+    image: asset('fleet-header.jpg'),
+    imageAlt:
+      'FleetTrack header: a laptop showing the live trip map, with geozone, login, and custom report screens around it.',
+    images: [
+      {
+        src: asset('fleet-map.jpg'),
+        alt: 'FleetTrack map showing which vehicles are driving and which are idle'
+      },
+      {
+        src: asset('fleet-dashboard.png'),
+        alt: 'Fleet manager dashboard with safety, fuel, maintenance, and asset widgets'
+      },
+      {
+        src: asset('fleet-trip.jpg'),
+        alt: 'Trip route with safety events pinned along the drive'
+      },
+      {
+        src: asset('fleet-vehicle.png'),
+        alt: 'Vehicle panel with speed, posted limit, camera, and mark resolved'
+      },
+      {
+        src: asset('fleet-report.png'),
+        alt: 'Custom report filtered by event type so it can become a dashboard tile'
+      }
+    ]
+  },
+{
+    slug: 'vr-eeg-analytics',
+    index: '02',
     title: 'Future City VR + EEG',
     summary:
       'I designed a 1:1 city in VR and a dashboard that turned live EEG into stress, delight, and fatigue planners could act on.',
@@ -104,78 +289,7 @@ export const projects: Project[] = [
       { src: asset('vr-diagnostics.png'), alt: 'VR diagnostic and experience mode selection' }
     ]
   },
-  {
-    slug: 'fleet-command-center',
-    index: '02',
-    title: 'Fleet Command Center',
-    summary:
-      'I consolidated maps, cameras, alerts, routes, and maintenance into one multi-tenant command center for fleets of 500+ vehicles.',
-    company: 'TODO: [FILL: case 02 company]',
-    cardRole: 'Senior Product Designer',
-    outcomeLine: 'Monitoring effort dropped 28% and critical response improved 45%.',
-    outcomeEvidence: [
-      {
-        metric: '28% less monitoring effort and 45% better critical response',
-        baseline: unconfirmedMethod,
-        method: unconfirmedMethod,
-        source: 'Fleet Command Center'
-      }
-    ],
-    tags: ['Enterprise', 'Logistics', 'B2B SaaS'],
-    industry: 'Fleet Logistics · Enterprise SaaS',
-    client: 'Enterprise fleet operations',
-    customers: 'Dispatchers and operators managing fleets of 500+ vehicles',
-    challenge:
-      'Stop forcing dispatchers to monitor a fleet across seven separate apps when every second of an incident counts.',
-    role: 'Senior Product Designer',
-    platforms: 'Responsive web command center',
-    year: '2024',
-    metrics: [
-      { label: 'Monitoring effort', value: '-28%' },
-      { label: 'Incident response', value: '+45%' },
-      { label: 'Modules unified', value: '07+' }
-    ],
-    problem: [
-      'Dispatchers continuously switched between maps, cameras, compliance, and alert tools.',
-      'High-volume notifications obscured critical safety events.',
-      'Tenant, vehicle, and driver context was repeatedly lost between modules.'
-    ],
-    goal: [
-      'Create a single operating picture for each fleet.',
-      'Prioritize anomalies by risk and required response.',
-      'Keep map, video, route, and telematics evidence in context.'
-    ],
-    process: [
-      {
-        title: 'Model operations',
-        body: 'Mapped the incident lifecycle, operator roles, tenant boundaries, and seven legacy module inventories.'
-      },
-      {
-        title: 'Design for triage',
-        body: 'Created risk tiers and contextual workspaces that grouped related alerts, camera evidence, and vehicle state.'
-      },
-      {
-        title: 'Stress-test density',
-        body: 'Validated high-density tables, maps, and tiled layouts against peak operational scenarios.'
-      }
-    ],
-    solution: [
-      'A flexible tiled command center with role- and tenant-aware views.',
-      'Critical, Warning, and Informational queues tied to recommended actions.',
-      'Live telematics overlays with clustering, camera picture-in-picture, and route replay.'
-    ],
-    outcomes: [
-      'Reduced manual monitoring effort by 28%.',
-      'Improved critical incident response time by 45%.',
-      'Consolidated seven legacy modules into one consistent operating model.'
-    ],
-    image: asset('fleet-geozone.png'),
-    images: [
-      { src: asset('fleet-geozone.png'), alt: 'Fleet geozone configuration command center' },
-      { src: asset('fleet-login.png'), alt: 'FleetTrack enterprise login experience' }
-    ]
-  },
-  {
+{
     slug: 'cloud-cost-optimization',
     index: '03',
     title: 'Cloud Cost Optimization',

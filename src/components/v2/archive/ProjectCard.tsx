@@ -1,59 +1,84 @@
+'use client';
+
 import Link from 'next/link';
 import Image from 'next/image';
+import { useRef } from 'react';
+import type { PointerEvent } from 'react';
+import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { type Project } from '@/src/config/v2/caseStudies';
 import { isUnconfirmed } from '@/src/config/v2/profile';
 
-type ProjectCardProps = {
-  project: Project;
-  index: number;
-};
+const TILT = { stiffness: 260, damping: 28, mass: 0.4 };
+const MAX_TILT_X = 6;
+const MAX_TILT_Y = 8;
 
-function Label({ children }: { children: React.ReactNode }) {
-  return <p className="archive-label text-text-muted">{children}</p>;
-}
+export function ProjectCard({ project }: { project: Project }) {
+  const bounds = useRef<DOMRect | null>(null);
+  const reduceMotion = useRef(false);
+  const rotateX = useMotionValue(0);
+  const rotateY = useMotionValue(0);
+  const tiltX = useSpring(rotateX, TILT);
+  const tiltY = useSpring(rotateY, TILT);
+  const meta = isUnconfirmed(project.company)
+    ? project.cardRole
+    : `${project.company} · ${project.cardRole}`;
 
-export function ProjectCard({ project, index }: ProjectCardProps) {
+  const onPointerEnter = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'mouse') return;
+    reduceMotion.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    bounds.current = event.currentTarget.getBoundingClientRect();
+    event.currentTarget.classList.add('is-active');
+  };
+
+  const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== 'mouse' || !bounds.current || reduceMotion.current) return;
+    const { left, top, width, height } = bounds.current;
+    const x = (event.clientX - left) / width - 0.5;
+    const y = (event.clientY - top) / height - 0.5;
+    rotateY.set(x * MAX_TILT_Y);
+    rotateX.set(-y * MAX_TILT_X);
+  };
+
+  const onPointerLeave = (event: PointerEvent<HTMLDivElement>) => {
+    bounds.current = null;
+    rotateX.set(0);
+    rotateY.set(0);
+    event.currentTarget.classList.remove('is-active');
+  };
+
   return (
     <Link
       href={`/v2/work/${project.slug}/`}
-      className="archive-project-card group block border border-border-subtle bg-bg-surface"
+      className="archive-project-card group flex h-full flex-col"
     >
-      <div
-        className={`relative overflow-hidden bg-[#070707] ${
-          index === 0 ? 'aspect-[16/7]' : 'aspect-[4/3]'
-        }`}
-      >
-        <Image
-          src={project.image}
-          alt=""
-          fill
-          loading="lazy"
-          decoding="async"
-          className="archive-image object-contain p-4 group-hover:scale-[1.02] md:p-8"
-          sizes={index === 0 ? '100vw' : '(max-width: 768px) 100vw, 50vw'}
-        />
-        <span className="archive-label absolute right-3 top-3 bg-bg-primary px-3 py-2">
-          Case {project.index}
-        </span>
+      <div className="archive-project-stage bg-[#070707]">
+        <motion.div
+          className="archive-project-thumb relative h-44 w-full overflow-hidden md:h-56"
+          style={{ rotateX: tiltX, rotateY: tiltY, transformPerspective: 900 }}
+          onPointerEnter={onPointerEnter}
+          onPointerMove={onPointerMove}
+          onPointerLeave={onPointerLeave}
+        >
+          <Image
+            src={project.image}
+            alt=""
+            fill
+            loading="lazy"
+            decoding="async"
+            className="archive-image object-contain"
+            sizes="(max-width: 768px) 100vw, 50vw"
+          />
+        </motion.div>
       </div>
-      <div className="flex min-w-0 flex-col gap-4 p-5 md:grid md:grid-cols-12 md:gap-5 md:p-7">
-        <div className="min-w-0 md:col-span-7">
-          <h3 className="text-2xl font-semibold tracking-tight md:text-3xl">{project.title}</h3>
-          <p className="mt-2 break-words text-sm text-text-secondary">
-            {isUnconfirmed(project.company)
-              ? project.role
-              : `${project.company} · ${project.role}`}
-          </p>
-          <p className="mt-2 text-sm text-text-secondary">{project.summary}</p>
-        </div>
-        <div className="min-w-0 md:col-span-4">
-          <p className="v2-card-outcome mb-3 text-sm text-accent-pop">{project.outcomeLine}</p>
-          <Label>{project.tags.join(' / ')}</Label>
-          <p className="mt-2 text-sm">{project.year}</p>
-        </div>
-        <span className="hidden text-2xl text-accent-pop md:col-span-1 md:block md:text-right">
-          ↗
-        </span>
+      <div className="flex flex-1 flex-col pt-5">
+        <p className="archive-label text-text-muted">Case {project.index}</p>
+        <h3 className="mt-2 line-clamp-2 h-14 text-2xl font-semibold leading-7 tracking-tight group-hover:text-accent-pop">
+          {project.title}
+        </h3>
+        <p className="mt-2 line-clamp-1 h-5 text-sm leading-5 text-text-secondary">{meta}</p>
+        <p className="mt-3 line-clamp-3 h-[4.875rem] text-sm leading-relaxed text-text-secondary">
+          {project.outcomeLine}
+        </p>
       </div>
     </Link>
   );

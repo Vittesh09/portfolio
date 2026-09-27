@@ -398,7 +398,8 @@ export function useBlackHole(
       blending: THREE.AdditiveBlending,
       depthWrite: false
     });
-    scene.add(new THREE.Points(starGeometry, starMaterial));
+    const stars = new THREE.Points(starGeometry, starMaterial);
+    scene.add(stars);
 
     // --- Singularity (primary + optional lab twin) ---
     const horizonGeo = new THREE.SphereGeometry(BLACK_HOLE_RADIUS * 1.05, 128, 64);
@@ -1137,7 +1138,13 @@ export function useBlackHole(
           }
         }
 
-        // Horizon / disk motion is shader flow only — no mesh or starfield rotation
+        // Quiet in-place turn. One revolution is about eight minutes, so the
+        // sky and disk drift without the void leaving its place.
+        if (!reduceMotion && !isLab) {
+          const turn = elapsed * ((Math.PI * 2) / (8 * 60));
+          stars.rotation.y = turn;
+          holeA.disk.rotation.z = DISK_YAW + turn;
+        }
         diskMaterial.uniforms.uTime.value = elapsed * timeScale;
         starMaterial.uniforms.uTime.value = elapsed * timeScale;
         horizonMat.uniforms.uTime.value = elapsed * timeScale;

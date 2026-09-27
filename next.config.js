@@ -16,11 +16,18 @@ const nextConfig = {
     optimizePackageImports: ['lucide-react', 'framer-motion', 'three']
   },
   async headers() {
+    // Dev chunk names are not content-hashed, so caching them as immutable serves stale code.
+    const staticCache =
+      process.env.NODE_ENV === 'production'
+        ? [
+            {
+              source: '/_next/static/:path*',
+              headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }]
+            }
+          ]
+        : [];
     return [
-      {
-        source: '/_next/static/:path*',
-        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }]
-      },
+      ...staticCache,
       {
         source: '/:path*',
         headers: [

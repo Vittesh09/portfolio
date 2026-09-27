@@ -19,12 +19,10 @@ export function ContactPanel({
       <div className="v2-contact-layout">
         <div className="v2-contact-intro">
           <div>
+            <p className="v2-contact-kicker">Seems like our stars are aligned!</p>
             <h2 id={headingId} className="archive-display v2-contact-title">
-              Let&apos;s talk
+              Let&apos;s connect
             </h2>
-            <p className="mt-5 max-w-md text-base leading-relaxed text-text-secondary">
-              Tell me what you&apos;re building and where the design is stuck.
-            </p>
             <div className="mt-6 max-w-md">
               <CopyEmail variant="surface" className="w-full" />
             </div>
@@ -33,7 +31,7 @@ export function ContactPanel({
 
         <div className="v2-contact-aside">
           <h3 id={formHeadingId} className="archive-display v2-contact-form-title">
-            Say hello
+            Shoot me a message
           </h3>
           <ContactForm labelledBy={formHeadingId} />
         </div>

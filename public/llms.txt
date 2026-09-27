@@ -6,8 +6,8 @@ Email: hello@vittesh.com
 Years: 7+
 
 Case studies:
+- FleetTrack: https://www.vittesh.com/v2/work/fleet-command-center/
 - Future City VR + EEG: https://www.vittesh.com/v2/work/vr-eeg-analytics/
-- Fleet Command Center: https://www.vittesh.com/v2/work/fleet-command-center/
 - Cloud Cost Optimization: https://www.vittesh.com/v2/work/cloud-cost-optimization/
 
 Machine-readable profile: https://www.vittesh.com/v2/machine/

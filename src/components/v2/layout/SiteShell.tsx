@@ -8,6 +8,9 @@ import { ThemeProvider } from '@/src/components/v2/layout/ThemeProvider';
 import { ExperienceMotion } from '@/src/components/v2/motion/ExperienceMotion';
 import { HorizonTransition } from '@/src/components/v2/motion/HorizonTransition';
 import { useScrollToHashOnMount } from '@/src/components/v2/ui/HashNavLink';
+import { BackgroundMusic } from '@/src/components/v2/ui/BackgroundMusic';
+import { ButtonHoverSound } from '@/src/components/v2/ui/ButtonHoverSound';
+import { MenuClickSound } from '@/src/components/v2/ui/MenuClickSound';
 
 function SkipLink() {
   return (
@@ -25,6 +28,9 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeProvider>
+      <MenuClickSound />
+      <ButtonHoverSound />
+      <BackgroundMusic />
       <HorizonTransition>
         {isMachine ? (
           <>

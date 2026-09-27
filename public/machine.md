@@ -15,8 +15,8 @@ Employers:
 - Cult.fit (formerly Curefit)
 
 Case studies:
+- FleetTrack
 - Future City VR + EEG
-- Fleet Command Center
 - Cloud Cost Optimization
 
 This file is a snapshot for crawlers. The live generator is src/config/v2/agentDocuments.ts.

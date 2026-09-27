@@ -36,7 +36,7 @@ export function collectFacts() {
   const profile = read('src/config/v2/profile.ts');
   const studies = read('src/config/v2/caseStudies.ts');
   const titles = grabTitles(studies).filter((title) =>
-    ['Future City VR + EEG', 'Fleet Command Center', 'Cloud Cost Optimization'].includes(title)
+    ['Future City VR + EEG', 'FleetTrack', 'Cloud Cost Optimization'].includes(title)
   );
   const profileBlock = /export const profile = \{([\s\S]*?)\n\} as const/.exec(profile)?.[1] ?? '';
 
@@ -74,7 +74,7 @@ export function buildAgentDocs(facts) {
         `- ${title}: https://www.vittesh.com/v2/work/${
           title === 'Future City VR + EEG'
             ? 'vr-eeg-analytics'
-            : title === 'Fleet Command Center'
+            : title === 'FleetTrack'
               ? 'fleet-command-center'
               : 'cloud-cost-optimization'
         }/`

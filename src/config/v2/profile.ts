@@ -48,10 +48,13 @@ export const resumePublicDetailsNote =
 export const taskFlowComplexityDefinition =
   'TODO: [FILL: define task-flow complexity — steps, taps, or time?]';
 
-export const heroHeadline = 'I make powerful products easier to use.';
-export const heroHeadlineLines = ['I make powerful products', 'easier to use.'] as const;
+export const heroName = 'Vittesh';
+export const heroKicker = `Hey, I am ${heroName}. Product Designer.`;
+export const heroHeadline = 'Experience is at the heart of being human.';
+export const heroCloser = 'I try to make it a little better everyday';
+export const heroHeadlineLines = [heroHeadline] as const;
 
-export const heroIntro = `Hi, I'm Vittesh, a product designer with ${yearsExperience} years. I turn complex systems into interfaces people can act on.`;
+export const heroIntro = heroCloser;
 
 export const metaDescription =
   'Vittesh Sinha, product designer for cars, VR, cloud tools, and enterprise software. I make powerful products easier to use.';

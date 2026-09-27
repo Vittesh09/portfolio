@@ -12,6 +12,11 @@ function getAudio(src: string) {
   return audio;
 }
 
+export function preloadUiSound(src: string) {
+  if (typeof window === 'undefined') return;
+  getAudio(src);
+}
+
 /** Fire-and-forget UI sound. Safe to call from click handlers. */
 export function playUiSound(src: string, volume = 0.2) {
   if (typeof window === 'undefined') return;
@@ -30,4 +35,5 @@ export function playUiSound(src: string, volume = 0.2) {
 }
 
 export const COPY_EMAIL_SOUND = '/assets/copyemail.mp3';
+export const HOVER_SOUND = '/assets/hover.mp3';
 export const MENU_CLICK_SOUND = '/assets/menu-click.wav';

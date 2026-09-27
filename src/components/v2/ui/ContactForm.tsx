@@ -321,9 +321,6 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
           </p>
         ) : null}
       </div>
-      <p className="mt-4 text-sm leading-relaxed text-text-secondary">
-        I use submissions only to reply. Nothing is sold or added to a marketing list.
-      </p>
     </form>
   );
 }

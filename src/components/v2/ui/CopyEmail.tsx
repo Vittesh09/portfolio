@@ -47,6 +47,7 @@ export function CopyEmail({
     <button
       type="button"
       onClick={copy}
+      data-sound="copy-email"
       className={`${ctaBase} w-full max-w-full gap-4 text-left md:justify-between ${ctaClass(variant, 'primary')} ${className}`}
       aria-label={copied ? 'Email copied to clipboard' : `Copy email ${email}`}
     >

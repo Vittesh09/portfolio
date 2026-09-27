@@ -1,30 +1,22 @@
 import type { CSSProperties } from 'react';
-import { profile } from '@/src/config/v2/profile';
+import { heroCloser, heroHeadline, heroName } from '@/src/config/v2/profile';
 
-export function HeroHeadlineLines() {
+export function HeroKicker({ className, style }: { className?: string; style?: CSSProperties }) {
   return (
-    <>
-      <span className="v2-hero-line v2-hero-plain">I make powerful products</span>
-      <span className="v2-hero-line">
-        <span className="v2-hero-emphasis v2-hero-emphasis-hot">easier to use.</span>
-      </span>
-    </>
+    <p className={`v2-hero-kicker text-text-secondary ${className ?? ''}`} style={style}>
+      Hey, I am <span className="text-accent-pop">{heroName}</span>. Product Designer.
+    </p>
   );
 }
 
-export function HeroIntroCopy({
-  className,
-  style
-}: {
-  className?: string;
-  style?: CSSProperties;
-}) {
-  const [before, after] = profile.heroIntro.split('Vittesh');
+export function HeroHeadlineLines() {
+  return <span className="v2-hero-line v2-hero-plain">{heroHeadline}</span>;
+}
+
+export function HeroCloser({ className, style }: { className?: string; style?: CSSProperties }) {
   return (
-    <p className={className} style={style}>
-      {before}
-      <span className="text-accent-pop">Vittesh</span>
-      {after}
+    <p className={`v2-hero-closer text-text-secondary ${className ?? ''}`} style={style}>
+      {heroCloser}
     </p>
   );
 }

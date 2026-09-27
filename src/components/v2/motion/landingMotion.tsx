@@ -24,10 +24,12 @@ export type HeroTitleLine = {
   accent?: boolean;
 };
 
-export const HERO_TITLE_LINES_KISS: HeroTitleLine[] = [{ text: 'I make powerful products easier to use.' }];
+export const HERO_TITLE_LINES_KISS: HeroTitleLine[] = [
+  { text: 'Experience is at the heart of being human.' }
+];
 
 export const HERO_TITLE_LINES_SINGULARITY: HeroTitleLine[] = [
-  { text: 'I make powerful products easier to use.' }
+  { text: 'Experience is at the heart of being human.' }
 ];
 
 export function heroTitleDuration(lines: HeroTitleLine[], stagger = 0.032) {

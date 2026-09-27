@@ -11,14 +11,14 @@ import { AnimatedStat } from '@/src/components/v2/motion/landingMotion';
 import { ContactPanel } from '@/src/components/v2/ui/ContactPanel';
 import { CopyEmail } from '@/src/components/v2/ui/CopyEmail';
 import { ResumeDownload } from '@/src/components/v2/ui/ResumeDownload';
+import { useBorderGlow } from '@/src/components/v2/ui/useBorderGlow';
 import { useMobileLanding } from '@/src/components/v2/ui/useMobileLanding';
-import { EarlierWorkRow } from '@/src/components/v2/archive/EarlierWorkRow';
-import { HeroHeadlineLines, HeroIntroCopy } from '@/src/components/v2/archive/HeroIntroCopy';
+import { HeroCloser, HeroHeadlineLines, HeroKicker } from '@/src/components/v2/archive/HeroIntroCopy';
 import { HeroPortrait } from '@/src/components/v2/archive/HeroPortrait';
 import { HeroMeta } from '@/src/components/v2/archive/HeroMeta';
 import { ProjectCard } from '@/src/components/v2/archive/ProjectCard';
 import { projects } from '@/src/config/v2/caseStudies';
-import { heroHeadline } from '@/src/config/v2/profile';
+import { heroCloser, heroHeadline, heroKicker } from '@/src/config/v2/profile';
 import { siteConfig, trustLogos, trustSignals } from '@/src/config/v2/site';
 
 const LandingExperienceKiss = dynamic(
@@ -35,6 +35,7 @@ function Label({ children }: { children: React.ReactNode }) {
 
 export function LandingExperienceSingularity() {
   const heroRef = useRef<HTMLElement>(null);
+  const borderGlow = useBorderGlow();
   const isMobileMedia = useMobileLanding();
   const { kissMode, hydrated } = useKissMode();
   const [clientReady, setClientReady] = useState(false);
@@ -76,15 +77,16 @@ export function LandingExperienceSingularity() {
         <div className="relative z-10 mx-auto flex max-w-[1600px] flex-col px-4 md:min-h-[calc(100svh-57px)] md:px-8 md:py-8">
           <div className="archive-hero relative flex min-h-[calc(100svh-57px)] flex-1 flex-col justify-center py-10 md:min-h-0 md:py-6">
             <div className="relative z-10 max-w-[52rem] md:w-[68%]">
-              <h1 className="bh-sr-only">{heroHeadline}</h1>
+              <h1 className="bh-sr-only">
+                {heroKicker} {heroHeadline} {heroCloser}
+              </h1>
               <div className="bh-copy bh-copy-source" data-bh-warp aria-hidden="true">
                 <HeroPortrait className="mb-5" />
+                <HeroKicker />
                 <p className="archive-display archive-display--hero text-[clamp(2.35rem,4.1vw,4.15rem)]">
                   <HeroHeadlineLines />
                 </p>
-                <div className="bh-copy-sub max-w-xl text-[0.95rem] leading-snug text-text-secondary md:text-base">
-                  <HeroIntroCopy />
-                </div>
+                <HeroCloser />
               </div>
               <div
                 className="bh-intro-fade bh-cta mt-8 flex max-w-xl flex-col gap-3 sm:flex-row sm:flex-wrap md:mt-10"
@@ -106,7 +108,7 @@ export function LandingExperienceSingularity() {
       </section>
 
       <section className="v2-trust-band border-b border-border-subtle">
-        <div className="v2-trust-band-inner mx-auto w-full max-w-[1600px]">
+        <div className="v2-trust-band-inner v2-border-glow mx-auto w-full max-w-[1600px]" {...borderGlow}>
           <div className="v2-trust-row grid md:grid-cols-4">
             <div className="flex flex-col justify-center">
               <Label>Quick facts</Label>
@@ -177,21 +179,20 @@ export function LandingExperienceSingularity() {
             </p>
           </div>
 
-          <div className="mt-14 grid gap-5 md:grid-cols-2">
+          <div className="mt-14 grid gap-x-8 gap-y-14 md:grid-cols-2">
             {projects.map((project, index) => (
               <motion.article
                 key={project.slug}
+                className="h-full"
                 initial={false}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-50px' }}
                 transition={{ delay: (index % 2) * 0.08 }}
-                className={index === 0 ? 'md:col-span-2' : ''}
               >
-                <ProjectCard project={project} index={index} />
+                <ProjectCard project={project} />
               </motion.article>
             ))}
           </div>
-          <EarlierWorkRow />
         </div>
       </section>
 

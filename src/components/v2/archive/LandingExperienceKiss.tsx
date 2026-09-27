@@ -5,13 +5,13 @@ import { CopyEmail } from '@/src/components/v2/ui/CopyEmail';
 import { ContactPanel } from '@/src/components/v2/ui/ContactPanel';
 import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
 import { ResumeDownload } from '@/src/components/v2/ui/ResumeDownload';
+import { useBorderGlow } from '@/src/components/v2/ui/useBorderGlow';
 import {
   AnimatedStat,
   RevealOnScroll,
   useKissHeroIntro
 } from '@/src/components/v2/motion/landingMotion';
-import { EarlierWorkRow } from '@/src/components/v2/archive/EarlierWorkRow';
-import { HeroHeadlineLines, HeroIntroCopy } from '@/src/components/v2/archive/HeroIntroCopy';
+import { HeroCloser, HeroHeadlineLines, HeroKicker } from '@/src/components/v2/archive/HeroIntroCopy';
 import { HeroPortrait } from '@/src/components/v2/archive/HeroPortrait';
 import { HeroMeta } from '@/src/components/v2/archive/HeroMeta';
 import { ProjectCard } from '@/src/components/v2/archive/ProjectCard';
@@ -25,6 +25,7 @@ function Label({ children }: { children: React.ReactNode }) {
 /** Simple mode — workbench-style grids, light motion on load + scroll. */
 export function LandingExperienceKiss() {
   const { heroRef } = useKissHeroIntro();
+  const borderGlow = useBorderGlow();
 
   return (
     <article>
@@ -36,15 +37,14 @@ export function LandingExperienceKiss() {
           {/* Mobile */}
           <div className="v2-kiss-copy md:hidden">
             <HeroPortrait className="v2-kiss-fade mb-1" />
+            <HeroKicker className="v2-kiss-fade" style={{ transitionDelay: '0.04s' }} />
             <h1
               className="v2-kiss-fade archive-display archive-display--hero text-[clamp(1.85rem,8vw,2.5rem)]"
               style={{ transitionDelay: '0.06s' }}
             >
               <HeroHeadlineLines />
             </h1>
-            <HeroIntroCopy
-              className="v2-kiss-fade mt-2 max-w-xl text-[0.95rem] leading-snug text-text-secondary"
-            />
+            <HeroCloser className="v2-kiss-fade" style={{ transitionDelay: '0.1s' }} />
           </div>
 
           <div
@@ -70,16 +70,14 @@ export function LandingExperienceKiss() {
           {/* Desktop kiss (SM mode) */}
           <div className="hidden md:block">
             <HeroPortrait className="v2-kiss-fade mb-2" />
+            <HeroKicker className="v2-kiss-fade" style={{ transitionDelay: '0.04s' }} />
             <h1
-              className="v2-kiss-fade archive-display archive-display--hero text-[clamp(2.75rem,10vw,6.5rem)]"
+              className="v2-kiss-fade archive-display archive-display--hero text-[clamp(2.5rem,5.2vw,4.5rem)]"
               style={{ transitionDelay: '0.06s' }}
             >
               <HeroHeadlineLines />
             </h1>
-            <HeroIntroCopy
-              className="v2-kiss-fade mt-2 max-w-xl text-[0.95rem] leading-snug text-text-secondary md:text-base"
-              style={{ transitionDelay: '0.1s' }}
-            />
+            <HeroCloser className="v2-kiss-fade" style={{ transitionDelay: '0.1s' }} />
             <div
               className="v2-kiss-fade mt-8 flex flex-col gap-3 border-t border-border-subtle pt-6 sm:flex-row sm:flex-wrap"
               style={{ transitionDelay: '0.14s' }}
@@ -99,7 +97,7 @@ export function LandingExperienceKiss() {
       </section>
 
       <section className="v2-trust-band border-b border-border-subtle">
-        <div className="v2-trust-band-inner mx-auto w-full max-w-[1600px]">
+        <div className="v2-trust-band-inner v2-border-glow mx-auto w-full max-w-[1600px]" {...borderGlow}>
           <div className="v2-trust-row grid grid-cols-1 gap-x-5 gap-y-4 md:grid-cols-4 md:gap-0">
             <RevealOnScroll className="hidden flex-col justify-center md:flex">
               <Label>Quick facts</Label>
@@ -167,19 +165,18 @@ export function LandingExperienceKiss() {
               VR · Ops · Enterprise
             </p>
           </RevealOnScroll>
-          <div className="mt-8 grid gap-5 md:mt-10 md:grid-cols-2">
+          <div className="mt-8 grid gap-x-8 gap-y-14 md:mt-10 md:grid-cols-2">
             {projects.map((project, index) => (
               <RevealOnScroll
                 key={project.slug}
+                className="h-full"
                 delay={index * 0.05}
                 y={20}
-                className={index === 0 ? 'md:col-span-2' : ''}
               >
-                <ProjectCard project={project} index={index} />
+                <ProjectCard project={project} />
               </RevealOnScroll>
             ))}
           </div>
-          <EarlierWorkRow />
         </div>
       </section>
 

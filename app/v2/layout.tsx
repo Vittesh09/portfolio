@@ -13,6 +13,7 @@ import '@/src/styles/v2.css';
 const jakarta = Plus_Jakarta_Sans({
   subsets: ['latin'],
   weight: ['400', '500', '600'],
+  style: ['normal', 'italic'],
   variable: '--font-jakarta',
   display: 'swap'
 });
@@ -58,6 +59,36 @@ const themeInit = `
 (function(){try{var t=localStorage.getItem('v2-appearance');var r=document.currentScript&&document.currentScript.parentElement;if(!r||!r.classList.contains('v2-root'))r=document.querySelector('.v2-root');if(!r)return;r.classList.remove('light');var dark=t==='dark'?true:t==='light'?false:window.matchMedia('(prefers-color-scheme: dark)').matches;if(dark)r.classList.add('dark');else r.classList.remove('dark');}catch(e){}})();
 `;
 
+const audioBoot = `
+(function(){
+  try {
+    var a = document.getElementById('v2-site-audio');
+    if (!a) {
+      a = document.createElement('audio');
+      a.id = 'v2-site-audio';
+      a.className = 'v2-site-audio';
+      a.src = '/assets/event-horizon.mp3';
+      a.loop = true;
+      a.preload = 'auto';
+      a.autoplay = true;
+      document.body.appendChild(a);
+    }
+    var study = /\\/v2\\/work\\/[^/?#]+/.test(location.pathname);
+    try { a.volume = study ? 0 : 0.1; } catch (e) {}
+    var start = function() {
+      if (!a.paused) return;
+      var pending = a.play();
+      if (pending && pending.catch) pending.catch(function(){});
+    };
+    if (!a.dataset.booted) {
+      a.dataset.booted = '1';
+      a.addEventListener('canplay', start);
+    }
+    start();
+  } catch (e) {}
+})();
+`;
+
 export default function V2Layout({ children }: { children: React.ReactNode }) {
   return (
     <div
@@ -66,6 +97,7 @@ export default function V2Layout({ children }: { children: React.ReactNode }) {
       suppressHydrationWarning
     >
       <script dangerouslySetInnerHTML={{ __html: themeInit }} />
+      <script dangerouslySetInnerHTML={{ __html: audioBoot }} />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{
