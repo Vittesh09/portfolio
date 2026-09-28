@@ -130,8 +130,8 @@ function LandingExperienceArchive() {
 
       <section className="border-b border-border-subtle">
         <div className="mx-auto max-w-[1600px]">
-          <div className="grid border-b border-border-subtle md:grid-cols-4">
-            <div className="p-5 md:p-8">
+          <div className="grid grid-cols-3 border-b border-border-subtle md:grid-cols-4">
+            <div className="col-span-3 p-5 md:col-span-1 md:p-8">
               <Label>Quick facts</Label>
             </div>
             {trustSignals.map((signal, index) => (
@@ -141,17 +141,19 @@ function LandingExperienceArchive() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ delay: index * 0.07 }}
-                className="border-t border-border-subtle p-5 md:border-l md:border-t-0 md:p-8"
+                className="border-t border-border-subtle p-4 md:border-l md:border-t-0 md:p-8"
               >
-                <p className="archive-display archive-display--stat text-5xl text-accent-pop md:text-6xl">
+                <p className="archive-display archive-display--stat text-3xl text-accent-pop md:text-6xl">
                   <AnimatedStat value={signal.value} />
                 </p>
                 <p className="v2-trust-fact-label mt-5 text-text-secondary">{signal.label}</p>
               </motion.div>
             ))}
           </div>
-          <div className="flex flex-wrap items-center gap-x-10 gap-y-3 px-5 py-5 md:px-8">
-            <Label>I&apos;ve worked with</Label>
+          <div className="grid grid-cols-3 items-center gap-x-3 gap-y-4 px-4 py-5 md:flex md:flex-wrap md:gap-x-10 md:px-8">
+            <div className="col-span-3">
+              <Label>I&apos;ve worked with</Label>
+            </div>
             {trustLogos.map((company) => (
               <a
                 key={company.name}
@@ -165,8 +167,8 @@ function LandingExperienceArchive() {
                 {company.name}
                 <span className="v2-visually-hidden"> (opens in a new tab)</span>
                 <span
-                  className={`ml-2 archive-label font-normal ${
-                    company.current ? 'text-text-muted' : 'v2-company-period is-past'
+                  className={`v2-company-period ml-2 archive-label font-normal ${
+                    company.current ? 'text-text-muted' : 'is-past'
                   }`}
                 >
                   {company.period}
@@ -230,9 +232,9 @@ function LandingExperienceArchive() {
         aria-labelledby="classic-work-heading"
       >
         <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-8 md:py-24">
-          <div className="grid gap-8 md:grid-cols-12 md:items-end">
+          <div className="grid gap-x-8 gap-y-20 md:grid-cols-12 md:items-center">
             <div className="md:col-span-8">
-              <Label>Selected work · 3 case studies</Label>
+              <Label>Selected work</Label>
               <h2
                 id="classic-work-heading"
                 className="archive-display mt-5 text-[clamp(2.75rem,9vw,6.5rem)]"
@@ -240,21 +242,17 @@ function LandingExperienceArchive() {
                 Work that shipped.
               </h2>
             </div>
-            <p className="max-w-sm text-sm leading-relaxed text-text-secondary md:col-span-4">
-              Three projects where I owned the experience end to end, from VR research and fleet
-              ops to cloud cost decisions.
+            <p className="max-w-sm text-sm leading-relaxed text-text-secondary md:col-span-4 md:self-end">
+              I owned each one from the first question to the shipped product.
             </p>
-          </div>
-
-          <div className="mt-14 grid gap-x-8 gap-y-14 md:grid-cols-2">
             {projects.map((project, index) => (
               <motion.article
                 key={project.slug}
-                className="h-full"
+                className="col-span-full md:grid md:grid-cols-subgrid md:items-center"
                 initial={false}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true, margin: '-50px' }}
-                transition={{ delay: (index % 2) * 0.08 }}
+                transition={{ delay: index * 0.06 }}
               >
                 <ProjectCard project={project} />
               </motion.article>
@@ -263,18 +261,18 @@ function LandingExperienceArchive() {
         </div>
       </section>
 
-      <section id="about" className="scroll-mt-16 border-b border-border-subtle">
-        <div className="mx-auto grid max-w-[1600px] items-stretch md:grid-cols-12">
-          <div className="relative min-h-[520px] overflow-hidden bg-bg-muted md:col-span-5 md:min-h-[36rem]">
+      <section id="about" className="hidden scroll-mt-16 border-b border-border-subtle md:block">
+        <div className="mx-auto grid max-w-[1600px] grid-cols-12 items-center md:items-stretch">
+          <div className="relative col-span-4 h-36 self-center overflow-hidden bg-bg-muted md:col-span-5 md:h-auto md:min-h-[36rem] md:self-stretch">
             <Image
               src="/assets/images/profile.png"
               alt={`Portrait of ${siteConfig.name}`}
               fill
               className="archive-image object-cover"
-              sizes="(max-width: 768px) 100vw, 42vw"
+              sizes="(max-width: 768px) 34vw, 42vw"
             />
           </div>
-          <div className="archive-grid flex min-h-[520px] flex-col justify-between p-5 md:col-span-7 md:min-h-[36rem] md:p-10">
+          <div className="archive-grid col-span-8 flex flex-col justify-between p-4 md:col-span-7 md:min-h-[36rem] md:p-10">
             <Label>A bit about who I am</Label>
             <p className="archive-serif my-12 max-w-[28ch] text-[clamp(1.85rem,4.2vw,3.25rem)] md:my-16">
               “{siteConfig.statement}”

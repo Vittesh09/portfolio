@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { siteConfig } from '@/src/config/v2/site';
+import { triggerHaptic } from '@/src/components/v2/ui/haptics';
 
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 type FieldName = 'name' | 'email' | 'message';
@@ -127,6 +128,7 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
       setInvalid({});
       setError('');
       setStatus('sent');
+      triggerHaptic('success');
     } catch (err) {
       setStatus('error');
       setError(

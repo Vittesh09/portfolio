@@ -12,7 +12,7 @@ Location: India
 Employers:
 - Nagarro
 - Simple Energy
-- Cult.fit (formerly Curefit)
+- Cult.fit
 
 Case studies:
 - FleetTrack

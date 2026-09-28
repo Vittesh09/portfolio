@@ -89,7 +89,7 @@ export function getMachineRecord() {
       url: caseStudyUrl(project.slug)
     })),
     earlierWork: {
-      company: 'Cult.fit (formerly Curefit)',
+      company: 'Cult.fit',
       summary: curefitEarlierWork,
       url: profile.links.behance
     },

@@ -111,7 +111,7 @@ export const employers: {
     ]
   },
   {
-    name: 'Cult.fit (formerly Curefit)',
+    name: 'Cult.fit',
     role: 'User Research & Experience Design',
     period: 'Oct 2018 – Jan 2022',
     href: 'https://www.cult.fit',
@@ -125,7 +125,7 @@ export const employers: {
         metric: '+15% NPS across 100+ centers on half-hour class flows',
         baseline: unconfirmedMethod,
         method: unconfirmedMethod,
-        source: 'Cult.fit (formerly Curefit)'
+        source: 'Cult.fit'
       }
     ]
   }

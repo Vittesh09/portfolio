@@ -3,16 +3,32 @@ import type { MetricEvidence } from '@/src/config/v2/profile';
 const unconfirmedMethod = 'TODO: [FILL: baseline and method for this metric]';
 
 export type CaseStory = {
+  eyebrow: string;
+  lede: string;
+  support: string;
   facts: { label: string; value: string }[];
-  takeaways: string[];
-  challenge: string[];
-  pains: string[];
-  brief: string;
-  approach: string;
-  decisions: { title: string; body: string }[];
-  features: { title: string; body: string; image: { src: string; alt: string } }[];
-  results: { value: string; label: string }[];
-  closing: string;
+  problemTitle: string;
+  problemPoints: { title: string; body: string }[];
+  problemClose: string;
+  ideaTitle: string;
+  ideaFlow: string[];
+  idea: string;
+  questions: { index: string; body: string }[];
+  ideaNote: string;
+  redesignTitle: string;
+  moments: { label: string; title: string; body: string; image: { src: string; alt: string } }[];
+  redesignClose: string;
+  systemTitle: string;
+  kit: string;
+  iconsTitle: string;
+  icons: string;
+  scaleTitle: string;
+  scaleShared: string[];
+  scaleFlexible: string[];
+  scale: string;
+  resultsTitle: string;
+  results: { title: string; body: string }[];
+  honesty: string;
 };
 
 export type Project = {
@@ -43,6 +59,8 @@ export type Project = {
   measurementNote?: string;
   image: string;
   imageAlt?: string;
+  /** Card frames. While the pointer is on the card, these crossfade in order. */
+  cardImages?: string[];
   images: { src: string; alt: string }[];
 };
 
@@ -54,7 +72,7 @@ export const projects: Project[] = [
     index: '01',
     title: 'FleetTrack',
     summary:
-      'I redesigned the FleetTrack dashboard so a fleet manager can see trucks and dumpsters, open a trip, and act on an event in one workspace.',
+      'I redesigned the FleetTrack dashboard so a fleet manager can find a problem, see why it happened, and close it in one workspace.',
     company: 'LB Technology',
     cardRole: 'Product Designer',
     outcomeLine:
@@ -62,7 +80,7 @@ export const projects: Project[] = [
     outcomeEvidence: [],
     tags: ['Fleet', 'Dashboard', 'Telematics'],
     industry: 'Fleet logistics',
-    client: 'Unnamed operator of trucks and dumpsters',
+    client: 'Fleet operators',
     customers: 'Fleet managers',
     challenge:
       'A fleet manager starts from the fleet, not from a single truck.',
@@ -106,84 +124,110 @@ export const projects: Project[] = [
       'Reports that can be shared and published back as dashboard tiles.'
     ],
     story: {
+      eyebrow: 'Case study · Enterprise product design · Fleet telematics',
+      lede: 'One workspace to understand what is happening across the fleet and act on it.',
+      support:
+        'I redesigned the FleetTrack dashboard to connect fleet visibility, vehicle context, events and actions in one experience.',
       facts: [
-        { label: 'My role', value: 'Product Designer, whole dashboard' },
-        { label: 'Timeline', value: '4+ months' }
+        { label: 'Role', value: 'Product Designer' },
+        { label: 'Scope', value: 'Entire dashboard redesign' },
+        { label: 'Timeline', value: '4 months · 2024' }
       ],
-      takeaways: [
-        'FleetTrack tracks the trucks and dumpsters of an operator that needs to know, every day, where its vehicles are, how they are being driven, and what they cost to run.',
-        'Over four months, with a project manager, a business analyst, and the developers, I redesigned the whole dashboard around the person who runs the fleet. The fleet, the trip, and the event now sit in one workspace, and a question the manager asks once stays on the dashboard for the next morning.'
-      ],
-      challenge: [
-        'The data was never the problem. GPS positions, harsh-driving events from the vehicles and their cameras, fuel and engine hours, and service intervals were all being collected.',
-        'The problem was the fleet manager’s morning. They answer for safety, fuel spend, maintenance, and the people behind the wheel, so their day starts with a check across the whole fleet, then a closer look at the few vehicles that need one. The product did not follow that day. A harsh stop was a row in one report, the truck’s position was on a map somewhere else, and the clip that explained it was in the camera software. The manager did the joining up.'
-      ],
-      pains: [
-        'Totals and the live fleet on separate screens',
-        'Events as rows, with no place attached',
-        'Speed, limit, and camera in different tools',
-        'The same report rebuilt every morning'
-      ],
-      brief:
-        'The brief was practical: one place where a manager can check the fleet, find what went wrong, see why, deal with it, and come back to the same view tomorrow.',
-      approach:
-        'With the business analyst I walked through how a manager moves through a day, and every point where they had to leave the product became something to fix. The project manager and developers were in those reviews from the start, so each idea was checked early against what the telematics and camera data could support.',
-      decisions: [
+      problemTitle: 'The data existed. The experience was fragmented.',
+      problemPoints: [
         {
-          title: 'The fleet comes first',
-          body: 'The first screen answers for the whole operation: who is driving, who is idle, and where the exceptions are. A single truck is what the manager opens next, not where they start.'
+          title: 'Information was scattered',
+          body: 'Fleet status, trips, events, reports and supporting information appeared in different parts of the experience.'
         },
         {
-          title: 'The event sits on the route',
-          body: 'A harsh stop means more on the map than in a table. Where it happened is often the explanation: a junction, a hill, a stretch of road where it keeps happening.'
+          title: 'Context was disconnected',
+          body: 'A manager often had to connect information from multiple views to understand what had happened.'
         },
         {
-          title: 'The manager composes the dashboard',
-          body: 'An operator running dumpsters and one running long-haul trucks do not watch the same numbers. Widgets let each manager keep their own morning, and any report can come back as a tile.'
+          title: 'The interface had grown complex',
+          body: 'The existing product needed a cleaner, more consistent experience as the amount of information and functionality increased.'
         }
       ],
-      features: [
+      problemClose: 'The redesign was about connecting context, not adding more data.',
+      ideaTitle: 'From screens to a connected workflow',
+      ideaFlow: ['Fleet', 'Vehicle', 'Trip', 'Event', 'Action'],
+      idea: 'Instead of treating the dashboard as a collection of separate screens, I designed the experience around how a fleet manager moves from an overview to a specific vehicle, then to an event, its context, and the next action.',
+      questions: [
+        { index: '01', body: 'What needs my attention?' },
+        { index: '02', body: 'What happened, and where?' },
+        { index: '03', body: 'What should I do next?' }
+      ],
+      ideaNote:
+        'I worked with the business analyst, project manager, developers and product leadership to understand the issues being raised by customers and translate them into product and UX decisions.',
+      redesignTitle: 'One workflow, four moments',
+      moments: [
         {
-          title: 'A morning dashboard',
-          body: 'Safety events, fuel, maintenance due, and asset status as widgets. Any of them can be removed, and new ones are added from a panel grouped the way managers talk about the fleet.',
+          label: '01 / See',
+          title: 'Start with the fleet',
+          body: 'The dashboard brings key operational information into one starting point and lets managers shape what they need to see.',
           image: {
             src: asset('fleet-dashboard.png'),
-            alt: 'Dashboard with safety, fuel, maintenance, and asset widgets, and the add-widget panel open'
+            alt: 'Dashboard with safety, fuel, maintenance and asset widgets, and the panel for adding a widget.'
           }
         },
         {
-          title: 'A live map, and the trip behind each truck',
-          body: 'Every vehicle has a status in the list and the same mark on the map, so a cluster of idle trucks stands out. Opening one draws its trip, with each event pinned where it happened.',
+          label: '02 / Locate',
+          title: 'Find the vehicle',
+          body: 'Fleet status and location are connected so the manager can move from an overview to a specific vehicle without losing context.',
+          image: {
+            src: asset('fleet-map-overview.jpg'),
+            alt: 'FleetTrack map overview for a selected vehicle, with trips listed beside the route.'
+          }
+        },
+        {
+          label: '03 / Understand',
+          title: 'Put the event in context',
+          body: 'Events become meaningful when they are connected to the trip, route and surrounding vehicle information.',
           image: {
             src: asset('fleet-trip.jpg'),
-            alt: 'Trip details with events listed and pinned along the route'
+            alt: 'Trip details with events listed and pinned along the route.'
           }
         },
         {
-          title: 'A vehicle panel that closes the loop',
-          body: 'Speed above the posted limit, location, and alerts in one column. The manager can message the driver, open the camera, or mark the event resolved without leaving the map.',
+          label: '04 / Act',
+          title: 'Take action from the same place',
+          body: 'The vehicle panel brings the relevant information and available actions together, reducing the need to jump between tools.',
           image: {
             src: asset('fleet-vehicle.png'),
-            alt: 'Vehicle panel with speed against the limit, camera, and mark as resolved'
-          }
-        },
-        {
-          title: 'Reports that become tiles',
-          body: 'A custom report can be filtered, grouped, and shared, then drawn as a chart and published to the dashboard, so tomorrow’s answer is already there.',
-          image: {
-            src: asset('fleet-tile.png'),
-            alt: 'Create-tile dialog with chart types, variables, and a preview'
+            alt: 'Vehicle panel with speed, the posted limit, camera and mark as resolved.'
           }
         }
       ],
+      redesignClose: 'See it → locate it → understand it → act',
+      systemTitle: 'A consistent product needs a consistent language.',
+      kit: 'A reusable kit, extended from the existing FleetTrack brand.',
+      iconsTitle: 'Vehicle iconography',
+      icons:
+        'One icon language so vehicle types stay recognisable across lists, maps and vehicle views.',
+      scaleTitle: 'One system, different fleet needs',
+      scaleShared: ['Fleet', 'Vehicle', 'Trip', 'Event', 'Action'],
+      scaleFlexible: ['Widgets', 'Reports', 'Operational views'],
+      scale:
+        'Different fleet operators may care about different information, but the core interaction model stays consistent. The dashboard can adapt without creating a different product for every fleet.',
+      resultsTitle: 'The result',
       results: [
-        { value: 'One', label: 'workspace for the fleet, the trip, and the event' },
-        { value: 'On the route', label: 'every safety event, beside speed and the posted limit' },
-        { value: 'Kept', label: 'custom reports stay on the dashboard as tiles' }
+        {
+          title: 'Connected',
+          body: 'Fleet, vehicle, trip and event context are brought into one workflow.'
+        },
+        {
+          title: 'Consistent',
+          body: 'The redesigned UI follows a shared visual and interaction language.'
+        },
+        {
+          title: 'Scalable',
+          body: 'The component system and vehicle iconography support a wider range of fleet configurations.'
+        }
       ],
-      closing:
-        'The manager no longer does the joining up. They start with the fleet, go straight to the exception, see where and why it happened, act on it, and find the same view waiting the next morning.'
+      honesty:
+        'No formal usability baseline or quantitative outcome measurement was captured during the project, so no numerical performance claims are being made.'
     },
+
     outcomes: [
       'Safety, fuel, maintenance, and asset status are on one dashboard, instead of a separate report for each question.',
       'An event is on the route, with speed and the limit, instead of a row with no place attached.',
@@ -191,9 +235,14 @@ export const projects: Project[] = [
     ],
     measurementNote:
       'These are changes in the product. I do not have a counted before-and-after for time saved, events caught, or fuel reduced, so none is stated here.',
-    image: asset('fleet-header.jpg'),
+    image: asset('fleet-cameras.jpg'),
+    cardImages: [
+      asset('fleet-overview.jpg'),
+      asset('fleet-thumb-video.jpg'),
+      asset('fleet-cameras.jpg')
+    ],
     imageAlt:
-      'FleetTrack header: a laptop showing the live trip map, with geozone, login, and custom report screens around it.',
+      'FleetTrack overview with the live map, cameras, geozone details, and event list.',
     images: [
       {
         src: asset('fleet-map.jpg'),

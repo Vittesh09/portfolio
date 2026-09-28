@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import { siteConfig } from '@/src/config/v2/site';
 import { ctaBase, ctaClass, type CtaVariant } from '@/src/components/v2/ui/ctaStyles';
+import { triggerHaptic } from '@/src/components/v2/ui/haptics';
 import { COPY_EMAIL_SOUND, playUiSound } from '@/src/components/v2/ui/playUiSound';
 
 type CopyEmailProps = {
@@ -29,6 +30,7 @@ export function CopyEmail({
     try {
       await navigator.clipboard.writeText(email);
       setCopied(true);
+      triggerHaptic('success');
     } catch {
       const input = document.createElement('textarea');
       input.value = email;
@@ -40,6 +42,7 @@ export function CopyEmail({
       document.execCommand('copy');
       document.body.removeChild(input);
       setCopied(true);
+      triggerHaptic('success');
     }
   }, [email]);
 

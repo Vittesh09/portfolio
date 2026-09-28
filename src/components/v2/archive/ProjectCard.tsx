@@ -2,83 +2,71 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
-import { useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent } from 'react';
-import { motion, useMotionValue, useSpring } from 'framer-motion';
 import { type Project } from '@/src/config/v2/caseStudies';
-import { isUnconfirmed } from '@/src/config/v2/profile';
+import { triggerHaptic } from '@/src/components/v2/ui/haptics';
 
-const TILT = { stiffness: 260, damping: 28, mass: 0.4 };
-const MAX_TILT_X = 6;
-const MAX_TILT_Y = 8;
+const FRAME_MS = 1800;
 
 export function ProjectCard({ project }: { project: Project }) {
-  const bounds = useRef<DOMRect | null>(null);
-  const reduceMotion = useRef(false);
-  const rotateX = useMotionValue(0);
-  const rotateY = useMotionValue(0);
-  const tiltX = useSpring(rotateX, TILT);
-  const tiltY = useSpring(rotateY, TILT);
-  const meta = isUnconfirmed(project.company)
-    ? project.cardRole
-    : `${project.company} · ${project.cardRole}`;
+  const cycleRef = useRef(0);
+  const frames = project.cardImages?.length ? project.cardImages : [project.image];
+  const [frame, setFrame] = useState(0);
 
-  const onPointerEnter = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.pointerType !== 'mouse') return;
-    reduceMotion.current = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    bounds.current = event.currentTarget.getBoundingClientRect();
-    event.currentTarget.classList.add('is-active');
+  const stopCycle = () => {
+    window.clearInterval(cycleRef.current);
+    cycleRef.current = 0;
+    setFrame(0);
   };
 
-  const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
-    if (event.pointerType !== 'mouse' || !bounds.current || reduceMotion.current) return;
-    const { left, top, width, height } = bounds.current;
-    const x = (event.clientX - left) / width - 0.5;
-    const y = (event.clientY - top) / height - 0.5;
-    rotateY.set(x * MAX_TILT_Y);
-    rotateX.set(-y * MAX_TILT_X);
+  const onCardEnter = (event: PointerEvent<HTMLAnchorElement>) => {
+    if (event.pointerType !== 'mouse' || frames.length < 2) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    window.clearInterval(cycleRef.current);
+    cycleRef.current = window.setInterval(() => {
+      setFrame((current) => (current + 1) % frames.length);
+    }, FRAME_MS);
   };
 
-  const onPointerLeave = (event: PointerEvent<HTMLDivElement>) => {
-    bounds.current = null;
-    rotateX.set(0);
-    rotateY.set(0);
-    event.currentTarget.classList.remove('is-active');
-  };
+  useEffect(() => () => window.clearInterval(cycleRef.current), []);
 
   return (
     <Link
       href={`/v2/work/${project.slug}/`}
-      className="archive-project-card group flex h-full flex-col"
+      className="archive-project-card group flex flex-col md:col-span-8 md:col-start-3 md:-mx-24"
+      onPointerEnter={onCardEnter}
+      onPointerLeave={stopCycle}
+      onClick={() => triggerHaptic('medium')}
     >
-      <div className="archive-project-stage bg-[#070707]">
-        <motion.div
-          className="archive-project-thumb relative h-44 w-full overflow-hidden md:h-56"
-          style={{ rotateX: tiltX, rotateY: tiltY, transformPerspective: 900 }}
-          onPointerEnter={onPointerEnter}
-          onPointerMove={onPointerMove}
-          onPointerLeave={onPointerLeave}
-        >
-          <Image
-            src={project.image}
-            alt=""
-            fill
-            loading="lazy"
-            decoding="async"
-            className="archive-image object-contain"
-            sizes="(max-width: 768px) 100vw, 50vw"
-          />
-        </motion.div>
+      <div className="archive-project-stage">
+        <div className="archive-project-thumb relative aspect-[8/3] w-full overflow-hidden">
+          {frames.map((src, index) => (
+            <Image
+              key={src}
+              src={src}
+              alt=""
+              fill
+              loading="lazy"
+              decoding="async"
+              className={
+                frames.length > 1
+                  ? `archive-image archive-project-frame ${index === 0 ? 'object-cover' : 'object-contain'}${index === frame ? ' is-shown' : ''}`
+                  : 'archive-image object-contain'
+              }
+              sizes="(max-width: 768px) 100vw, 66vw"
+            />
+          ))}
+        </div>
       </div>
-      <div className="flex flex-1 flex-col pt-5">
-        <p className="archive-label text-text-muted">Case {project.index}</p>
-        <h3 className="mt-2 line-clamp-2 h-14 text-2xl font-semibold leading-7 tracking-tight group-hover:text-accent-pop">
-          {project.title}
-        </h3>
-        <p className="mt-2 line-clamp-1 h-5 text-sm leading-5 text-text-secondary">{meta}</p>
-        <p className="mt-3 line-clamp-3 h-[4.875rem] text-sm leading-relaxed text-text-secondary">
-          {project.outcomeLine}
-        </p>
+      <div className="archive-project-caption">
+        <div className="archive-project-caption-main">
+          <h3 className="archive-display text-text-primary group-hover:text-accent-pop">{project.title}</h3>
+          <p className="archive-project-meta">
+            {project.cardRole} · {project.year}
+          </p>
+        </div>
+        <p className="archive-project-outcome">{project.outcomeLine}</p>
       </div>
     </Link>
   );

@@ -5,6 +5,7 @@ import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { siteConfig } from '@/src/config/v2/site';
 import { profile } from '@/src/config/v2/profile';
+import { triggerHaptic } from '@/src/components/v2/ui/haptics';
 import { ThemeToggle } from '@/src/components/v2/ui/ThemeToggle';
 import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
 import { useMobileLanding } from '@/src/components/v2/ui/useMobileLanding';
@@ -155,7 +156,7 @@ export function ArchiveHeader() {
           <Link
             href="/v2/"
             onClick={goHome}
-            className={`${navOptionClass} v2-archive-wordmark font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2`}
+            className={`${navOptionClass} v2-archive-wordmark font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2${isHome ? ' max-md:hidden' : ''}`}
           >
             Vittesh Sinha®
             <span className="v2-visually-hidden"> — Home</span>
@@ -193,14 +194,17 @@ export function ArchiveHeader() {
             </Link>
             <ThemeToggle />
           </nav>
-          <div className="flex items-center gap-1 md:hidden">
+          <div className="ml-auto flex items-center gap-1 md:hidden">
             <ThemeToggle />
             <button
               type="button"
               className={`${navOptionClass} min-h-11 border border-border-subtle px-3`}
               aria-expanded={open}
               aria-controls="v2-mobile-nav"
-              onClick={() => setOpen((value) => !value)}
+              onClick={() => {
+                triggerHaptic('light');
+                setOpen((value) => !value);
+              }}
             >
               {open ? 'Close' : 'Menu'}
             </button>

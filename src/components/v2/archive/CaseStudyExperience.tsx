@@ -1,10 +1,11 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
+import { Fragment, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import type { CaseStory, Project } from '@/src/config/v2/caseStudies';
 import { howMeasured, projects } from '@/src/config/v2/caseStudies';
 import { HashNavLink, scrollToHash } from '@/src/components/v2/ui/HashNavLink';
+import { triggerHaptic } from '@/src/components/v2/ui/haptics';
 import { isUnconfirmed } from '@/src/config/v2/profile';
 
 function ChoicePanel({
@@ -96,7 +97,10 @@ function ScreenStage({ images }: { images: Project['images'] }) {
         <button
           type="button"
           className="block w-full cursor-zoom-in"
-          onClick={() => setOpen(true)}
+          onClick={() => {
+            triggerHaptic('medium');
+            setOpen(true);
+          }}
           aria-label={`Enlarge: ${current.alt}`}
         >
           {/* Natural ratio, so the screen is shown whole. */}
@@ -178,46 +182,16 @@ function ScreenStage({ images }: { images: Project['images'] }) {
   );
 }
 
-function ZoomImage({ src, alt }: { src: string; alt: string }) {
-  const dialogRef = useRef<HTMLDialogElement>(null);
-
+function ZoomImage({ src, alt, showCaption = true }: { src: string; alt: string; showCaption?: boolean }) {
   return (
-    <figure className="border border-border-subtle bg-[#070707]">
-      <button
-        type="button"
-        className="block w-full cursor-zoom-in"
-        onClick={() => dialogRef.current?.showModal()}
-        aria-label={`Enlarge: ${alt}`}
-      >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} alt={alt} loading="lazy" className="block h-auto w-full" />
-      </button>
-      <figcaption className="border-t border-border-subtle bg-bg-primary px-4 py-3 text-sm leading-relaxed text-text-secondary">
-        {alt}
-      </figcaption>
-      <dialog
-        ref={dialogRef}
-        aria-label={alt}
-        className="w-[min(1200px,calc(100vw-2rem))] max-w-none border border-border-subtle bg-bg-primary p-0 text-text-primary backdrop:bg-black/80"
-        onClick={(event) => {
-          if (event.target === dialogRef.current) dialogRef.current?.close();
-        }}
-      >
-        <div className="flex items-center justify-between gap-4 border-b border-border-subtle px-4 py-3">
-          <p className="text-sm text-text-secondary">{alt}</p>
-          <button
-            type="button"
-            className="archive-label shrink-0 text-accent-pop"
-            onClick={() => dialogRef.current?.close()}
-          >
-            Close
-          </button>
-        </div>
-        <div className="bg-[#070707]">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={src} alt={alt} className="block h-auto w-full" />
-        </div>
-      </dialog>
+    <figure className="v2-story-shot">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={src} alt={alt} loading="lazy" />
+      {showCaption ? (
+        <figcaption className="border-t border-border-subtle bg-bg-primary px-4 py-3 text-sm leading-relaxed text-text-secondary">
+          {alt}
+        </figcaption>
+      ) : null}
     </figure>
   );
 }
@@ -232,10 +206,11 @@ function Label({ children, light }: { children: string; light?: boolean }) {
 
 const storySections = [
   { id: 'overview', label: 'Overview' },
-  { id: 'challenge', label: 'The challenge' },
-  { id: 'approach', label: 'My approach' },
-  { id: 'built', label: 'What I built' },
-  { id: 'outcomes', label: 'Outcomes' }
+  { id: 'idea', label: 'The idea' },
+  { id: 'redesign', label: 'The redesign' },
+  { id: 'system', label: 'The system' },
+  { id: 'scale', label: 'The scale' },
+  { id: 'reflection', label: 'Reflection' }
 ];
 
 function useActiveStorySection() {
@@ -281,6 +256,11 @@ function StoryNav({ active }: { active: string }) {
       const headerHidden = header?.getAttribute('data-hidden') === 'true';
       const headerHeight = headerHidden ? 16 : Math.round(header?.getBoundingClientRect().height ?? 72);
       const desktop = window.matchMedia('(min-width: 1024px)').matches;
+      if (!desktop) {
+        nav.dataset.dock = 'stick';
+        article.style.paddingTop = '';
+        return;
+      }
       const story = article.querySelector('.v2-story-main');
       const limitBox = (story ?? article).getBoundingClientRect();
       const navHeight = nav.offsetHeight;
@@ -363,141 +343,132 @@ function StoryNav({ active }: { active: string }) {
   );
 }
 
-function readingMinutes(story: CaseStory) {
-  const text = [
-    ...story.takeaways,
-    ...story.challenge,
-    ...story.pains,
-    story.brief,
-    story.approach,
-    ...story.decisions.flatMap((item) => [item.title, item.body]),
-    ...story.features.flatMap((item) => [item.title, item.body]),
-    ...story.results.flatMap((item) => [item.value, item.label]),
-    story.closing
-  ].join(' ');
-  return Math.max(1, Math.round(text.split(/\s+/).length / 200));
+function FlowDiagram({ steps, caption }: { steps: string[]; caption?: string }) {
+  return (
+    <figure className="mt-12 max-w-[1100px]">
+      <ol className="sr-only">
+        {steps.map((step) => (
+          <li key={step}>{step}</li>
+        ))}
+      </ol>
+      <div aria-hidden="true" className="v2-flow">
+        {steps.map((step, index) => (
+          <Fragment key={step}>
+            <div className="v2-flow-step">
+              <span className="archive-label text-accent-pop">{String(index + 1).padStart(2, '0')}</span>
+              <p>{step}</p>
+            </div>
+            {index < steps.length - 1 ? <span className="v2-flow-arrow" /> : null}
+          </Fragment>
+        ))}
+      </div>
+      {caption ? <figcaption className="mt-4 text-sm leading-relaxed text-text-secondary">{caption}</figcaption> : null}
+    </figure>
+  );
 }
 
-function StoryBody({ project, story }: { project: Project; story: CaseStory }) {
+const storyHeading = 'archive-serif max-w-[68ch] text-[clamp(1.75rem,3.5vw,2.5rem)] leading-tight';
+const storyCopy = 'max-w-[68ch] text-lg leading-[1.65] text-text-secondary';
+
+function StoryBody({ story }: { story: CaseStory }) {
   return (
     <>
       <section id="overview" className="v2-story-section border-b border-border-subtle">
         <div className="py-16 md:py-24">
-          <div className="space-y-6">
-            {story.takeaways.map((paragraph, index) => (
-              <p
-                key={paragraph}
-                className={
-                  index === 0
-                    ? 'archive-serif text-[clamp(1.5rem,2.6vw,2.25rem)] leading-snug'
-                    : 'max-w-3xl text-lg leading-8 text-text-secondary'
-                }
-              >
-                {paragraph}
-              </p>
+          <h2 className={storyHeading}>{story.problemTitle}</h2>
+          <ol className="mt-12 max-w-[1100px] space-y-10">
+            {story.problemPoints.map((point, index) => (
+              <li key={point.title} className="grid gap-3 border-t border-border-subtle pt-8 md:grid-cols-[7rem_minmax(0,1fr)] md:gap-10">
+                <p className="archive-label text-accent-pop">{String(index + 1).padStart(2, '0')}</p>
+                <div>
+                  <h3 className="text-2xl font-medium leading-snug">{point.title}</h3>
+                  <p className="mt-3 max-w-[62ch] text-lg leading-[1.65] text-text-secondary">{point.body}</p>
+                </div>
+              </li>
             ))}
-          </div>
+          </ol>
+          <p className="v2-story-line archive-serif mt-16 text-[clamp(1.75rem,3vw,2.75rem)] leading-tight">
+            {story.problemClose}
+          </p>
         </div>
       </section>
 
-      <section id="challenge" className="v2-story-section border-b border-border-subtle">
+      <section id="idea" className="v2-story-section border-b border-border-subtle">
         <div className="py-16 md:py-24">
-          <div>
-            <h2 className="archive-serif text-[clamp(1.75rem,3.5vw,2.75rem)] leading-tight">
-              {project.challenge}
-            </h2>
-            <div className="mt-8 max-w-3xl space-y-5">
-              {story.challenge.map((paragraph) => (
-                <p key={paragraph} className="text-base leading-7 text-text-secondary">
-                  {paragraph}
-                </p>
-              ))}
+          <h2 className={storyHeading}>{story.ideaTitle}</h2>
+          <FlowDiagram steps={story.ideaFlow} />
+          <p className={`mt-10 ${storyCopy}`}>{story.idea}</p>
+          <ol className="v2-story-pair mt-10 md:mt-16">
+            {story.questions.map((item) => (
+              <li key={item.index}>
+                <p className="archive-label text-accent-pop">{item.index}</p>
+                <p className="v2-story-pair-title archive-serif">{item.body}</p>
+              </li>
+            ))}
+          </ol>
+          <p className="mt-14 max-w-[68ch] text-sm leading-relaxed text-text-muted">{story.ideaNote}</p>
+        </div>
+      </section>
+
+      <section id="redesign" className="v2-story-section border-b border-border-subtle">
+        <div className="py-16 md:py-24">
+          <h2 className={storyHeading}>{story.redesignTitle}</h2>
+          <div className="mt-6 max-w-[1100px]">
+            {story.moments.map((moment) => (
+              <article key={moment.label} className="mt-16">
+                <p className="archive-label text-accent-pop">{moment.label}</p>
+                <h3 className="archive-serif mt-3 text-[clamp(1.75rem,2.8vw,2.5rem)] leading-tight">{moment.title}</h3>
+                <p className={`mt-4 ${storyCopy}`}>{moment.body}</p>
+                <div className="mt-8">
+                  <ZoomImage src={moment.image.src} alt={moment.image.alt} showCaption={false} />
+                </div>
+              </article>
+            ))}
+          </div>
+          <p className="v2-story-line archive-serif mt-20 text-[clamp(1.75rem,3vw,2.75rem)] leading-tight">
+            {story.redesignClose}
+          </p>
+        </div>
+      </section>
+
+      <section id="system" className="v2-story-section border-b border-border-subtle">
+        <div className="py-16 md:py-24">
+          <h2 className={storyHeading}>{story.systemTitle}</h2>
+          <div className="v2-story-split">
+            <div>
+              <h3>UI kit</h3>
+              <p>{story.kit}</p>
             </div>
-            <ol className="mt-12 grid gap-px border border-border-subtle bg-border-subtle sm:grid-cols-2">
-              {story.pains.map((pain, index) => (
-                <li key={pain} className="bg-bg-primary p-6">
-                  <span className="archive-label text-accent-pop">{String(index + 1).padStart(2, '0')}</span>
-                  <p className="mt-3 text-lg leading-snug">{pain}</p>
-                </li>
-              ))}
-            </ol>
-            <p className="mt-12 max-w-3xl border-l-2 border-accent-pop pl-5 text-lg leading-8">
-              {story.brief}
-            </p>
+            <div>
+              <h3>{story.iconsTitle}</h3>
+              <p>{story.icons}</p>
+            </div>
           </div>
         </div>
       </section>
 
-      <section id="approach" className="v2-story-section border-b border-border-subtle">
+      <section id="scale" className="v2-story-section border-b border-border-subtle">
         <div className="py-16 md:py-24">
-          <div>
-            <h2 className="archive-serif text-[clamp(1.75rem,3.5vw,2.75rem)] leading-tight">
-              Start with the manager, not the data.
-            </h2>
-            <p className="mt-8 max-w-3xl text-base leading-7 text-text-secondary">{story.approach}</p>
-            <p className="archive-label mt-12 text-text-muted">Key decisions</p>
-            <ol className="mt-5 border-t border-border-subtle">
-              {story.decisions.map((decision, index) => (
-                <li
-                  key={decision.title}
-                  className="grid gap-3 border-b border-border-subtle py-6 md:grid-cols-12 md:gap-8"
-                >
-                  <div className="md:col-span-5">
-                    <span className="archive-label text-accent-pop">{String(index + 1).padStart(2, '0')}.</span>
-                    <h3 className="mt-2 text-xl font-medium leading-snug">{decision.title}</h3>
-                  </div>
-                  <p className="text-base leading-7 text-text-secondary md:col-span-7">{decision.body}</p>
-                </li>
-              ))}
-            </ol>
-          </div>
+          <h2 className={storyHeading}>{story.scaleTitle}</h2>
+          <p className="archive-label mt-12 text-text-muted">Flexible layer</p>
+          <FlowDiagram steps={story.scaleFlexible} />
+          <p className={`mt-10 ${storyCopy}`}>{story.scale}</p>
         </div>
       </section>
 
-      <section id="built" className="v2-story-section border-b border-border-subtle">
+      <section id="reflection" className="v2-story-section border-b border-border-subtle">
         <div className="py-16 md:py-24">
-          <h2 className="archive-serif text-[clamp(1.75rem,3.5vw,2.75rem)] leading-tight">
-            One workspace, four parts.
-          </h2>
-          <div className="mt-14 space-y-16 md:space-y-24">
-            {story.features.map((feature, index) => (
-              <div key={feature.title} className="grid items-center gap-8 lg:grid-cols-12 lg:gap-12">
-                <div className={`lg:col-span-4 ${index % 2 ? 'lg:order-last' : ''}`}>
-                  <span className="archive-label text-accent-pop">{String(index + 1).padStart(2, '0')}</span>
-                  <h3 className="archive-serif mt-3 text-[clamp(1.5rem,2.4vw,2rem)] leading-tight">
-                    {feature.title}
-                  </h3>
-                  <p className="mt-4 text-base leading-7 text-text-secondary">{feature.body}</p>
-                </div>
-                <div className="lg:col-span-8">
-                  <ZoomImage src={feature.image.src} alt={feature.image.alt} />
-                </div>
-              </div>
+          <h2 className={`${storyHeading} text-accent-pop`}>{story.resultsTitle}</h2>
+          <ol className="v2-story-results">
+            {story.results.map((item, index) => (
+              <li key={item.title}>
+                <p className="archive-label text-accent-pop">{String(index + 1).padStart(2, '0')}</p>
+                <h3>{item.title}</h3>
+                <p>{item.body}</p>
+              </li>
             ))}
-          </div>
-        </div>
-      </section>
-
-      <section id="outcomes" className="v2-story-section archive-blue">
-        <div className="py-16 md:py-24">
-          <div>
-            <ul className="grid gap-8 sm:grid-cols-3">
-              {story.results.map((result) => (
-                <li key={result.value} className="border-t border-white/40 pt-5">
-                  <p className="text-[clamp(1.75rem,3vw,2.5rem)] font-semibold leading-tight tracking-tight">
-                    {result.value}
-                  </p>
-                  <p className="mt-4 text-sm leading-relaxed text-white/80">{result.label}</p>
-                </li>
-              ))}
-            </ul>
-            <p className="archive-serif mt-16 max-w-3xl text-[clamp(1.5rem,2.6vw,2.25rem)] leading-snug">
-              {story.closing}
-            </p>
-            {project.measurementNote ? (
-              <p className="mt-8 max-w-2xl text-sm leading-relaxed text-white/80">{project.measurementNote}</p>
-            ) : null}
-          </div>
+          </ol>
+          <p className="mt-10 max-w-[68ch] text-sm leading-relaxed text-text-muted">{story.honesty}</p>
         </div>
       </section>
     </>
@@ -628,14 +599,34 @@ export function CaseStudyExperience({ project }: { project: Project }) {
               ← Back to work
             </HashNavLink>
           </div>
-          <p className="archive-label mt-12 text-accent-pop">
-            Case {project.index} · {project.year}
-            {project.story ? ` · ${readingMinutes(project.story)} min read` : null}
-          </p>
-          <h1 className="archive-display mt-5 max-w-[12ch] text-[clamp(3rem,8vw,6rem)]">{project.title}</h1>
-          <p className="mt-6 max-w-xl text-base leading-7 text-text-secondary">{project.outcomeLine}</p>
           {project.story ? (
-            <dl className="mt-12 flex flex-wrap gap-x-12 gap-y-6 border-t border-border-subtle pt-8">
+            <p className="archive-label mt-12 text-accent-pop">{project.story.eyebrow}</p>
+          ) : null}
+          <h1 className={`archive-display max-w-[12ch] ${project.story ? 'mt-5 text-[clamp(2.5rem,6vw,4.5rem)]' : 'mt-12 text-[clamp(3rem,8vw,6rem)]'}`}>{project.title}</h1>
+          <p className="mt-6 max-w-[68ch] text-lg leading-[1.65] text-text-secondary">
+            {project.story ? project.story.lede : project.outcomeLine}
+          </p>
+        </div>
+        <div className={`${band} pb-8 md:pb-12`}>
+          {project.story ? (
+            <figure className="v2-story-shot v2-story-shot--wide">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={project.image} alt={project.imageAlt || `${project.title} overview`} />
+            </figure>
+          ) : (
+            <div className="flex justify-center border border-border-subtle bg-black">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={project.image}
+                alt={project.imageAlt || `${project.title} overview`}
+                className="block h-auto max-h-[70vh] w-auto max-w-full"
+              />
+            </div>
+          )}
+        </div>
+        {project.story ? (
+          <div className={`${band} pb-16 md:pb-20`}>
+            <dl className="grid grid-cols-2 gap-x-8 gap-y-6 border-t border-border-subtle pt-8 md:grid-cols-3">
               {project.story.facts.map((fact) => (
                 <div key={fact.label}>
                   <dt className="archive-label text-accent-pop">{fact.label}</dt>
@@ -643,22 +634,12 @@ export function CaseStudyExperience({ project }: { project: Project }) {
                 </div>
               ))}
             </dl>
-          ) : null}
-        </div>
-        <div className={`${band} pb-8 md:pb-12`}>
-          {/* The black frame matches the image edges, so a square image still reads as a wide banner. */}
-          <div className="flex justify-center border border-border-subtle bg-black">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={project.image}
-              alt={project.imageAlt || `${project.title} overview`}
-              className="block h-auto max-h-[70vh] w-auto max-w-full"
-            />
+            <p className="mt-8 max-w-[68ch] text-base leading-7 text-text-secondary">{project.story.support}</p>
           </div>
-        </div>
+        ) : null}
       </section>
 
-      {project.story ? <StoryBody project={project} story={project.story} /> : <ClassicBody project={project} />}
+      {project.story ? <StoryBody story={project.story} /> : <ClassicBody project={project} />}
 
       </div>
       <section className={project.story ? 'v2-story-next border-b border-border-subtle' : 'border-b border-border-subtle'}>
