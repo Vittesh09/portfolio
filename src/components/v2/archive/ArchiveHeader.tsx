@@ -116,8 +116,18 @@ export function ArchiveHeader() {
       else setVisible(true);
     };
 
-    const onWheel = (event: WheelEvent) => onScrollActivity(event);
-    const onTouchMove = (event: TouchEvent) => onScrollActivity(event);
+    const fromHeader = (event: Event) => {
+      const target = event.target;
+      return target instanceof Node && Boolean(headerRef.current?.contains(target));
+    };
+    const onWheel = (event: WheelEvent) => {
+      if (fromHeader(event)) return;
+      onScrollActivity(event);
+    };
+    const onTouchMove = (event: TouchEvent) => {
+      if (fromHeader(event)) return;
+      onScrollActivity(event);
+    };
     const onScroll = (event: Event) => onScrollActivity(event);
     const onLenis = (event: Event) => onScrollActivity(event);
 

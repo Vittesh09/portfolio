@@ -235,14 +235,14 @@ export const projects: Project[] = [
     ],
     measurementNote:
       'These are changes in the product. I do not have a counted before-and-after for time saved, events caught, or fuel reduced, so none is stated here.',
-    image: asset('fleet-cameras.jpg'),
+    image: asset('Frame 1000005391.svg'),
     cardImages: [
-      asset('fleet-overview.jpg'),
-      asset('fleet-thumb-video.jpg'),
-      asset('fleet-cameras.jpg')
+      asset('Frame 1000005391.svg'),
+      asset('fleet-cameras-device.webp'),
+      asset('fleet-thumb-video.jpg')
     ],
     imageAlt:
-      'FleetTrack overview with the live map, cameras, geozone details, and event list.',
+      'Fleet Management System collage with the live map, cameras, geozone, and event list.',
     images: [
       {
         src: asset('fleet-map.jpg'),

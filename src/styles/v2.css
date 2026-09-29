@@ -1526,9 +1526,7 @@ html.v2-smooth-scroll body {
   color: var(--v2-text-primary);
   overflow: visible;
   pointer-events: auto;
-  transform: translate3d(0, 0, 0);
   transition: transform 280ms cubic-bezier(0.42, 0, 0.58, 1);
-  will-change: transform;
 }
 
 .v2-root .v2-archive-header-bar {
@@ -1748,6 +1746,12 @@ html.v2-smooth-scroll body {
 }
 
 @media (max-width: 767px) {
+  .v2-root .v2-kiss-stars,
+  .v2-root .v2-kiss-stars canvas {
+    pointer-events: none;
+    touch-action: none;
+  }
+
   .v2-root .v2-kiss-stars canvas {
     display: block;
     height: 100%;

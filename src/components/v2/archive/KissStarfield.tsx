@@ -36,6 +36,8 @@ export function KissStarfield() {
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
     renderer.toneMappingExposure = 1.2;
     renderer.setClearColor(0x000002, 1);
+    renderer.domElement.style.pointerEvents = 'none';
+    renderer.domElement.style.touchAction = 'none';
     mount.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
