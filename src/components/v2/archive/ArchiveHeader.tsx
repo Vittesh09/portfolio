@@ -6,6 +6,7 @@ import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { siteConfig } from '@/src/config/v2/site';
 import { profile } from '@/src/config/v2/profile';
 import { triggerHaptic } from '@/src/components/v2/ui/haptics';
+import { IosHapticSwitch } from '@/src/components/v2/ui/IosHapticSwitch';
 import { ThemeToggle } from '@/src/components/v2/ui/ThemeToggle';
 import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
 import { useMobileLanding } from '@/src/components/v2/ui/useMobileLanding';
@@ -206,18 +207,21 @@ export function ArchiveHeader() {
           </nav>
           <div className="ml-auto flex items-center gap-1 md:hidden">
             <ThemeToggle />
-            <button
-              type="button"
-              className={`${navOptionClass} min-h-11 border border-border-subtle px-3`}
-              aria-expanded={open}
-              aria-controls="v2-mobile-nav"
-              onClick={() => {
-                triggerHaptic('light');
-                setOpen((value) => !value);
-              }}
-            >
-              {open ? 'Close' : 'Menu'}
-            </button>
+            <span className="relative inline-flex">
+              <button
+                type="button"
+                className={`${navOptionClass} min-h-11 border border-border-subtle px-3`}
+                aria-expanded={open}
+                aria-controls="v2-mobile-nav"
+                onClick={() => {
+                  triggerHaptic('light');
+                  setOpen((value) => !value);
+                }}
+              >
+                {open ? 'Close' : 'Menu'}
+              </button>
+              <IosHapticSwitch onActivate={() => setOpen((value) => !value)} />
+            </span>
           </div>
         </div>
 

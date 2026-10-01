@@ -58,6 +58,8 @@ export function KissStarfield() {
       new THREE.Color(COLORS.starEmber),
       new THREE.Color(0xffffff)
     ];
+    const nightColors = new Float32Array(STAR_COUNT * 3);
+    const nightSizes = new Float32Array(STAR_COUNT);
 
     for (let index = 0; index < STAR_COUNT; index += 1) {
       const i3 = index * 3;
@@ -69,10 +71,10 @@ export function KissStarfield() {
       positions[i3 + 2] = radius * Math.cos(phi);
       const color = palette[Math.floor(Math.random() * palette.length)].clone();
       color.multiplyScalar(0.3 + Math.random() * 0.7);
-      colors[i3] = color.r;
-      colors[i3 + 1] = color.g;
-      colors[i3 + 2] = color.b;
-      sizes[index] = THREE.MathUtils.randFloat(0.6, 3.0);
+      nightColors[i3] = colors[i3] = color.r;
+      nightColors[i3 + 1] = colors[i3 + 1] = color.g;
+      nightColors[i3 + 2] = colors[i3 + 2] = color.b;
+      nightSizes[index] = sizes[index] = THREE.MathUtils.randFloat(0.6, 3.0);
       twinkle[index] = Math.random() * Math.PI * 2;
     }
 
@@ -85,10 +87,22 @@ export function KissStarfield() {
     const material = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
-        uPixelRatio: { value: renderer.getPixelRatio() }
+        uPixelRatio: { value: renderer.getPixelRatio() },
+        uSizeScale: { value: 1 },
+        uAlphaFloor: { value: 0.25 }
       },
-      vertexShader: starVertexShader,
-      fragmentShader: starFragmentShader,
+      vertexShader: starVertexShader
+        .replace('uniform float uPixelRatio;', 'uniform float uPixelRatio;\n  uniform float uSizeScale;')
+        .replace(
+          'gl_PointSize = size * uPixelRatio * (300.0 / -mvPosition.z);',
+          'gl_PointSize = size * uSizeScale * uPixelRatio * (300.0 / -mvPosition.z);'
+        ),
+      fragmentShader: starFragmentShader
+        .replace('varying float vTwinkle;', 'varying float vTwinkle;\n  uniform float uAlphaFloor;')
+        .replace(
+          'alpha *= (0.25 + vTwinkle * 0.75);',
+          'alpha *= (uAlphaFloor + vTwinkle * (1.0 - uAlphaFloor));'
+        ),
       transparent: true,
       vertexColors: true,
       blending: THREE.AdditiveBlending,
@@ -101,6 +115,44 @@ export function KissStarfield() {
     composer.addPass(new RenderPass(scene, camera));
     const bloom = new UnrealBloomPass(new THREE.Vector2(1, 1), 0.8, 0.7, 0.8);
     composer.addPass(bloom);
+
+    const colorAttribute = geometry.getAttribute('color') as THREE.BufferAttribute;
+    const sizeAttribute = geometry.getAttribute('size') as THREE.BufferAttribute;
+    const paintSky = (isDark: boolean) => {
+      const target = colorAttribute.array as Float32Array;
+      const pointSizes = sizeAttribute.array as Float32Array;
+      if (isDark) {
+        target.set(nightColors);
+        pointSizes.set(nightSizes);
+        renderer.setClearColor(0x000002, 1);
+        scene.background = new THREE.Color(0x000002);
+        scene.fog = new THREE.FogExp2(0x020104, 0.025);
+        material.blending = THREE.AdditiveBlending;
+        material.uniforms.uSizeScale.value = 1;
+        material.uniforms.uAlphaFloor.value = 0.25;
+        bloom.strength = 0.8;
+      } else {
+        target.fill(0);
+        pointSizes.set(nightSizes);
+        renderer.setClearColor(0xeef1f5, 1);
+        scene.background = new THREE.Color(0xeef1f5);
+        scene.fog = null;
+        material.blending = THREE.NormalBlending;
+        material.uniforms.uSizeScale.value = 3.2;
+        material.uniforms.uAlphaFloor.value = 0.85;
+        bloom.strength = 0;
+      }
+      colorAttribute.needsUpdate = true;
+      sizeAttribute.needsUpdate = true;
+      material.needsUpdate = true;
+    };
+
+    const root = document.querySelector('.v2-root');
+    paintSky(root?.classList.contains('dark') ?? false);
+    const themeObserver = new MutationObserver(() => {
+      paintSky(root?.classList.contains('dark') ?? false);
+    });
+    if (root) themeObserver.observe(root, { attributes: true, attributeFilter: ['class'] });
 
     const clock = new THREE.Clock();
     let frame = 0;
@@ -139,6 +191,7 @@ export function KissStarfield() {
       window.cancelAnimationFrame(frame);
       resizeObserver.disconnect();
       visibility.disconnect();
+      themeObserver.disconnect();
       geometry.dispose();
       material.dispose();
       composer.dispose();

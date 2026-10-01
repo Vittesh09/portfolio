@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { siteConfig } from '@/src/config/v2/site';
 import { ctaBase, ctaClass, type CtaVariant } from '@/src/components/v2/ui/ctaStyles';
 import { triggerHaptic } from '@/src/components/v2/ui/haptics';
+import { IosHapticSwitch } from '@/src/components/v2/ui/IosHapticSwitch';
 import { COPY_EMAIL_SOUND, playUiSound } from '@/src/components/v2/ui/playUiSound';
 
 type CopyEmailProps = {
@@ -47,11 +48,12 @@ export function CopyEmail({
   }, [email]);
 
   return (
+    <span className={`relative ${className}`} data-sound="copy-email">
     <button
       type="button"
       onClick={copy}
       data-sound="copy-email"
-      className={`${ctaBase} w-full max-w-full gap-4 text-left md:justify-between ${ctaClass(variant, 'primary')} ${className}`}
+      className={`${ctaBase} w-full max-w-full gap-4 text-left md:justify-between ${ctaClass(variant, 'primary')}`}
       aria-label={copied ? 'Email copied to clipboard' : `Copy email ${email}`}
     >
       <span className="v2-visually-hidden" aria-live="polite">
@@ -62,5 +64,7 @@ export function CopyEmail({
         {copied ? 'Copied' : 'Copy'}
       </span>
     </button>
+    <IosHapticSwitch onActivate={() => void copy()} />
+    </span>
   );
 }

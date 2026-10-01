@@ -2,7 +2,7 @@ export type HapticPreset = 'light' | 'medium' | 'success';
 
 const SWITCH_ID = 'v2-ios-haptic-switch';
 
-function isIosDevice() {
+export function isIosDevice() {
   if (typeof navigator === 'undefined') return false;
   const ua = navigator.userAgent;
   if (/iPad|iPhone|iPod/.test(ua)) return true;
@@ -26,7 +26,7 @@ function ensureIosSwitch() {
   input.tabIndex = -1;
   input.setAttribute('aria-hidden', 'true');
   input.style.cssText =
-    'position:fixed;left:0;top:0;width:0;height:0;opacity:0;pointer-events:none;border:0;margin:0;';
+    'position:fixed;left:0;top:0;width:48px;height:28px;margin:0;opacity:0.02;z-index:-1;border:0;pointer-events:none;';
   document.body.appendChild(input);
   return input;
 }

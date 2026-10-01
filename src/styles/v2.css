@@ -285,6 +285,10 @@
 .v2-root .v2-footer {
   background: var(--v2-bg-primary);
   color: var(--v2-text-primary);
+  isolation: isolate;
+  min-height: 100svh;
+  overflow: hidden;
+  position: relative;
 }
 
 .v2-root .v2-footer-inner {
@@ -295,37 +299,49 @@
   gap: 2.5rem 3rem;
   max-width: 1600px;
   margin-inline: auto;
+  position: relative;
   width: 100%;
-  padding: 2.5rem 1.25rem 1rem;
+  z-index: 2;
+  padding: calc(5.25rem + env(safe-area-inset-top, 0px)) 1.25rem 1rem;
+}
+
+.v2-root .v2-footer-inner::before {
+  background: linear-gradient(
+    to bottom,
+    var(--v2-bg-primary) 0%,
+    var(--v2-bg-primary) calc(100% - 7.5rem),
+    color-mix(in srgb, var(--v2-bg-primary) 35%, transparent) calc(100% - 2.5rem),
+    transparent 100%
+  );
+  bottom: -7.5rem;
+  content: '';
+  left: 50%;
+  pointer-events: none;
+  position: absolute;
+  top: 0;
+  transform: translateX(-50%);
+  width: 100vw;
+  z-index: -1;
 }
 
 @media (min-width: 768px) {
   .v2-root .v2-footer-inner {
-    padding: 3rem 2rem 1.25rem;
+    padding: calc(5.5rem + env(safe-area-inset-top, 0px)) 2rem 1.25rem;
   }
 }
 
 .v2-root .v2-footer-landscape {
-  position: relative;
-  width: 100%;
-  height: clamp(14rem, 38vw, 28rem);
-  overflow: hidden;
+  height: 100%;
+  inset: 0;
   isolation: isolate;
+  overflow: hidden;
+  position: absolute;
+  width: 100%;
+  z-index: 0;
 }
 
 .v2-root .v2-footer-landscape::after {
-  background: linear-gradient(
-    to bottom,
-    var(--v2-bg-primary) 0%,
-    color-mix(in srgb, var(--v2-bg-primary) 88%, transparent) 22%,
-    color-mix(in srgb, var(--v2-bg-primary) 35%, transparent) 52%,
-    transparent 78%
-  );
-  content: '';
-  inset: 0;
-  pointer-events: none;
-  position: absolute;
-  z-index: 1;
+  content: none;
 }
 
 .v2-root .v2-footer-landscape-img {
@@ -2404,7 +2420,7 @@ html.v2-disc-lock .v2-root .v2-page-enter {
 /* 1024px files stay at 1:1 on a retina screen. No click-to-enlarge. */
 .v2-root .v2-story-shot {
   display: block;
-  width: min(100%, 32rem);
+  width: min(100%, 40rem);
   margin-inline: auto;
   border: 1px solid var(--v2-border-subtle);
   background: #070707;
@@ -2420,10 +2436,47 @@ html.v2-disc-lock .v2-root .v2-page-enter {
   width: min(100%, 64rem);
 }
 
-.v2-root .v2-story-shot img {
+.v2-root .v2-story-pair-shots {
+  display: grid;
+  gap: 1rem;
+}
+
+@media (min-width: 768px) {
+  .v2-root .v2-story-pair-shots {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.v2-root .v2-story-pair-shots .v2-story-shot {
+  width: 100%;
+  margin-inline: 0;
+}
+
+.v2-root .v2-story-shot img,
+.v2-root .v2-story-shot video {
   display: block;
   width: 100%;
   height: auto;
+}
+
+.v2-root .v2-story-shot video {
+  aspect-ratio: 16 / 9;
+  object-fit: contain;
+  background: #111;
+}
+
+.v2-root .v2-ios-haptic-switch {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  box-sizing: border-box;
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  opacity: 0.02;
+  cursor: pointer;
 }
 
 .v2-root .v2-flow {
@@ -2586,6 +2639,10 @@ html.v2-disc-lock .v2-root .v2-page-enter {
     grid-template-columns: repeat(3, minmax(0, 1fr));
     gap: 2rem 2.5rem;
     margin-top: 3rem;
+  }
+
+  .v2-root .v2-story-results:has(li:nth-child(4)) {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .v2-root .v2-story-results li {

@@ -211,7 +211,7 @@ export const siteConfig = {
 
 export const trustSignals = [
   { label: 'Years shipping', value: yearsExperience },
-  { label: 'Domains I’ve touched', value: String(domains.length) },
+  { label: 'Domains', value: String(domains.length) },
   { label: factualStatLabel, value: factualStatValue }
 ] as const;
 

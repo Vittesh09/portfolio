@@ -6,6 +6,7 @@ import type { CaseStory, Project } from '@/src/config/v2/caseStudies';
 import { howMeasured, projects } from '@/src/config/v2/caseStudies';
 import { HashNavLink, scrollToHash } from '@/src/components/v2/ui/HashNavLink';
 import { triggerHaptic } from '@/src/components/v2/ui/haptics';
+import { IosHapticSwitch } from '@/src/components/v2/ui/IosHapticSwitch';
 import { isUnconfirmed } from '@/src/config/v2/profile';
 
 function ChoicePanel({
@@ -94,6 +95,7 @@ function ScreenStage({ images }: { images: Project['images'] }) {
   return (
     <div>
       <figure className="border border-border-subtle bg-[#070707]">
+        <span className="relative block">
         <button
           type="button"
           className="block w-full cursor-zoom-in"
@@ -107,6 +109,8 @@ function ScreenStage({ images }: { images: Project['images'] }) {
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={current.src} alt={current.alt} className="block h-auto w-full" />
         </button>
+        <IosHapticSwitch onActivate={() => setOpen(true)} />
+        </span>
         <figcaption className="flex items-start justify-between gap-4 border-t border-border-subtle bg-bg-primary p-4">
           <span className="text-sm leading-relaxed text-text-secondary">{current.alt}</span>
           <span className="archive-label shrink-0 text-accent-pop">
@@ -182,9 +186,119 @@ function ScreenStage({ images }: { images: Project['images'] }) {
   );
 }
 
-function ZoomImage({ src, alt, showCaption = true }: { src: string; alt: string; showCaption?: boolean }) {
+function StoryVideo({
+  src,
+  alt,
+  wide = false,
+  poster
+}: {
+  src: string;
+  alt: string;
+  wide?: boolean;
+  poster?: string;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+
+  useEffect(() => {
+    const node = videoRef.current;
+    if (!node) return;
+
+    node.defaultMuted = true;
+    node.muted = true;
+    node.setAttribute('muted', '');
+    node.setAttribute('playsinline', '');
+    node.setAttribute('webkit-playsinline', '');
+
+    let wantsPlay = false;
+    let started = false;
+
+    const visibleHeight = () => {
+      const rect = node.getBoundingClientRect();
+      const viewH = window.innerHeight || document.documentElement.clientHeight;
+      return Math.max(0, Math.min(rect.bottom, viewH) - Math.max(rect.top, 0));
+    };
+
+    const sync = () => {
+      wantsPlay = visibleHeight() >= 80;
+      if (wantsPlay) {
+        if (node.preload === 'none') node.preload = 'auto';
+        const pending = node.play();
+        if (pending) pending.catch(() => undefined);
+        return;
+      }
+      if (started && !node.paused) {
+        window.requestAnimationFrame(() => {
+          if (visibleHeight() < 80) node.pause();
+        });
+      }
+    };
+
+    let retries = 0;
+
+    const onPlaying = () => {
+      started = true;
+      retries = 0;
+    };
+
+    const onPause = () => {
+      if (!wantsPlay || retries > 3) return;
+      retries += 1;
+      const pending = node.play();
+      if (pending) pending.catch(() => undefined);
+    };
+
+    const observer = new IntersectionObserver(sync, {
+      threshold: [0, 0.01, 0.2, 0.5, 1]
+    });
+    observer.observe(node);
+    node.addEventListener('playing', onPlaying);
+    node.addEventListener('pause', onPause);
+    node.addEventListener('loadeddata', sync);
+    window.addEventListener('resize', sync);
+    sync();
+    const frame = window.requestAnimationFrame(sync);
+    const later = window.setTimeout(sync, 250);
+
+    return () => {
+      observer.disconnect();
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(later);
+      node.removeEventListener('playing', onPlaying);
+      node.removeEventListener('pause', onPause);
+      node.removeEventListener('loadeddata', sync);
+      window.removeEventListener('resize', sync);
+    };
+  }, [src]);
+
   return (
-    <figure className="v2-story-shot">
+    <figure className={`v2-story-shot${wide ? ' v2-story-shot--wide' : ''}`}>
+      <video
+        ref={videoRef}
+        src={src}
+        poster={poster}
+        loop
+        muted
+        playsInline
+        preload="none"
+        aria-label={alt}
+      />
+    </figure>
+  );
+}
+
+function ZoomImage({
+  src,
+  alt,
+  showCaption = true,
+  wide = false
+}: {
+  src: string;
+  alt: string;
+  showCaption?: boolean;
+  wide?: boolean;
+}) {
+  return (
+    <figure className={`v2-story-shot${wide ? ' v2-story-shot--wide' : ''}`}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img src={src} alt={alt} loading="lazy" />
       {showCaption ? (
@@ -204,7 +318,7 @@ function Label({ children, light }: { children: string; light?: boolean }) {
   );
 }
 
-const storySections = [
+const fleetStorySections = [
   { id: 'overview', label: 'Overview' },
   { id: 'idea', label: 'The idea' },
   { id: 'redesign', label: 'The redesign' },
@@ -213,14 +327,27 @@ const storySections = [
   { id: 'reflection', label: 'Reflection' }
 ];
 
-function useActiveStorySection() {
-  const [active, setActive] = useState(storySections[0].id);
+const journeyStorySections = [
+  { id: 'overview', label: 'Overview' },
+  { id: 'idea', label: 'The idea' },
+  { id: 'scale', label: 'The roles' },
+  { id: 'redesign', label: 'The journey' },
+  { id: 'system', label: 'The system' },
+  { id: 'reflection', label: 'Reflection' }
+];
+
+function sectionsFor(story?: CaseStory) {
+  return story?.rolesFirst ? journeyStorySections : fleetStorySections;
+}
+
+function useActiveStorySection(sections: { id: string; label: string }[]) {
+  const [active, setActive] = useState(sections[0].id);
 
   useEffect(() => {
     const update = () => {
       const line = window.innerHeight * 0.32;
-      let current = storySections[0].id;
-      for (const item of storySections) {
+      let current = sections[0].id;
+      for (const item of sections) {
         const section = document.getElementById(item.id);
         if (!section) continue;
         if (section.getBoundingClientRect().top - 8 <= line) current = item.id;
@@ -235,12 +362,18 @@ function useActiveStorySection() {
       window.removeEventListener('scroll', update);
       window.removeEventListener('v2-lenis-scroll', update);
     };
-  }, []);
+  }, [sections]);
 
   return active;
 }
 
-function StoryNav({ active }: { active: string }) {
+function StoryNav({
+  active,
+  sections
+}: {
+  active: string;
+  sections: { id: string; label: string }[];
+}) {
   const slotRef = useRef<HTMLDivElement>(null);
   const navRef = useRef<HTMLElement>(null);
   const listRef = useRef<HTMLUListElement>(null);
@@ -320,7 +453,7 @@ function StoryNav({ active }: { active: string }) {
     <div ref={slotRef} className="v2-story-nav-slot">
       <nav ref={navRef} className="v2-story-nav" data-dock="stick" aria-label="Case study sections">
         <ul ref={listRef}>
-          {storySections.map((item) => {
+          {sections.map((item) => {
             const current = item.id === active;
             return (
               <li key={item.id}>
@@ -370,6 +503,71 @@ function FlowDiagram({ steps, caption }: { steps: string[]; caption?: string }) 
 const storyHeading = 'archive-serif max-w-[68ch] text-[clamp(1.75rem,3.5vw,2.5rem)] leading-tight';
 const storyCopy = 'max-w-[68ch] text-lg leading-[1.65] text-text-secondary';
 
+function ScaleBlock({ story, showLayer }: { story: CaseStory; showLayer: boolean }) {
+  return (
+    <section id="scale" className="v2-story-section border-b border-border-subtle">
+      <div className="py-16 md:py-24">
+        <h2 className={storyHeading}>{story.scaleTitle}</h2>
+        {showLayer ? <p className="archive-label mt-12 text-text-muted">Flexible layer</p> : null}
+        <FlowDiagram steps={story.scaleFlexible} />
+        <p className={`mt-10 ${storyCopy}`}>{story.scale}</p>
+      </div>
+    </section>
+  );
+}
+
+function Moments({ story }: { story: CaseStory }) {
+  return (
+    <section id="redesign" className="v2-story-section border-b border-border-subtle">
+      <div className="py-16 md:py-24">
+        {story.redesignTitle ? <h2 className={storyHeading}>{story.redesignTitle}</h2> : null}
+        <div className="mt-6 max-w-[1100px]">
+          {story.moments.map((moment) => (
+            <article key={moment.label} className="mt-16">
+              <p className="archive-label text-accent-pop">{moment.label}</p>
+              <h3 className="archive-serif mt-3 text-[clamp(1.75rem,2.8vw,2.5rem)] leading-tight">{moment.title}</h3>
+              <p className={`mt-4 ${storyCopy}`}>{moment.body}</p>
+              <div className="mt-8">
+                {moment.pair ? (
+                  <div className="v2-story-pair-shots">
+                    {moment.pair.map((shot) => (
+                      <ZoomImage key={shot.src} src={shot.src} alt={shot.alt} showCaption={false} />
+                    ))}
+                  </div>
+                ) : null}
+                {moment.video ? (
+                  <div className={moment.pair ? 'mt-8' : undefined}>
+                    <StoryVideo
+                      src={moment.video}
+                      alt={moment.image.alt}
+                      poster={moment.video.replace(/\.mp4$/, '-poster.jpg')}
+                      wide
+                    />
+                  </div>
+                ) : moment.pair ? null : (
+                  <ZoomImage src={moment.image.src} alt={moment.image.alt} showCaption={false} />
+                )}
+                {moment.pair
+                  ? null
+                  : moment.also?.map((shot) => (
+                      <div key={shot.src} className="mt-8">
+                        <ZoomImage src={shot.src} alt={shot.alt} showCaption={false} />
+                      </div>
+                    ))}
+              </div>
+            </article>
+          ))}
+        </div>
+        {story.redesignClose ? (
+          <p className="v2-story-line archive-serif mt-20 text-[clamp(1.75rem,3vw,2.75rem)] leading-tight">
+            {story.redesignClose}
+          </p>
+        ) : null}
+      </div>
+    </section>
+  );
+}
+
 function StoryBody({ story }: { story: CaseStory }) {
   return (
     <>
@@ -390,46 +588,51 @@ function StoryBody({ story }: { story: CaseStory }) {
           <p className="v2-story-line archive-serif mt-16 text-[clamp(1.75rem,3vw,2.75rem)] leading-tight">
             {story.problemClose}
           </p>
+          {story.solutionImage ? (
+            <div className="mt-16">
+              <p className="archive-label text-accent-pop">The solution</p>
+              <div className="mt-8">
+                <ZoomImage src={story.solutionImage.src} alt={story.solutionImage.alt} showCaption={false} wide />
+              </div>
+            </div>
+          ) : null}
         </div>
       </section>
 
       <section id="idea" className="v2-story-section border-b border-border-subtle">
         <div className="py-16 md:py-24">
-          <h2 className={storyHeading}>{story.ideaTitle}</h2>
-          <FlowDiagram steps={story.ideaFlow} />
-          <p className={`mt-10 ${storyCopy}`}>{story.idea}</p>
-          <ol className="v2-story-pair mt-10 md:mt-16">
-            {story.questions.map((item) => (
-              <li key={item.index}>
-                <p className="archive-label text-accent-pop">{item.index}</p>
-                <p className="v2-story-pair-title archive-serif">{item.body}</p>
-              </li>
-            ))}
-          </ol>
-          <p className="mt-14 max-w-[68ch] text-sm leading-relaxed text-text-muted">{story.ideaNote}</p>
+          {story.ideaTitle ? <h2 className={storyHeading}>{story.ideaTitle}</h2> : null}
+          {story.ideaFlow.length ? <FlowDiagram steps={story.ideaFlow} /> : null}
+          {story.idea ? <p className={`mt-10 ${storyCopy}`}>{story.idea}</p> : null}
+          {story.questions.length ? (
+            <ol className="v2-story-pair mt-10 md:mt-16">
+              {story.questions.map((item) => (
+                <li key={item.index}>
+                  <p className="archive-label text-accent-pop">{item.index}</p>
+                  <p className="v2-story-pair-title archive-serif">{item.body}</p>
+                </li>
+              ))}
+            </ol>
+          ) : null}
+          {story.ideaNote ? (
+            <p className={`${story.ideaTitle || story.idea || story.questions.length ? 'mt-14' : ''} max-w-[68ch] text-sm leading-relaxed text-text-muted`}>{story.ideaNote}</p>
+          ) : null}
+          {story.plan ? (
+            <article className="mt-16 max-w-[1100px]">
+              <p className="archive-label text-accent-pop">{story.plan.label}</p>
+              <h3 className="archive-serif mt-3 text-[clamp(1.75rem,2.8vw,2.5rem)] leading-tight">{story.plan.title}</h3>
+              <p className={`mt-4 ${storyCopy}`}>{story.plan.body}</p>
+              <div className="mt-8">
+                <ZoomImage src={story.plan.image.src} alt={story.plan.image.alt} showCaption={false} />
+              </div>
+            </article>
+          ) : null}
         </div>
       </section>
 
-      <section id="redesign" className="v2-story-section border-b border-border-subtle">
-        <div className="py-16 md:py-24">
-          <h2 className={storyHeading}>{story.redesignTitle}</h2>
-          <div className="mt-6 max-w-[1100px]">
-            {story.moments.map((moment) => (
-              <article key={moment.label} className="mt-16">
-                <p className="archive-label text-accent-pop">{moment.label}</p>
-                <h3 className="archive-serif mt-3 text-[clamp(1.75rem,2.8vw,2.5rem)] leading-tight">{moment.title}</h3>
-                <p className={`mt-4 ${storyCopy}`}>{moment.body}</p>
-                <div className="mt-8">
-                  <ZoomImage src={moment.image.src} alt={moment.image.alt} showCaption={false} />
-                </div>
-              </article>
-            ))}
-          </div>
-          <p className="v2-story-line archive-serif mt-20 text-[clamp(1.75rem,3vw,2.75rem)] leading-tight">
-            {story.redesignClose}
-          </p>
-        </div>
-      </section>
+      {story.rolesFirst ? <ScaleBlock story={story} showLayer={false} /> : null}
+
+      <Moments story={story} />
 
       <section id="system" className="v2-story-section border-b border-border-subtle">
         <div className="py-16 md:py-24">
@@ -447,17 +650,18 @@ function StoryBody({ story }: { story: CaseStory }) {
         </div>
       </section>
 
-      <section id="scale" className="v2-story-section border-b border-border-subtle">
-        <div className="py-16 md:py-24">
-          <h2 className={storyHeading}>{story.scaleTitle}</h2>
-          <p className="archive-label mt-12 text-text-muted">Flexible layer</p>
-          <FlowDiagram steps={story.scaleFlexible} />
-          <p className={`mt-10 ${storyCopy}`}>{story.scale}</p>
-        </div>
-      </section>
+      {story.rolesFirst ? null : <ScaleBlock story={story} showLayer />}
 
       <section id="reflection" className="v2-story-section border-b border-border-subtle">
         <div className="py-16 md:py-24">
+          {story.capabilityImage ? (
+            <div className="mb-16">
+              <p className="archive-label text-accent-pop">The capability</p>
+              <div className="mt-8">
+                <ZoomImage src={story.capabilityImage.src} alt={story.capabilityImage.alt} showCaption={false} wide />
+              </div>
+            </div>
+          ) : null}
           <h2 className={`${storyHeading} text-accent-pop`}>{story.resultsTitle}</h2>
           <ol className="v2-story-results">
             {story.results.map((item, index) => (
@@ -468,7 +672,9 @@ function StoryBody({ story }: { story: CaseStory }) {
               </li>
             ))}
           </ol>
-          <p className="mt-10 max-w-[68ch] text-sm leading-relaxed text-text-muted">{story.honesty}</p>
+          {story.honesty ? (
+            <p className="mt-10 max-w-[68ch] text-sm leading-relaxed text-text-muted">{story.honesty}</p>
+          ) : null}
         </div>
       </section>
     </>
@@ -585,12 +791,13 @@ function ClassicBody({ project }: { project: Project }) {
 export function CaseStudyExperience({ project }: { project: Project }) {
   const next =
     projects[(projects.findIndex((item) => item.slug === project.slug) + 1) % projects.length];
-  const active = useActiveStorySection();
+  const sections = sectionsFor(project.story);
+  const active = useActiveStorySection(sections);
   const band = project.story ? 'v2-story-wrap' : wrap;
 
   return (
     <article className={project.story ? 'v2-case-study v2-case-study--story' : 'v2-case-study'}>
-      {project.story ? <StoryNav active={active} /> : null}
+      {project.story ? <StoryNav active={active} sections={sections} /> : null}
       <div className={project.story ? 'v2-story-main' : undefined}>
       <section className="border-b border-border-subtle">
         <div className={`${band} py-8 md:py-12`}>
@@ -609,10 +816,19 @@ export function CaseStudyExperience({ project }: { project: Project }) {
         </div>
         <div className={`${band} pb-8 md:pb-12`}>
           {project.story ? (
-            <figure className="v2-story-shot v2-story-shot--wide">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={project.image} alt={project.imageAlt || `${project.title} overview`} />
-            </figure>
+            project.heroVideo ? (
+              <StoryVideo
+                src={project.heroVideo}
+                alt={project.imageAlt || `${project.title} overview`}
+                poster={project.heroVideo.replace(/\.mp4$/, '-poster.jpg')}
+                wide
+              />
+            ) : (
+              <figure className="v2-story-shot v2-story-shot--wide">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={project.image} alt={project.imageAlt || `${project.title} overview`} />
+              </figure>
+            )
           ) : (
             <div className="flex justify-center border border-border-subtle bg-black">
               {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -634,7 +850,11 @@ export function CaseStudyExperience({ project }: { project: Project }) {
                 </div>
               ))}
             </dl>
-            <p className="mt-8 max-w-[68ch] text-base leading-7 text-text-secondary">{project.story.support}</p>
+            <div className={`mt-8 space-y-4 text-base leading-7 text-text-secondary${project.story.supportWide ? '' : ' max-w-[68ch]'}`}>
+              {project.story.support.split('\n\n').map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </div>
           </div>
         ) : null}
       </section>

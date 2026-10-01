@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { siteConfig } from '@/src/config/v2/site';
 import { triggerHaptic } from '@/src/components/v2/ui/haptics';
+import { IosHapticSwitch } from '@/src/components/v2/ui/IosHapticSwitch';
 
 type Status = 'idle' | 'sending' | 'sent' | 'error';
 type FieldName = 'name' | 'email' | 'message';
@@ -299,7 +300,7 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
         </div>
       </div>
 
-      <div className="v2-contact-actions">
+      <div className="v2-contact-actions relative">
         <button
           type="submit"
           disabled={status === 'sending'}
@@ -308,6 +309,13 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
           {status === 'sending' ? 'Sending…' : 'Submit'}
           <span aria-hidden="true"> →</span>
         </button>
+        <IosHapticSwitch
+          onActivate={() => {
+            if (status === 'sending') return;
+            const form = document.getElementById(FORM_ID);
+            if (form instanceof HTMLFormElement) form.requestSubmit();
+          }}
+        />
       </div>
 
       <div aria-live="polite" aria-atomic="true">

@@ -4,6 +4,7 @@ import { Monitor, Moon, Sun } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useV2Theme } from '@/src/components/v2/layout/ThemeProvider';
 import { triggerHaptic } from '@/src/components/v2/ui/haptics';
+import { IosHapticSwitch } from '@/src/components/v2/ui/IosHapticSwitch';
 
 type ThemeToggleProps = {
   className?: string;
@@ -36,24 +37,27 @@ export function ThemeToggle({ className = '' }: ThemeToggleProps) {
   const labels = LABELS[mode];
 
   return (
-    <button
-      type="button"
-      onClick={() => {
-        triggerHaptic('light');
-        toggleTheme();
-      }}
-      className={`inline-flex h-11 w-11 items-center justify-center rounded-full border border-border-subtle p-2.5 text-accent-pop transition-[color,background-color,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-pop hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 ${className}`}
-      aria-label={labels.next}
-      title={labels.current}
-      suppressHydrationWarning
-    >
-      {mode === 'dark' ? (
-        <Sun size={14} strokeWidth={1.5} aria-hidden />
-      ) : mode === 'light' ? (
-        <Moon size={14} strokeWidth={1.5} aria-hidden />
-      ) : (
-        <Monitor size={14} strokeWidth={1.5} aria-hidden />
-      )}
-    </button>
+    <span className={`relative inline-flex ${className}`}>
+      <button
+        type="button"
+        onClick={() => {
+          triggerHaptic('light');
+          toggleTheme();
+        }}
+        className="inline-flex h-11 w-11 items-center justify-center rounded-full border border-border-subtle p-2.5 text-accent-pop transition-[color,background-color,border-color] duration-300 ease-[cubic-bezier(0.16,1,0.3,1)] hover:bg-accent-pop hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
+        aria-label={labels.next}
+        title={labels.current}
+        suppressHydrationWarning
+      >
+        {mode === 'dark' ? (
+          <Sun size={14} strokeWidth={1.5} aria-hidden />
+        ) : mode === 'light' ? (
+          <Moon size={14} strokeWidth={1.5} aria-hidden />
+        ) : (
+          <Monitor size={14} strokeWidth={1.5} aria-hidden />
+        )}
+      </button>
+      <IosHapticSwitch onActivate={toggleTheme} />
+    </span>
   );
 }

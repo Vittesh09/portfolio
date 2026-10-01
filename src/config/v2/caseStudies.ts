@@ -6,17 +6,35 @@ export type CaseStory = {
   eyebrow: string;
   lede: string;
   support: string;
+  /** Let the opening paragraphs use the full story column. */
+  supportWide?: boolean;
   facts: { label: string; value: string }[];
   problemTitle: string;
   problemPoints: { title: string; body: string }[];
   problemClose: string;
+  /** Diagram that states the solution, after the challenge. */
+  solutionImage?: { src: string; alt: string };
   ideaTitle: string;
   ideaFlow: string[];
   idea: string;
   questions: { index: string; body: string }[];
   ideaNote: string;
+  /** Planning image, shown before the designed screens. */
+  plan?: { label: string; title: string; body: string; image: { src: string; alt: string } };
   redesignTitle: string;
-  moments: { label: string; title: string; body: string; image: { src: string; alt: string } }[];
+  /** Place the roles block before the journey. */
+  rolesFirst?: boolean;
+  moments: {
+    label: string;
+    title: string;
+    body: string;
+    image: { src: string; alt: string };
+    /** Extra screens shown with this moment, not as their own step. */
+    also?: { src: string; alt: string }[];
+    /** Screens shown in one row, above any video. */
+    pair?: { src: string; alt: string }[];
+    video?: string;
+  }[];
   redesignClose: string;
   systemTitle: string;
   kit: string;
@@ -27,6 +45,8 @@ export type CaseStory = {
   scaleFlexible: string[];
   scale: string;
   resultsTitle: string;
+  /** Diagram for how the capability is understood, before the results. */
+  capabilityImage?: { src: string; alt: string };
   results: { title: string; body: string }[];
   honesty: string;
 };
@@ -60,8 +80,12 @@ export type Project = {
   measurementNote?: string;
   image: string;
   imageAlt?: string;
+  /** Wide opening video. The still in `image` stays the card frame. */
+  heroVideo?: string;
   /** Card frames. While the pointer is on the card, these crossfade in order. */
   cardImages?: string[];
+  /** Fill the wide thumbnail. Later frames are not letterboxed. */
+  cardCover?: boolean;
   images: { src: string; alt: string }[];
 };
 
@@ -75,7 +99,7 @@ export const projects: Project[] = [
     summary:
       'I redesigned the FleetTrack dashboard so a fleet manager can find a problem, see why it happened, and close it in one workspace.',
     company: 'LB Technology',
-    cardRole: 'Product Designer',
+    cardRole: 'Senior Product Designer',
     outcomeLine: 'The fleet, the trip, and the event.\nOne workspace for the manager.',
     outcomeEvidence: [],
     tags: ['Fleet', 'Dashboard', 'Telematics'],
@@ -271,70 +295,268 @@ export const projects: Project[] = [
     index: '02',
     title: 'Future City VR + EEG',
     summary:
-      'I designed a 1:1 city in VR and a dashboard that turned live EEG into stress, delight, and fatigue planners could act on.',
-    company: 'TODO: [FILL: Simple Energy or Nagarro. 2023 is the handover year, so confirm]',
-    cardRole: 'Product & Spatial Experience Designer',
-    outcomeLine: '50+ insight points for planners.\nThree layout bottlenecks, before build.',
-    outcomeEvidence: [
-      {
-        metric: '50+ spatial insight points and three layout bottlenecks before build',
-        baseline: unconfirmedMethod,
-        method: unconfirmedMethod,
-        source: 'Future City VR + EEG'
-      }
-    ],
-    tags: ['Spatial UX', 'VR', 'Neuro-tech'],
-    industry: 'Urban Development · Spatial Computing',
+      'I was the sole UX designer, shaping the immersive VR experience and the analytics platform end to end.',
+    company: 'TODO: [FILL: employer for Future City VR + EEG]',
+    cardRole: 'UX Designer',
+    outcomeLine: 'The city, the session, and the roles.\nOne system around the experience.',
+    outcomeEvidence: [],
+    tags: ['VR', 'Experience', 'Dashboards'],
+    industry: 'Urban development · Spatial computing',
     client: 'Future-city development group',
-    customers: 'Urban planners, stakeholders, and research participants',
+    customers: 'Participants, urban planners, and the teams running the sessions',
     challenge:
-      'Let people walk an unbuilt city without getting sick, and turn raw brainwaves into insights planners could use without a data scientist.',
-    role: 'Product & Spatial Experience Designer',
-    platforms: 'VR headset · Analytics dashboard',
-    year: '2023',
+      'A future city had to be walked in VR, while four roles still needed a way to prepare people, keep raw EEG data, and configure simulations.',
+    role: 'Sole UX designer',
+    platforms: 'VR headset · Web',
+    year: '2024',
     metrics: [
-      { label: 'Participants', value: '25+' },
-      { label: 'Insight points', value: '50+' },
-      { label: 'Bottlenecks found', value: '03' }
+      { label: 'Role', value: 'Sole designer' },
+      { label: 'Timeline', value: '3 months' },
+      { label: 'Platforms', value: 'VR · Web' }
     ],
     problem: [
-      'Poor spatial cues risked motion discomfort and cognitive overload.',
-      'Survey responses interrupted immersion and captured stated rather than felt reactions.',
-      'Raw Alpha, Beta, and Theta signals were inaccessible to planning stakeholders.'
+      'There was no existing workflow for inviting people, preparing them, and guiding them through the city.',
+      'The virtual city was too large to wander without a sequence of meaningful places.',
+      'Participants, data providers, planners, and admins each needed a different screen on the same operation.'
     ],
     goal: [
-      'Preserve presence while collecting passive emotional evidence.',
-      'Connect biometric events to exact locations in the virtual city.',
-      'Translate neuro-data into clear stress, delight, fatigue, and engagement patterns.'
+      'Map the journey before the screens: invitation, profile, diagnostics, the city, then a response.',
+      'Keep questions at selected places so the walk stays intact.',
+      'Give each role control without exposing the technical system underneath.'
     ],
     process: [
       {
-        title: 'Design spatial comfort',
-        body: 'Established movement, depth, ambient, and wayfinding rules for a legible 1:1-scale environment.'
+        title: 'Map the operation',
+        body: 'The participant journey came first. Everything else, from admin access to the simulation, hung off that sequence.'
       },
       {
-        title: 'Synchronize signals',
-        body: 'Connected participant position, environmental state, and EEG events on a shared session timeline.'
+        title: 'Structure the city',
+        body: 'Predefined routes moved people between places such as homes and a university, so sessions could be compared.'
       },
       {
-        title: 'Make emotion actionable',
-        body: 'Converted brainwave spikes into comparative maps and plain-language spatial findings.'
+        title: 'Split the roles',
+        body: 'Admins managed access. Raw Data Providers kept the EEG record available. Planners configured the world, the people, the time, and the environment.'
       }
     ],
     solution: [
-      'A future-city simulation with sunrise, density, and spatial-audio controls.',
-      'Passive EEG capture synchronized with 3D participant position.',
-      'A multi-session dashboard comparing stress, engagement, delight, and fatigue.'
+      'A staged participant list, from invitation through a completed experience.',
+      'A setup check for the EEG device, the network, the microphone, and the headset.',
+      'Routes and in-headset prompts, plus separate screens for admins and planners.'
     ],
+    story: {
+      eyebrow: 'Case study · Experience design · VR',
+      lede: 'An immersive walk through a future city, and a platform that captures, analyses, and visualises how people respond.',
+      supportWide: true,
+      support:
+        'A future city had to be walked before it was built. The VR session opened its key places and captured the response.\n\nI was the sole UX designer on the project, responsible for shaping the experience end to end. I worked closely with the product, engineering, and research teams, owning design decisions across both the immersive VR experience and the supporting analytics platform.',
+      facts: [
+        { label: 'Role', value: 'Sole UX designer' },
+        { label: 'Scope', value: 'VR, participants, simulation, and dashboards' },
+        { label: 'Timeline', value: '3 months' }
+      ],
+      rolesFirst: true,
+      problemTitle: 'The goal was twofold.',
+      problemPoints: [
+        {
+          title: 'Explore the future city',
+          body: 'Create an immersive VR experience that lets users explore the future city.'
+        },
+        {
+          title: 'Read the response',
+          body: 'Build a unified platform to capture, analyse, and visualise emotional responses during that experience.'
+        }
+      ],
+      problemClose:
+        'How might we enable normal citizens to experience a future city immersively and capture their emotional responses in a structured, scalable way?',
+      solutionImage: {
+        src: asset('4.svg'),
+        alt: 'The solution: an immersive VR experience, passive EEG capture while questions are asked, then centralised insights for the team.'
+      },
+      ideaTitle: '',
+      ideaFlow: [],
+      idea: '',
+      questions: [],
+      ideaNote: '',
+      plan: {
+        label: 'Planning',
+        title: 'Predefined user routes',
+        body: 'For all three cities, Module 45, Module 47, and Capital of Tiran, we mapped the route so people could walk them and get the best experience.',
+        image: {
+          src: asset('future-route.png'),
+          alt: 'A planned route from Primary Homes to Creative University across the city map.'
+        }
+      },
+      redesignTitle: '',
+      moments: [
+        {
+          label: '01 / Administer',
+          title: 'Keep roles explicit',
+          body: 'Admins created users, assigned a role, and turned access on or off. Administration stayed a short list, not a second product.',
+          image: {
+            src: asset('future-admin.png'),
+            alt: 'Admin user list with a filter for role and status.'
+          }
+        },
+        {
+          label: 'Urban planners',
+          title: 'Configure the simulation',
+          body: 'Planners chose a world, the areas and points of interest, who the virtual population was, how many, the period, and the situation for that session: time of day, light, cloud, and sound.',
+          image: {
+            src: asset('future-configure.png'),
+            alt: 'Urban planner screen for configuring a simulation: world, areas, virtual population, period, and environment.'
+          },
+          also: [
+            {
+              src: asset('future-visualisation.png'),
+              alt: 'Urban planner list of simulations, with the execution date, status, and a way to open each one.'
+            }
+          ]
+        },
+        {
+          label: 'Participant',
+          title: 'Track your progress',
+          body: 'Participants had a separate dashboard to track their progress and update their profile, so the Urban Planner got accurate data.',
+          image: {
+            src: asset('future-profile.jpg'),
+            alt: 'The participant profile, with current status from mobile number verified through experience completed, and fields for name, age, and gender.'
+          }
+        },
+        {
+          label: '04 / Diagnose',
+          title: 'System diagnostics before users experience the city',
+          body: 'Once the headset is on, this is what they see. Diagnostics is open. The city stays closed until that step is done, and only then does the experience begin.',
+          image: {
+            src: asset('future-headset.jpg'),
+            alt: 'Inside the headset, Diagnostics is open and the city experience is still waiting.'
+          },
+          pair: [
+            {
+              src: asset('future-headset.jpg'),
+              alt: 'Inside the headset, Diagnostics is open and the city experience is still waiting.'
+            },
+            {
+              src: asset('future-question.jpg'),
+              alt: 'A question in the headset, with a microphone prompt to answer by voice.'
+            }
+          ]
+        },
+        {
+          label: '05 / Settle',
+          title: 'Onboarding for users, and guidance on how to use Quest 3 and the EEG device',
+          body: 'Before the city, the participant confirmed the headset felt right, or stopped and called a moderator.',
+          image: {
+            src: asset('future-diagnostics.png'),
+            alt: 'A check that the headset is comfortable before the session starts.'
+          },
+          video: asset('future-comfort.mp4')
+        },
+        {
+          label: '06 / The city',
+          title: 'The VR experience of the city',
+          body: 'A small group moved through the areas assigned to them, on foot or by teleport, across flat ground, stairs, and slopes. The other people in the group were visible nearby, and a virtual population filled the streets. Questions appeared in the place and were answered by voice. The same walk kept a record of where they were, the light and sound there, and the raw EEG. The controller guide stayed in the city, and a journey card held the current area, the destination, and the time spent.',
+          image: {
+            src: asset('future-controller.png'),
+            alt: 'Walking through the virtual city with other people, across paths, stairs, and slopes.'
+          },
+          video: asset('future-city-walk.mp4'),
+          pair: [
+            {
+              src: asset('future-controller.png'),
+              alt: 'Controller guide in the virtual city, marking the triggers for the interface and the microphone.'
+            },
+            {
+              src: asset('future-journey.jpg'),
+              alt: 'Journey tracker in the headset, with the current area, destination, and time spent.'
+            }
+          ]
+        }
+      ],
+      redesignClose: '',
+      systemTitle: 'A consistent product needs a consistent language.',
+      kit: 'A reusable kit for forms, tables, filters, and controls, shared by every dashboard.',
+      iconsTitle: 'One visual language',
+      icons: 'I also set the logo and the visual foundation, so the web tools and the VR moments read as one product.',
+      scaleTitle: 'One experience, four roles.',
+      scaleShared: ['Manage', 'Prepare', 'Experience', 'Capture', 'Configure'],
+      scaleFlexible: ['Admin', 'Participant', 'Raw Data Provider', 'Urban Planner'],
+      scale:
+        'The screens were different. The workflow was not. Admins managed access. Participants prepared and entered the city. Raw Data Providers kept the EEG record available for the people downstream. Urban planners set the world, the people, the time, and the environment.',
+      capabilityImage: {
+        src: asset('5.svg'),
+        alt: 'The capability: citizens experience the unbuilt city, emotional and cognitive data is captured, and one dashboard holds it for the team.'
+      },
+      resultsTitle: 'Learnings',
+      results: [
+        {
+          title: 'Passive signals and self-reporting',
+          body: 'EEG captured a continuous emotional signal. Asking participants, at intervals, how they were feeling validated that signal and gave it context, without fully breaking immersion.'
+        },
+        {
+          title: 'Timing of prompts',
+          body: 'Prompts placed too often disrupted immersion and added noise to both the EEG and what people reported. Check-ins at natural transitions produced more consistent emotional insight, and still captured a conscious response.'
+        },
+        {
+          title: 'Baseline mood',
+          body: 'Mood at the start strongly shaped the emotional response in the early part of the VR journey. Pre-experience diagnostics were essential for reading those first peaks accurately.'
+        },
+        {
+          title: 'Synthesis, not volume',
+          body: 'The real challenge was not collecting more emotional input. It was aligning the EEG with what people reported, so the patterns were ones stakeholders could trust.'
+        }
+      ],
+      honesty: ''
+    },
     outcomes: [
-      'Captured more than 50 actionable architectural insight points.',
-      'Identified three major layout bottlenecks before construction.',
-      'Made biometric evidence usable by planners without a data-science intermediary.'
+      'EEG captured a continuous emotional signal. Periodic self-reporting validated it without fully breaking immersion.',
+      'Prompts placed too often added noise. Check-ins at natural transitions produced more consistent emotional insight.',
+      'Baseline mood shaped the early VR journey, so pre-experience diagnostics were essential for reading the first peaks.',
+      'The challenge was aligning EEG with what people reported, so stakeholders could trust the patterns.'
     ],
-    image: asset('vr-welcome.png'),
+    measurementNote:
+      'No formal quantitative outcome was captured during the project, so no numerical performance claims are being made.',
+    image: asset('future-city.jpg'),
+    imageAlt: 'A participant standing in the virtual city, with session updates beside the path.',
+    heroVideo: asset('future-welcome.mp4'),
+    cardCover: true,
+    cardImages: [
+      asset('future-city.jpg'),
+      asset('future-headset.jpg'),
+      asset('future-controller.png'),
+      asset('future-configure.png')
+    ],
     images: [
-      { src: asset('vr-welcome.png'), alt: 'Virtual Humans future-city entry experience' },
-      { src: asset('vr-diagnostics.png'), alt: 'VR diagnostic and experience mode selection' }
+      {
+        src: asset('future-city.jpg'),
+        alt: 'A participant standing in the virtual city, with session updates beside the path.'
+      },
+      {
+        src: asset('future-participants.png'),
+        alt: 'Participant list with a status path from invitation sent through experience completed.'
+      },
+      {
+        src: asset('future-diagnostics.png'),
+        alt: 'System connection checks, with the EEG device marked checked.'
+      },
+      {
+        src: asset('future-controller.png'),
+        alt: 'Controller guide in the virtual city, marking the triggers for the interface and the microphone.'
+      },
+      {
+        src: asset('future-route.png'),
+        alt: 'A planned route from Primary Homes to Creative University across the city map.'
+      },
+      {
+        src: asset('future-journey.jpg'),
+        alt: 'Journey tracker in the headset, with the current area, destination, and time spent.'
+      },
+      {
+        src: asset('future-admin.png'),
+        alt: 'Admin user list with a filter for role and status.'
+      },
+      {
+        src: asset('future-simulation.png'),
+        alt: 'Urban planner screen for configuring a simulation: world, people, time, and environment.'
+      }
     ]
   },
 {
