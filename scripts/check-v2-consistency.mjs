@@ -29,7 +29,7 @@ must(llms.includes(facts.yearsExperience), 'llms.txt years mismatch');
 must(full.includes(facts.name), 'llms-full.txt missing name');
 must(md.includes(facts.name), 'machine.md missing name');
 must(md.includes(facts.title), 'machine.md title mismatch');
-must(facts.employers.includes('Cult.fit (formerly Curefit)'), 'Cult.fit name missing from employers');
+must(facts.employers.includes('Cult.fit'), 'Cult.fit name missing from employers');
 must(facts.title === 'Senior Product Designer', 'Current title is not Senior Product Designer');
 must(json.name === facts.name, 'machine.json name mismatch');
 must(json.yearsExperience === facts.yearsExperience, 'machine.json years mismatch');

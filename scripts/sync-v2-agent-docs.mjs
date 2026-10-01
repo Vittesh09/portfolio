@@ -52,7 +52,7 @@ export function collectFacts() {
     linkedin: /linkedin: '([^']+)'/.exec(profile)?.[1] ?? '',
     behance: /behance: '([^']+)'/.exec(profile)?.[1] ?? '',
     employers: [
-      ...profile.matchAll(/name: '(Nagarro|Simple Energy|Cult\.fit \(formerly Curefit\))'/g)
+      ...profile.matchAll(/name: '(Nagarro|Simple Energy|Cult\.fit)'/g)
     ].map((match) => match[1]),
     caseTitles: titles
   };
