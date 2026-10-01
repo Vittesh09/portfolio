@@ -38,6 +38,7 @@ export type Project = {
   summary: string;
   company: string;
   cardRole: string;
+  /** Card outcome, two lines split by a newline. */
   outcomeLine: string;
   outcomeEvidence: MetricEvidence[];
   tags: string[];
@@ -75,8 +76,7 @@ export const projects: Project[] = [
       'I redesigned the FleetTrack dashboard so a fleet manager can find a problem, see why it happened, and close it in one workspace.',
     company: 'LB Technology',
     cardRole: 'Product Designer',
-    outcomeLine:
-      'The fleet manager sees the fleet, the trip, and the event in one workspace.',
+    outcomeLine: 'The fleet, the trip, and the event.\nOne workspace for the manager.',
     outcomeEvidence: [],
     tags: ['Fleet', 'Dashboard', 'Telematics'],
     industry: 'Fleet logistics',
@@ -274,8 +274,7 @@ export const projects: Project[] = [
       'I designed a 1:1 city in VR and a dashboard that turned live EEG into stress, delight, and fatigue planners could act on.',
     company: 'TODO: [FILL: Simple Energy or Nagarro. 2023 is the handover year, so confirm]',
     cardRole: 'Product & Spatial Experience Designer',
-    outcomeLine:
-      'Planners got 50+ spatial insight points and found three layout bottlenecks before anything was built.',
+    outcomeLine: '50+ insight points for planners.\nThree layout bottlenecks, before build.',
     outcomeEvidence: [
       {
         metric: '50+ spatial insight points and three layout bottlenecks before build',
@@ -346,7 +345,7 @@ export const projects: Project[] = [
       'I designed a FinOps workspace that turns messy AWS usage into ranked recommendations teams can act on.',
     company: 'TODO: [FILL: case 03 company]',
     cardRole: 'Senior Product Designer',
-    outcomeLine: 'Waste diagnosis got 30% faster across 20+ AWS services.',
+    outcomeLine: 'Waste diagnosis got 30% faster.\nAcross 20+ AWS services.',
     outcomeEvidence: [
       {
         metric: '30% faster waste diagnosis across 20+ AWS services',

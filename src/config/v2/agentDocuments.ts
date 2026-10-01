@@ -83,7 +83,7 @@ export function getMachineRecord() {
       year: project.year,
       problem: project.challenge,
       contribution: project.summary,
-      outcome: project.outcomeLine,
+      outcome: project.outcomeLine.replace(/\n+/g, ' '),
       howMeasured: howMeasured(project),
       evidence: project.outcomeEvidence,
       url: caseStudyUrl(project.slug)
@@ -335,7 +335,7 @@ export function assertAgentFactsMatchPages() {
   record.caseStudies.forEach((study, index) => {
     if (study.title !== projects[index].title) errors.push(`Case study title mismatch at ${index}`);
     if (study.role !== projects[index].role) errors.push(`Case study role mismatch at ${index}`);
-    if (study.outcome !== projects[index].outcomeLine) {
+    if (study.outcome !== projects[index].outcomeLine.replace(/\n+/g, ' ')) {
       errors.push(`Case study outcome mismatch at ${index}`);
     }
   });

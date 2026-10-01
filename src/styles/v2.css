@@ -310,6 +310,7 @@
   width: 100%;
   height: clamp(14rem, 38vw, 28rem);
   overflow: hidden;
+  isolation: isolate;
 }
 
 .v2-root .v2-footer-landscape::after {
@@ -814,6 +815,14 @@
   max-width: 36rem;
 }
 
+@media (min-width: 768px) {
+  .v2-root .archive-project-outcome {
+    justify-self: end;
+    max-width: 100%;
+    width: max-content;
+  }
+}
+
 .v2-root .archive-image {
   filter: grayscale(1) contrast(1.08);
   transition: filter 350ms ease, transform 500ms ease;
@@ -1071,10 +1080,20 @@
   }
 }
 
-.v2-root .v2-ambient-cursor {
-  align-items: center;
+.v2-root .v2-ambient-cursor-ring {
   border: 1px solid color-mix(in srgb, var(--v2-accent-pop) 65%, transparent);
   border-radius: 50%;
+  height: 36px;
+  left: 0;
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  width: 36px;
+  z-index: 899;
+}
+
+.v2-root .v2-ambient-cursor {
+  align-items: center;
   display: flex;
   height: 36px;
   justify-content: center;
@@ -1087,6 +1106,7 @@
   z-index: 900;
 }
 
+.v2-root .v2-ambient-cursor-ring[data-native-grab='true'],
 .v2-root .v2-ambient-cursor[data-native-grab='true'] {
   visibility: hidden;
 }
@@ -1200,7 +1220,7 @@
   width: 2px;
 }
 
-.v2-root .v2-ambient-cursor[data-interactive='true'] {
+.v2-root .v2-ambient-cursor-ring[data-interactive='true'] {
   background: color-mix(in srgb, var(--v2-accent-pop) 14%, transparent);
   border-color: var(--v2-accent-pop);
 }
@@ -1625,31 +1645,60 @@ html.v2-smooth-scroll body {
   border-right: 1px solid color-mix(in srgb, var(--v2-border-subtle) 55%, transparent);
 }
 
+.v2-root .v2-trust-row,
+.v2-root .v2-fluid-host {
+  isolation: isolate;
+  position: relative;
+}
+
 .v2-root .v2-trust-row {
   min-height: 0;
   border-bottom: 1px solid color-mix(in srgb, var(--v2-border-subtle) 55%, transparent);
 }
 
-.v2-root .v2-trust-row > * {
+.v2-root .v2-fluid-canvas {
+  display: block;
+  height: 100%;
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+  z-index: 0;
+}
+
+.v2-root .v2-trust-row > :not(.v2-fluid-canvas),
+.v2-root .v2-fluid-host > :not(.v2-fluid-canvas) {
+  position: relative;
+  z-index: 1;
+}
+
+.v2-root .archive-project-thumb.is-fluid .archive-image,
+.v2-root .v2-footer-landscape.is-fluid .v2-footer-landscape-img,
+.v2-root .archive-project-thumb.is-lens .archive-image,
+.v2-root .v2-footer-landscape.is-lens .v2-footer-landscape-img {
+  opacity: 0 !important;
+}
+
+.v2-root .v2-trust-row > :not(.v2-fluid-canvas) {
   min-width: 0;
   min-height: 0;
   padding: 2rem 1.75rem 2rem 2rem;
   border-right: 1px solid color-mix(in srgb, var(--v2-border-subtle) 55%, transparent);
 }
 
-.v2-root .v2-trust-row > *:last-child {
+.v2-root .v2-trust-row > :nth-last-child(1 of :not(.v2-fluid-canvas)) {
   border-right: 0;
 }
 
 /* Cursor-following border glow: a radial highlight masked down to each cell's edge ring.
    Insets overlap the neighbouring grid lines so the glow sits exactly on them. */
 @media (hover: hover) and (pointer: fine) {
-  .v2-root .v2-border-glow .v2-trust-row > * {
+  .v2-root .v2-border-glow .v2-trust-row > :not(.v2-fluid-canvas) {
     position: relative;
   }
 
-  .v2-root .v2-border-glow .v2-trust-row > *::before,
-  .v2-root .v2-border-glow .v2-trust-row > *::after {
+  .v2-root .v2-border-glow .v2-trust-row > :not(.v2-fluid-canvas)::before,
+  .v2-root .v2-border-glow .v2-trust-row > :not(.v2-fluid-canvas)::after {
     content: '';
     position: absolute;
     pointer-events: none;
@@ -1662,7 +1711,7 @@ html.v2-smooth-scroll body {
     mask-composite: exclude;
   }
 
-  .v2-root .v2-border-glow .v2-trust-row > *::after {
+  .v2-root .v2-border-glow .v2-trust-row > :not(.v2-fluid-canvas)::after {
     inset: -1px 0 -1px -1px;
     padding: 1px;
     background: radial-gradient(
@@ -1672,7 +1721,7 @@ html.v2-smooth-scroll body {
     );
   }
 
-  .v2-root .v2-border-glow .v2-trust-row > *::before {
+  .v2-root .v2-border-glow .v2-trust-row > :not(.v2-fluid-canvas)::before {
     inset: -4px -3px -4px -4px;
     padding: 4px;
     filter: blur(3px);
@@ -1876,19 +1925,19 @@ html.v2-smooth-scroll body {
     padding-block: 1.35rem 0.35rem;
   }
 
-  .v2-root .v2-trust-row > * {
+  .v2-root .v2-trust-row > :not(.v2-fluid-canvas) {
     border-right: 0;
     border-top: 1px solid color-mix(in srgb, var(--v2-border-subtle) 55%, transparent);
     padding: 0.85rem 0;
   }
 
-  .v2-root .v2-trust-row > *:first-child {
+  .v2-root .v2-trust-row > :not(.v2-fluid-canvas):first-child {
     border-top: 0;
     padding-top: 0;
     padding-bottom: 0.15rem;
   }
 
-  .v2-root .v2-trust-row > *:not(:first-child) {
+  .v2-root .v2-trust-row > :not(.v2-fluid-canvas):not(:first-child) {
     display: flex;
     flex-direction: row;
     align-items: baseline;
@@ -1896,7 +1945,7 @@ html.v2-smooth-scroll body {
     gap: 1.25rem;
   }
 
-  .v2-root .v2-trust-row > *:not(:first-child) p {
+  .v2-root .v2-trust-row > :not(.v2-fluid-canvas):not(:first-child) p {
     margin: 0;
   }
 

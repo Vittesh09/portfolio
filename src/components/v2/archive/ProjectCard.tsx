@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
 import type { PointerEvent } from 'react';
 import { type Project } from '@/src/config/v2/caseStudies';
+import { GravityLens } from '@/src/components/v2/ui/GravityLens';
 import { triggerHaptic } from '@/src/components/v2/ui/haptics';
 
 const FRAME_MS = 1800;
@@ -57,6 +58,11 @@ export function ProjectCard({ project }: { project: Project }) {
               sizes="(max-width: 768px) 100vw, 66vw"
             />
           ))}
+          <GravityLens
+            mode="image"
+            src={frames[frame]}
+            fit={frames.length > 1 && frame === 0 ? 'cover' : 'contain'}
+          />
         </div>
       </div>
       <div className="archive-project-caption">
@@ -66,7 +72,14 @@ export function ProjectCard({ project }: { project: Project }) {
             {project.cardRole} · {project.year}
           </p>
         </div>
-        <p className="archive-project-outcome">{project.outcomeLine}</p>
+        <p className="archive-project-outcome">
+          {project.outcomeLine.split('\n').map((line, index) => (
+            <span key={line}>
+              {index > 0 ? <br /> : null}
+              {line}
+            </span>
+          ))}
+        </p>
       </div>
     </Link>
   );

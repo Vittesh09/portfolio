@@ -112,8 +112,8 @@ function useSectionReveals(enabled: boolean) {
 function AmbientCursor({ enabled }: { enabled: boolean }) {
   const x = useMotionValue(-100);
   const y = useMotionValue(-100);
-  const smoothX = useSpring(x, { stiffness: 260, damping: 28, mass: 0.35 });
-  const smoothY = useSpring(y, { stiffness: 260, damping: 28, mass: 0.35 });
+  const ringX = useSpring(x, { stiffness: 210, damping: 26, mass: 0.4 });
+  const ringY = useSpring(y, { stiffness: 210, damping: 26, mass: 0.4 });
   const [pressed, setPressed] = useState(false);
   const [interactive, setInteractive] = useState(false);
   const [nativeGrab, setNativeGrab] = useState(false);
@@ -122,6 +122,21 @@ function AmbientCursor({ enabled }: { enabled: boolean }) {
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const snap = () => {
+      if (!media.matches) return;
+      ringX.jump(x.get());
+      ringY.jump(y.get());
+    };
+    const stopX = x.on('change', snap);
+    const stopY = y.on('change', snap);
+    return () => {
+      stopX();
+      stopY();
+    };
+  }, [ringX, ringY, x, y]);
 
   useEffect(() => {
     if (!enabled || window.matchMedia('(pointer: coarse)').matches) return;
@@ -162,29 +177,41 @@ function AmbientCursor({ enabled }: { enabled: boolean }) {
   const orbit = pressed && !interactive && !nativeGrab;
 
   return (
-    <motion.div
-      aria-hidden
-      className="v2-ambient-cursor"
-      data-interactive={interactive}
-      data-native-grab={nativeGrab}
-      data-pressed={pressed}
-      data-orbit={orbit}
-      initial={false}
-      style={{ x: smoothX, y: smoothY }}
-      animate={{
-        scale: nativeGrab ? 1 : pressed ? 0.88 : interactive ? 1.55 : 1,
-        opacity: nativeGrab ? 0 : 1
-      }}
-      transition={{ duration: 0.18 }}
-    >
-      <span className="v2-ambient-cursor-orbit" aria-hidden>
-        <span className="v2-ambient-cursor-trail" data-trail="4" />
-        <span className="v2-ambient-cursor-trail" data-trail="3" />
-        <span className="v2-ambient-cursor-trail" data-trail="2" />
-        <span className="v2-ambient-cursor-trail" data-trail="1" />
-        <span className="v2-ambient-cursor-core" />
-      </span>
-    </motion.div>
+    <>
+      <motion.div
+        aria-hidden
+        className="v2-ambient-cursor-ring"
+        data-interactive={interactive}
+        data-native-grab={nativeGrab}
+        initial={false}
+        style={{ x: ringX, y: ringY }}
+        animate={{
+          scale: nativeGrab ? 1 : pressed ? 0.88 : interactive ? 1.55 : 1,
+          opacity: nativeGrab ? 0 : 1
+        }}
+        transition={{ duration: 0.18 }}
+      />
+      <motion.div
+        aria-hidden
+        className="v2-ambient-cursor"
+        data-interactive={interactive}
+        data-native-grab={nativeGrab}
+        data-pressed={pressed}
+        data-orbit={orbit}
+        initial={false}
+        style={{ x, y }}
+        animate={{ opacity: nativeGrab ? 0 : 1 }}
+        transition={{ duration: 0.18 }}
+      >
+        <span className="v2-ambient-cursor-orbit" aria-hidden>
+          <span className="v2-ambient-cursor-trail" data-trail="4" />
+          <span className="v2-ambient-cursor-trail" data-trail="3" />
+          <span className="v2-ambient-cursor-trail" data-trail="2" />
+          <span className="v2-ambient-cursor-trail" data-trail="1" />
+          <span className="v2-ambient-cursor-core" />
+        </span>
+      </motion.div>
+    </>
   );
 }
 

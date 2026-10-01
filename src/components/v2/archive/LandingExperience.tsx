@@ -130,7 +130,7 @@ function LandingExperienceArchive() {
 
       <section className="border-b border-border-subtle">
         <div className="mx-auto max-w-[1600px]">
-          <div className="grid grid-cols-3 border-b border-border-subtle md:grid-cols-4">
+          <div className="v2-fluid-host grid grid-cols-3 border-b border-border-subtle md:grid-cols-4">
             <div className="col-span-3 p-5 md:col-span-1 md:p-8">
               <Label>Quick facts</Label>
             </div>
@@ -150,7 +150,7 @@ function LandingExperienceArchive() {
               </motion.div>
             ))}
           </div>
-          <div className="grid grid-cols-3 items-center gap-x-3 gap-y-4 px-4 py-5 md:flex md:flex-wrap md:gap-x-10 md:px-8">
+          <div className="v2-fluid-host grid grid-cols-3 items-center gap-x-3 gap-y-4 px-4 py-5 md:flex md:flex-wrap md:gap-x-10 md:px-8">
             <div className="col-span-3">
               <Label>I&apos;ve worked with</Label>
             </div>
@@ -242,9 +242,6 @@ function LandingExperienceArchive() {
                 Work that shipped.
               </h2>
             </div>
-            <p className="max-w-sm text-sm leading-relaxed text-text-secondary md:col-span-4 md:self-end">
-              I owned each one from the first question to the shipped product.
-            </p>
             {projects.map((project, index) => (
               <motion.article
                 key={project.slug}

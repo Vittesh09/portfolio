@@ -173,9 +173,6 @@ export function LandingExperienceSingularity() {
                 Work that shipped.
               </h2>
             </div>
-            <p className="max-w-sm text-sm leading-relaxed text-text-secondary md:col-span-4 md:self-end">
-              I owned each one from the first question to the shipped product.
-            </p>
             {projects.map((project, index) => (
               <motion.article
                 key={project.slug}

@@ -1,8 +1,8 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import { siteConfig } from '@/src/config/v2/site';
 import { profile } from '@/src/config/v2/profile';
 import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
+import { FooterLandscape } from '@/src/components/v2/ui/GravityLens';
 
 export function ArchiveFooter() {
   return (
@@ -72,22 +72,7 @@ export function ArchiveFooter() {
         </div>
       </div>
 
-      <div className="v2-footer-landscape" aria-hidden="true">
-        <Image
-          src="/assets/images/footer-landscape-light.jpg"
-          alt=""
-          fill
-          sizes="100vw"
-          className="v2-footer-landscape-img v2-footer-landscape-img--light"
-        />
-        <Image
-          src="/assets/images/footer-landscape.jpg"
-          alt=""
-          fill
-          sizes="100vw"
-          className="v2-footer-landscape-img v2-footer-landscape-img--dark"
-        />
-      </div>
+      <FooterLandscape />
     </footer>
   );
 }
