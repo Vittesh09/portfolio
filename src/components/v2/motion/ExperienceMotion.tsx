@@ -112,8 +112,8 @@ function useSectionReveals(enabled: boolean) {
 function AmbientCursor({ enabled }: { enabled: boolean }) {
   const x = useMotionValue(-100);
   const y = useMotionValue(-100);
-  const ringX = useSpring(x, { stiffness: 210, damping: 26, mass: 0.4 });
-  const ringY = useSpring(y, { stiffness: 210, damping: 26, mass: 0.4 });
+  const ringX = useSpring(x, { stiffness: 980, damping: 52, mass: 0.22 });
+  const ringY = useSpring(y, { stiffness: 980, damping: 52, mass: 0.22 });
   const [pressed, setPressed] = useState(false);
   const [interactive, setInteractive] = useState(false);
   const [nativeGrab, setNativeGrab] = useState(false);

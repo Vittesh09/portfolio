@@ -792,7 +792,7 @@
   line-height: 1.05;
   margin: 0;
   text-transform: none;
-  transition: color 220ms ease;
+  transition: color 900ms cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 .v2-root .archive-project-caption {
@@ -841,11 +841,29 @@
 
 .v2-root .archive-image {
   filter: grayscale(1) contrast(1.08);
-  transition: filter 350ms ease, transform 500ms ease;
+  transition:
+    filter 3200ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 3200ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .v2-root .group:hover .archive-image {
   filter: grayscale(0) contrast(1);
+}
+
+/* Selected-work thumbs start slightly cropped, then ease outward on hover */
+.v2-root .archive-project-thumb .archive-image,
+.v2-root .archive-project-thumb .v2-lens-canvas {
+  transform: scale(1.14);
+  transform-origin: center center;
+  transition:
+    filter 3200ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 3800ms cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 3200ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.v2-root .group:hover .archive-project-thumb .archive-image,
+.v2-root .group:hover .archive-project-thumb .v2-lens-canvas {
+  transform: scale(1);
 }
 
 @media (max-width: 1023px), (hover: none) {
@@ -874,9 +892,9 @@
 .v2-root .archive-project-frame {
   opacity: 0;
   transition:
-    opacity 800ms cubic-bezier(0.65, 0, 0.35, 1),
-    filter 350ms ease,
-    transform 500ms cubic-bezier(0.16, 1, 0.3, 1);
+    opacity 3200ms cubic-bezier(0.16, 1, 0.3, 1),
+    filter 3200ms cubic-bezier(0.16, 1, 0.3, 1),
+    transform 3800ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .v2-root .archive-project-frame.is-shown {
@@ -1690,9 +1708,13 @@ html.v2-smooth-scroll body {
 
 .v2-root .archive-project-thumb.is-fluid .archive-image,
 .v2-root .v2-footer-landscape.is-fluid .v2-footer-landscape-img,
-.v2-root .archive-project-thumb.is-lens .archive-image,
 .v2-root .v2-footer-landscape.is-lens .v2-footer-landscape-img {
   opacity: 0 !important;
+}
+
+/* Lens fades in over the still; only hide the photo once the warp is nearly opaque */
+.v2-root .archive-project-thumb.is-lens .archive-image {
+  opacity: 0;
 }
 
 .v2-root .v2-trust-row > :not(.v2-fluid-canvas) {

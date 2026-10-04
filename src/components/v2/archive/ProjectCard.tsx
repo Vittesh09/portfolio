@@ -10,7 +10,7 @@ import { GravityLens } from '@/src/components/v2/ui/GravityLens';
 import { triggerHaptic } from '@/src/components/v2/ui/haptics';
 import { IosHapticSwitch } from '@/src/components/v2/ui/IosHapticSwitch';
 
-const FRAME_MS = 1800;
+const FRAME_MS = 2800;
 
 export function ProjectCard({ project }: { project: Project }) {
   const router = useRouter();

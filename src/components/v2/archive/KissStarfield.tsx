@@ -11,8 +11,8 @@ import { starFragmentShader, starVertexShader } from '@/src/components/v2/singul
 /** Thinner than the desktop sky so the mobile hero stays quiet. */
 const STAR_COUNT = 10000;
 const FIELD_RADIUS = 2000;
-/** One revolution in eight minutes, matching the desktop sky. */
-const TURN = (Math.PI * 2) / (8 * 60);
+/** One revolution in 48s, matching the desktop sky. */
+const TURN = (Math.PI * 2) / 48;
 
 /**
  * Desktop singularity star field only: same shaders, palette, and slow turn.

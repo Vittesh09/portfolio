@@ -1138,12 +1138,12 @@ export function useBlackHole(
           }
         }
 
-        // Quiet in-place turn. One revolution is about eight minutes, so the
-        // sky and disk drift without the void leaving its place.
+        // Sky drift you can see. One revolution is about 48s. The disk stays
+        // on shader flow so the horizon does not spin with the stars.
         if (!reduceMotion && !isLab) {
-          const turn = elapsed * ((Math.PI * 2) / (8 * 60));
-          stars.rotation.y = turn;
-          holeA.disk.rotation.z = DISK_YAW + turn;
+          const skyTurn = elapsed * ((Math.PI * 2) / 48);
+          stars.rotation.y = skyTurn;
+          stars.rotation.x = skyTurn * 0.12;
         }
         diskMaterial.uniforms.uTime.value = elapsed * timeScale;
         starMaterial.uniforms.uTime.value = elapsed * timeScale;

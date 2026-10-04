@@ -81,7 +81,8 @@ const FRAG = `
       float g = texture2D(uImage, uv).g;
       float b = texture2D(uImage, uvB).b;
       float a = texture2D(uImage, uv).a;
-      gl_FragColor = vec4(r, g, b, a);
+      float fade = smoothstep(0.28, 1.0, uStrength);
+      gl_FragColor = vec4(r, g, b, a * fade);
       return;
     }
 
@@ -295,12 +296,13 @@ export function GravityLens({
       const dt = Math.min(0.05, last ? (now - last) / 1000 : 0.016);
       last = now;
       if (document.hidden) return;
-      const ease = 1 - Math.exp(-dt * 7);
-      strength += (target - strength) * ease;
-      hole.x += (holeTarget.x - hole.x) * ease;
-      hole.y += (holeTarget.y - hole.y) * ease;
+      const strengthEase = 1 - Math.exp(-dt * (mode === 'image' ? 0.62 : 7));
+      const holeEase = 1 - Math.exp(-dt * 7);
+      strength += (target - strength) * strengthEase;
+      hole.x += (holeTarget.x - hole.x) * holeEase;
+      hole.y += (holeTarget.y - hole.y) * holeEase;
       if (mode === 'image') {
-        if (strength > 0.04 && imageReady) host.classList.add('is-lens');
+        if (strength > 0.92 && imageReady) host.classList.add('is-lens');
         else host.classList.remove('is-lens');
       }
       draw();
