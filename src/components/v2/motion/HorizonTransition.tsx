@@ -18,13 +18,13 @@ function normalizePath(path: string) {
 
 function routeLabel(path: string) {
   const p = normalizePath(path);
-  if (p === '/v2/') return 'Home';
-  if (p.startsWith('/v2/about')) return 'About';
-  if (p.startsWith('/v2/work/')) return 'Work';
-  if (p.startsWith('/v2/machine')) return 'Machine';
-  if (p.startsWith('/v2/classic/workbench')) return 'Workbench';
-  if (p.startsWith('/v2/classic')) return 'Classic';
-  if (p.startsWith('/v2/singularity')) return 'Lab';
+  if (p === '/') return 'Home';
+  if (p.startsWith('/about')) return 'About';
+  if (p.startsWith('/work/')) return 'Work';
+  if (p.startsWith('/machine')) return 'Machine';
+  if (p.startsWith('/classic/workbench')) return 'Workbench';
+  if (p.startsWith('/classic')) return 'Classic';
+  if (p.startsWith('/singularity')) return 'Lab';
   return 'Archive';
 }
 
@@ -38,6 +38,13 @@ function isModifiedClick(event: MouseEvent) {
 
 function coverRadius() {
   return Math.ceil(Math.hypot(window.innerWidth, window.innerHeight));
+}
+
+function isSitePath(pathname: string) {
+  if (pathname.startsWith('/legacy')) return false;
+  if (pathname.startsWith('/_next')) return false;
+  if (pathname.startsWith('/assets')) return false;
+  return true;
 }
 
 /**
@@ -123,7 +130,7 @@ export function HorizonTransition({ children }: { children: ReactNode }) {
         return;
       }
       if (next.origin !== window.location.origin) return;
-      if (!next.pathname.startsWith('/v2')) return;
+      if (!isSitePath(next.pathname)) return;
       if (normalizePath(next.pathname) === normalizePath(window.location.pathname)) return;
       if (prefersReducedMotion()) return;
 

@@ -3,7 +3,6 @@
 import Link from 'next/link';
 import { Fragment, useEffect, useId, useLayoutEffect, useRef, useState } from 'react';
 import type { CaseStory, Project } from '@/src/config/v2/caseStudies';
-import { howMeasured, projects } from '@/src/config/v2/caseStudies';
 import { HashNavLink, scrollToHash } from '@/src/components/v2/ui/HashNavLink';
 import { triggerHaptic } from '@/src/components/v2/ui/haptics';
 import { IosHapticSwitch } from '@/src/components/v2/ui/IosHapticSwitch';
@@ -218,7 +217,16 @@ function StoryVideo({
       return Math.max(0, Math.min(rect.bottom, viewH) - Math.max(rect.top, 0));
     };
 
+    const connection = (
+      navigator as Navigator & { connection?: { saveData?: boolean; effectiveType?: string } }
+    ).connection;
+    const restrained =
+      Boolean(connection?.saveData) ||
+      connection?.effectiveType === '2g' ||
+      connection?.effectiveType === 'slow-2g';
+
     const sync = () => {
+      if (restrained) return;
       wantsPlay = visibleHeight() >= 80;
       if (wantsPlay) {
         if (node.preload === 'none') node.preload = 'auto';
@@ -355,12 +363,22 @@ function useActiveStorySection(sections: { id: string; label: string }[]) {
       setActive((previous) => (previous === current ? previous : current));
     };
 
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        update();
+      });
+    };
+
     update();
-    window.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('v2-lenis-scroll', update);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('v2-lenis-scroll', onScroll);
     return () => {
-      window.removeEventListener('scroll', update);
-      window.removeEventListener('v2-lenis-scroll', update);
+      window.cancelAnimationFrame(frame);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('v2-lenis-scroll', onScroll);
     };
   }, [sections]);
 
@@ -429,15 +447,25 @@ function StoryNav({
       }
     };
 
+    let frame = 0;
+    const onScroll = () => {
+      if (frame) return;
+      frame = window.requestAnimationFrame(() => {
+        frame = 0;
+        update();
+      });
+    };
+
     update();
-    window.addEventListener('scroll', update, { passive: true });
-    window.addEventListener('resize', update);
-    window.addEventListener('v2-lenis-scroll', update);
+    window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
+    window.addEventListener('v2-lenis-scroll', onScroll);
     return () => {
+      window.cancelAnimationFrame(frame);
       article.style.paddingTop = '';
-      window.removeEventListener('scroll', update);
-      window.removeEventListener('resize', update);
-      window.removeEventListener('v2-lenis-scroll', update);
+      window.removeEventListener('scroll', onScroll);
+      window.removeEventListener('resize', onScroll);
+      window.removeEventListener('v2-lenis-scroll', onScroll);
     };
   }, []);
 
@@ -690,7 +718,12 @@ function ClassicBody({ project }: { project: Project }) {
     ['Platforms', project.platforms],
     ['Audience', project.customers]
   ].filter(([, value]) => !isUnconfirmed(value));
-  const measured = howMeasured(project);
+  const measured = project.outcomeEvidence
+    .map(
+      (item) =>
+        `${item.metric}. Baseline: ${item.baseline}. Method: ${item.method}. Source: ${item.source}.`
+    )
+    .join(' ');
 
   return (
     <>
@@ -788,9 +821,14 @@ function ClassicBody({ project }: { project: Project }) {
   );
 }
 
-export function CaseStudyExperience({ project }: { project: Project }) {
-  const next =
-    projects[(projects.findIndex((item) => item.slug === project.slug) + 1) % projects.length];
+export function CaseStudyExperience({
+  project,
+  nextProject
+}: {
+  project: Project;
+  nextProject: { slug: string; title: string };
+}) {
+  const next = nextProject;
   const sections = sectionsFor(project.story);
   const active = useActiveStorySection(sections);
   const band = project.story ? 'v2-story-wrap' : wrap;
@@ -802,7 +840,7 @@ export function CaseStudyExperience({ project }: { project: Project }) {
       <section className="border-b border-border-subtle">
         <div className={`${band} py-8 md:py-12`}>
           <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-4">
-            <HashNavLink href="/v2/#work" className="archive-label text-text-muted hover:text-accent-pop">
+            <HashNavLink href="/#work" className="archive-label text-text-muted hover:text-accent-pop">
               ← Back to work
             </HashNavLink>
           </div>
@@ -864,7 +902,7 @@ export function CaseStudyExperience({ project }: { project: Project }) {
       </div>
       <section className={project.story ? 'v2-story-next border-b border-border-subtle' : 'border-b border-border-subtle'}>
         <Link
-          href={`/v2/work/${next.slug}/`}
+          href={`/work/${next.slug}/`}
           className={`group ${wrap} flex items-end justify-between gap-6 py-14 md:py-20`}
         >
           <div>

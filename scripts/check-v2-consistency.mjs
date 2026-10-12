@@ -1,3 +1,4 @@
+import { execSync } from 'child_process';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -40,10 +41,63 @@ facts.caseTitles.forEach((title) => {
 });
 must(home.includes(facts.heroHeadline) || home.includes('heroHeadline'), 'Home hero not driven by shared headline');
 must(agentDocs.includes('Person') && agentDocs.includes('CreativeWork'), 'JSON-LD types missing');
-must(!robots.includes('Disallow: /v2/machine'), 'robots.txt blocks machine page');
+must(!robots.includes('Disallow: /machine'), 'robots.txt blocks machine page');
 must(robots.includes('Sitemap:'), 'robots.txt missing sitemap');
-must(sitemap.includes('/v2/machine/'), 'sitemap missing machine page');
-must(sitemap.includes('/v2/work/vr-eeg-analytics/'), 'sitemap missing VR case');
+must(sitemap.includes('/machine/'), 'sitemap missing machine page');
+must(sitemap.includes('/work/vr-eeg-analytics/'), 'sitemap missing VR case');
+
+const assetsRoot = path.join(root, 'public/assets');
+function walk(dir) {
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const full = path.join(dir, entry.name);
+    return entry.isDirectory() ? walk(full) : [full];
+  });
+}
+walk(assetsRoot).forEach((file) => {
+  const rel = path.relative(root, file).replaceAll('\\', '/');
+  const size = fs.statSync(file).size;
+  must(size <= 8 * 1024 * 1024, `${rel} is larger than 8 MB`);
+  if (file.endsWith('.svg')) {
+    const text = fs.readFileSync(file, 'utf8');
+    must(!text.includes('data:image/'), `${rel} embeds a raster image`);
+  }
+});
+
+const tracked = new Set(
+  execSync('git ls-files', { cwd: root, encoding: 'utf8' })
+    .trim()
+    .split(/\r?\n/)
+    .filter(Boolean)
+);
+const importRe = /from\s+['"]([^'"]+)['"]/g;
+function resolveImport(fromFile, spec) {
+  if (spec.startsWith('@/')) return path.join(root, spec.slice(2));
+  if (spec.startsWith('.')) return path.resolve(path.dirname(fromFile), spec);
+  return null;
+}
+function sourceFiles(dir) {
+  return fs.readdirSync(dir, { withFileTypes: true }).flatMap((entry) => {
+    const full = path.join(dir, entry.name);
+    if (entry.isDirectory()) return sourceFiles(full);
+    return /\.(ts|tsx|js|jsx|mjs)$/.test(entry.name) ? [full] : [];
+  });
+}
+for (const dir of ['src', 'app', 'scripts']) {
+  for (const file of sourceFiles(path.join(root, dir))) {
+    const text = fs.readFileSync(file, 'utf8');
+    for (const match of text.matchAll(importRe)) {
+      const target = resolveImport(file, match[1]);
+      if (!target) continue;
+      const candidates = ['', '.ts', '.tsx', '.js', '.jsx', '.mjs'].map((ext) =>
+        ext && target.endsWith(ext) ? null : `${target}${ext}`
+      );
+      const existing = [target, ...candidates].find((item) => item && fs.existsSync(item) && fs.statSync(item).isFile());
+      if (!existing) continue;
+      const rel = path.relative(root, existing).replaceAll('\\', '/');
+      must(tracked.has(rel), `${rel} is imported but not tracked in git`);
+    }
+  }
+}
 
 if (errors.length) {
   console.error('V2 consistency check failed:');

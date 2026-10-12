@@ -14,13 +14,13 @@ export function ArchiveFooter() {
               Explore
             </p>
             <div className="mt-4 flex flex-col gap-2 text-sm">
-              <Link href="/v2/" className="underline-offset-4 hover:underline">
+              <Link href="/" className="underline-offset-4 hover:underline">
                 Home
               </Link>
-              <HashNavLink href="/v2/#work" className="underline-offset-4 hover:underline">
+              <HashNavLink href="/#work" className="underline-offset-4 hover:underline">
                 Work
               </HashNavLink>
-              <Link href="/v2/about/" className="underline-offset-4 hover:underline">
+              <Link href="/about/" className="underline-offset-4 hover:underline">
                 About
               </Link>
               <Link href={profile.agentNav.href} className="underline-offset-4 hover:underline">

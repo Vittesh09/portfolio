@@ -151,10 +151,25 @@ export function GravityLens({
   const loadRef = useRef<(url?: string) => void>(() => {});
   const srcRef = useRef(src);
   const fitRef = useRef(fit);
+  const enterRef = useRef<PointerEvent | null>(null);
+  const [hot, setHot] = useState(false);
   srcRef.current = src;
   fitRef.current = fit;
 
   useEffect(() => {
+    const host = canvasRef.current?.parentElement;
+    if (!host || prefersStill() || hot) return;
+    const onEnter = (event: PointerEvent) => {
+      if (event.pointerType !== 'mouse') return;
+      enterRef.current = event;
+      setHot(true);
+    };
+    host.addEventListener('pointerenter', onEnter);
+    return () => host.removeEventListener('pointerenter', onEnter);
+  }, [hot]);
+
+  useEffect(() => {
+    if (!hot) return;
     const canvas = canvasRef.current;
     const host = canvas?.parentElement;
     if (!canvas || !host || prefersStill()) return;
@@ -181,6 +196,28 @@ export function GravityLens({
     gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
     gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 1, -1, -1, 1, 1, 1]), gl.STATIC_DRAW);
     const aPos = gl.getAttribLocation(program, 'aPos');
+    const uImage = gl.getUniformLocation(program, 'uImage');
+    const uHole = gl.getUniformLocation(program, 'uHole');
+    const uStrength = gl.getUniformLocation(program, 'uStrength');
+    const uRadius = gl.getUniformLocation(program, 'uRadius');
+    const uPull = gl.getUniformLocation(program, 'uPull');
+    const uAspect = gl.getUniformLocation(program, 'uAspect');
+    const uImageAspect = gl.getUniformLocation(program, 'uImageAspect');
+    const uCanvasAspect = gl.getUniformLocation(program, 'uCanvasAspect');
+    const uFit = gl.getUniformLocation(program, 'uFit');
+    const uMode = gl.getUniformLocation(program, 'uMode');
+    const uAberration = gl.getUniformLocation(program, 'uAberration');
+    const uInk = gl.getUniformLocation(program, 'uInk');
+    const root = document.querySelector('.v2-root');
+    const readInk = () =>
+      hexToRgb(
+        getComputedStyle(root ?? document.body).getPropertyValue('--v2-accent-pop')
+      );
+    let ink = readInk();
+    const themeObserver = new MutationObserver(() => {
+      ink = readInk();
+    });
+    if (root) themeObserver.observe(root, { attributes: true, attributeFilter: ['class'] });
 
     const imageTex = gl.createTexture();
     gl.bindTexture(gl.TEXTURE_2D, imageTex);
@@ -269,23 +306,18 @@ export function GravityLens({
       gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
       gl.activeTexture(gl.TEXTURE0);
       gl.bindTexture(gl.TEXTURE_2D, imageTex);
-      gl.uniform1i(gl.getUniformLocation(program, 'uImage'), 0);
-      gl.uniform2f(gl.getUniformLocation(program, 'uHole'), hole.x, hole.y);
-      gl.uniform1f(gl.getUniformLocation(program, 'uStrength'), strength);
-      gl.uniform1f(gl.getUniformLocation(program, 'uRadius'), mode === 'image' ? 0.46 : 0.62);
-      gl.uniform1f(gl.getUniformLocation(program, 'uPull'), mode === 'image' ? 0.08 : 0.14);
-      gl.uniform1f(gl.getUniformLocation(program, 'uAspect'), width / heightPx);
-      gl.uniform1f(gl.getUniformLocation(program, 'uImageAspect'), imageAspect);
-      gl.uniform1f(gl.getUniformLocation(program, 'uCanvasAspect'), width / heightPx);
-      gl.uniform1f(gl.getUniformLocation(program, 'uFit'), fitRef.current === 'cover' ? 1 : 0);
-      gl.uniform1f(gl.getUniformLocation(program, 'uMode'), mode === 'wash' ? 1 : 0);
-      gl.uniform1f(gl.getUniformLocation(program, 'uAberration'), mode === 'image' ? 0.18 : 0.12);
-      const ink = hexToRgb(
-        getComputedStyle(document.querySelector('.v2-root') ?? document.body).getPropertyValue(
-          '--v2-accent-pop'
-        )
-      );
-      gl.uniform3f(gl.getUniformLocation(program, 'uInk'), ink[0], ink[1], ink[2]);
+      gl.uniform1i(uImage, 0);
+      gl.uniform2f(uHole, hole.x, hole.y);
+      gl.uniform1f(uStrength, strength);
+      gl.uniform1f(uRadius, mode === 'image' ? 0.46 : 0.62);
+      gl.uniform1f(uPull, mode === 'image' ? 0.08 : 0.14);
+      gl.uniform1f(uAspect, width / heightPx);
+      gl.uniform1f(uImageAspect, imageAspect);
+      gl.uniform1f(uCanvasAspect, width / heightPx);
+      gl.uniform1f(uFit, fitRef.current === 'cover' ? 1 : 0);
+      gl.uniform1f(uMode, mode === 'wash' ? 1 : 0);
+      gl.uniform1f(uAberration, mode === 'image' ? 0.18 : 0.12);
+      gl.uniform3f(uInk, ink[0], ink[1], ink[2]);
       gl.enable(gl.BLEND);
       gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
       gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
@@ -352,10 +384,13 @@ export function GravityLens({
     host.addEventListener('pointerenter', onEnter);
     host.addEventListener('pointermove', onMove);
     host.addEventListener('pointerleave', onLeave);
+    const opening = enterRef.current;
+    if (opening) onEnter(opening);
 
     return () => {
       loadRef.current = () => {};
       window.cancelAnimationFrame(frame);
+      themeObserver.disconnect();
       host.removeEventListener('pointerenter', onEnter);
       host.removeEventListener('pointermove', onMove);
       host.removeEventListener('pointerleave', onLeave);
@@ -365,8 +400,9 @@ export function GravityLens({
       gl.deleteShader(vs);
       gl.deleteShader(fs);
       gl.deleteBuffer(buffer);
+      gl.getExtension('WEBGL_lose_context')?.loseContext();
     };
-  }, [mode]);
+  }, [mode, hot]);
 
   useEffect(() => {
     loadRef.current(src);

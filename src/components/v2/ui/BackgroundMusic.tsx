@@ -13,7 +13,7 @@ const WAVE =
   'M0 8C1 7.6 2 7.17 3 6.79C4 6.42 5 6.06 6 5.77C7 5.49 8 5.24 9 5.09C10 4.94 11 4.85 12 4.85C13 4.85 14 4.94 15 5.09C16 5.24 17 5.49 18 5.77C19 6.06 20 6.42 21 6.79C22 7.17 23 7.6 24 8C25 8.4 26 8.83 27 9.21C28 9.58 29 9.94 30 10.23C31 10.51 32 10.76 33 10.91C34 11.06 35 11.15 36 11.15C37 11.15 38 11.06 39 10.91C40 10.76 41 10.51 42 10.23C43 9.94 44 9.58 45 9.21C46 8.83 47 8.4 48 8C49 7.6 50 7.17 51 6.79C52 6.42 53 6.06 54 5.77C55 5.49 56 5.24 57 5.09C58 4.94 59 4.85 60 4.85C61 4.85 62 4.94 63 5.09C64 5.24 65 5.49 66 5.77C67 6.06 68 6.42 69 6.79C70 7.17 71 7.6 72 8C73 8.4 74 8.83 75 9.21C76 9.58 77 9.94 78 10.23C79 10.51 80 10.76 81 10.91C82 11.06 83 11.15 84 11.15C85 11.15 86 11.06 87 10.91C88 10.76 89 10.51 90 10.23C91 9.94 92 9.58 93 9.21C94 8.83 95 8.4 96 8';
 
 function isCaseStudy(pathname: string) {
-  return /\/v2\/work\/[^/]+/.test(pathname);
+  return /\/work\/[^/]+/.test(pathname);
 }
 
 function scrollOffset() {
@@ -59,13 +59,22 @@ function siteAudio() {
     if (existing instanceof HTMLAudioElement) {
       sharedAudio = existing;
     } else {
-      sharedAudio = new Audio(SRC);
+      sharedAudio = new Audio();
       sharedAudio.volume = FULL;
     }
     sharedAudio.loop = true;
-    sharedAudio.preload = 'auto';
+    sharedAudio.preload = 'none';
   }
   return sharedAudio;
+}
+
+/** Attach the file once, on the first gesture or after the page goes idle. */
+function armAudio(audio: HTMLAudioElement) {
+  if (audio.dataset.armed === '1') return;
+  audio.dataset.armed = '1';
+  audio.preload = 'auto';
+  if (!audio.src) audio.src = SRC;
+  audio.load();
 }
 
 /** Looping site music. On until the floater is pressed. */
@@ -105,6 +114,7 @@ export function BackgroundMusic() {
     };
 
     let fadeToken = 0;
+    let away = false;
 
     const fadeTo = (target: number, duration: number, onDone?: () => void) => {
       const node = audioRef.current;
@@ -131,7 +141,7 @@ export function BackgroundMusic() {
       const tick = (now: number) => {
         if (token !== fadeToken) return;
         const current = audioRef.current;
-        if (!current || !enabledRef.current) return;
+        if (!current || !enabledRef.current || away) return;
         const t = Math.min(1, (now - start) / duration);
         setVolume(current, from + (target - from) * smoothstep(t));
         if (t < 1) {
@@ -149,14 +159,15 @@ export function BackgroundMusic() {
         // Stay playing at silence. pause() here makes the next play() need a
         // fresh gesture, so the homepage comes back muted.
         const node = audioRef.current;
-        if (!node || userStopped) return;
+        if (!node || userStopped || away) return;
         if (node.paused) node.play().catch(() => {});
         if (!isCaseStudy(pathnameRef.current)) fadeTo(restingLevel(), SCROLL_FADE_MS);
       });
     };
 
     const playNow = (fadeIn = false) => {
-      if (userStopped || !enabledRef.current) return;
+      if (userStopped || !enabledRef.current || away || document.visibilityState === 'hidden') return;
+      armAudio(audio);
       const study = isCaseStudy(pathnameRef.current);
       const next = study ? 0 : restingLevel();
       const swell = () => {
@@ -183,7 +194,7 @@ export function BackgroundMusic() {
         const blocked = error instanceof DOMException && error.name === 'NotAllowedError';
         if (blocked || userStopped || !audio.paused) return;
         window.setTimeout(() => {
-          if (!userStopped && audio.paused) playNow(false);
+          if (!userStopped && !away && audio.paused) playNow(false);
         }, 250);
       });
     };
@@ -208,15 +219,41 @@ export function BackgroundMusic() {
       if (node) setPlaying(!node.paused);
     };
 
+    const heldByPage = () => document.visibilityState === 'hidden';
+
+    const holdForPage = () => {
+      away = true;
+      const node = audioRef.current;
+      if (!node || node.paused) {
+        setPlaying(false);
+        return;
+      }
+      stopRamp();
+      node.pause();
+      setPlaying(false);
+    };
+
+    const releaseForPage = () => {
+      away = false;
+      if (userStopped || !enabledRef.current) return;
+      if (document.visibilityState === 'hidden') return;
+      playNow(false);
+    };
+
+    const onVisibility = () => {
+      if (heldByPage()) holdForPage();
+      else releaseForPage();
+    };
+
     const onPause = () => {
       syncPlaying();
-      if (userStopped) return;
+      if (userStopped || heldByPage() || away) return;
       const now = performance.now();
       resumeBurst = now - lastResume < 500 ? resumeBurst + 1 : 0;
       if (resumeBurst > 6) return;
       lastResume = now;
       window.setTimeout(() => {
-        if (userStopped || !audio.paused) return;
+        if (userStopped || away || heldByPage() || !audio.paused) return;
         // Resume the same element. playNow() would retarget the volume and
         // undo a fade that is already in flight.
         audio.play().catch(() => {});
@@ -224,7 +261,7 @@ export function BackgroundMusic() {
     };
 
     const retryIfPaused = () => {
-      if (userStopped || !audio.paused) return;
+      if (userStopped || !audio.paused || heldByPage() || away) return;
       playNow(false);
     };
 
@@ -238,18 +275,21 @@ export function BackgroundMusic() {
       enabledRef.current = false;
       if (!audio.paused) audio.pause();
       setPlaying(false);
-    } else if (audio.paused) {
-      playNow(false);
-    } else {
+    } else if (!audio.paused) {
       setPlaying(true);
     }
+
+    const scheduleIdle = typeof window.requestIdleCallback === 'function';
+    const idleId = scheduleIdle
+      ? window.requestIdleCallback(() => playNow(false), { timeout: 4000 })
+      : window.setTimeout(() => playNow(false), 2500);
 
     const onStudyClick = (event: MouseEvent) => {
       if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
       const target = event.target;
       if (!(target instanceof Element)) return;
       const href = target.closest('a')?.getAttribute('href') ?? '';
-      if (!/\/v2\/work\/[^/?#]+/.test(href)) return;
+      if (!/\/work\/[^/?#]+/.test(href)) return;
       fadeOut();
     };
 
@@ -261,6 +301,10 @@ export function BackgroundMusic() {
     window.addEventListener('v2-lenis-scroll', onScroll);
     window.addEventListener('load', retryIfPaused);
     window.addEventListener('pageshow', retryIfPaused);
+    document.addEventListener('visibilitychange', onVisibility);
+    document.addEventListener('freeze', holdForPage);
+    document.addEventListener('resume', releaseForPage);
+    window.addEventListener('pagehide', holdForPage);
 
     function onUnlock(event: Event) {
       if (event instanceof KeyboardEvent && isMuteShortcut(event)) return;
@@ -277,6 +321,8 @@ export function BackgroundMusic() {
     }
 
     return () => {
+      if (scheduleIdle) window.cancelIdleCallback(idleId);
+      else window.clearTimeout(idleId);
       window.removeEventListener('pointerdown', onUnlock, true);
       window.removeEventListener('keydown', onUnlock, true);
       window.removeEventListener('keydown', onMuteKey);
@@ -285,6 +331,10 @@ export function BackgroundMusic() {
       window.removeEventListener('v2-lenis-scroll', onScroll);
       window.removeEventListener('load', retryIfPaused);
       window.removeEventListener('pageshow', retryIfPaused);
+      document.removeEventListener('visibilitychange', onVisibility);
+      document.removeEventListener('freeze', holdForPage);
+      document.removeEventListener('resume', releaseForPage);
+      window.removeEventListener('pagehide', holdForPage);
       audio.removeEventListener('play', syncPlaying);
       audio.removeEventListener('pause', onPause);
       audio.removeEventListener('canplay', retryIfPaused);

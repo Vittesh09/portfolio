@@ -1,31 +1,49 @@
 import { DISK_INNER, DISK_OUTER } from './constants';
 
 export const starVertexShader = /* glsl */ `
-  uniform float uTime;
   uniform float uPixelRatio;
+  uniform float uTime;
   attribute float size;
-  attribute float twinkle;
   varying vec3 vColor;
-  varying float vTwinkle;
+  varying float vSigma;
+  varying float vSprite;
+  varying float vGain;
+
+  float hash(vec3 p, float salt) {
+    return fract(sin(dot(p, vec3(12.9898, 78.233, 37.719)) + salt) * 43758.5453);
+  }
 
   void main() {
     vColor = color;
-    vTwinkle = sin(uTime * 2.5 + twinkle) * 0.5 + 0.5;
     vec4 mvPosition = modelViewMatrix * vec4(position, 1.0);
-    gl_PointSize = size * uPixelRatio * (300.0 / -mvPosition.z);
+    float px = size * uPixelRatio * (300.0 / -mvPosition.z);
+    // A hard sprite smaller than ~3px snaps between pixel blocks as it moves.
+    // Draw a Gaussian at least ~0.7px wide on a padded sprite so brightness
+    // stays the same at any sub-pixel position.
+    float floorSigma = 0.7 * uPixelRatio;
+    vSigma = max(px * 0.35, floorSigma);
+    vGain = clamp(px / (1.2 * uPixelRatio), 0.5, 1.0);
+    // About a third of the stars breathe faintly, each on its own phase and speed.
+    float phase = hash(position, 1.0) * 6.2832;
+    float speed = 0.4 + hash(position, 2.0) * 0.6;
+    float depth = step(0.66, hash(position, 3.0)) * 0.18;
+    vGain *= 1.0 - depth * (0.5 + 0.5 * sin(uTime * speed + phase));
+    vSprite = ceil(vSigma * 6.0) + 2.0;
+    gl_PointSize = vSprite;
     gl_Position = projectionMatrix * mvPosition;
   }
 `;
 
 export const starFragmentShader = /* glsl */ `
   varying vec3 vColor;
-  varying float vTwinkle;
+  varying float vSigma;
+  varying float vSprite;
+  varying float vGain;
 
   void main() {
-    float dist = distance(gl_PointCoord, vec2(0.5));
-    if (dist > 0.5) discard;
-    float alpha = 1.0 - smoothstep(0.0, 0.5, dist);
-    alpha *= (0.25 + vTwinkle * 0.75);
+    float d = length(gl_PointCoord - 0.5) * vSprite;
+    float alpha = exp(-0.5 * (d * d) / (vSigma * vSigma)) * vGain;
+    if (alpha < 0.004) discard;
     gl_FragColor = vec4(vColor, alpha);
   }
 `;

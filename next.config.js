@@ -15,33 +15,6 @@ const nextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', 'framer-motion', 'three']
   },
-  async headers() {
-    // Dev chunk names are not content-hashed, so caching them as immutable serves stale code.
-    const staticCache =
-      process.env.NODE_ENV === 'production'
-        ? [
-            {
-              source: '/_next/static/:path*',
-              headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }]
-            }
-          ]
-        : [];
-    return [
-      ...staticCache,
-      {
-        source: '/:path*',
-        headers: [
-          { key: 'X-Content-Type-Options', value: 'nosniff' },
-          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
-          { key: 'X-Frame-Options', value: 'DENY' },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=(), payment=(), usb=()'
-          }
-        ]
-      }
-    ];
-  },
   turbopack: {
     root: path.join(__dirname)
   }

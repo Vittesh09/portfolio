@@ -7,6 +7,8 @@
 export const WARP_CAPTURE_PAD_X = 16;
 export const WARP_CAPTURE_PAD_Y = 36;
 
+let embeddedFonts: string | undefined;
+
 export function measureWarpBox(node: HTMLElement) {
   const rect = node.getBoundingClientRect();
   const width = Math.max(1, Math.max(rect.width, node.scrollWidth) + WARP_CAPTURE_PAD_X);
@@ -34,7 +36,14 @@ export async function captureWarpSource(node: HTMLElement): Promise<HTMLCanvasEl
     const width = Math.round(box.width);
     const height = Math.round(box.height);
     const ratio = Math.min(2, Math.max(1, window.devicePixelRatio || 1));
-    const { toCanvas } = await import('html-to-image');
+    const { toCanvas, getFontEmbedCSS } = await import('html-to-image');
+    if (embeddedFonts === undefined) {
+      try {
+        embeddedFonts = await getFontEmbedCSS(node);
+      } catch {
+        embeddedFonts = '';
+      }
+    }
 
     const root = document.querySelector('.v2-root');
     const rootStyle = root ? getComputedStyle(root) : null;
@@ -45,7 +54,8 @@ export async function captureWarpSource(node: HTMLElement): Promise<HTMLCanvasEl
 
     return await toCanvas(node, {
       pixelRatio: ratio,
-      cacheBust: true,
+      cacheBust: false,
+      fontEmbedCSS: embeddedFonts,
       preferredFontFormat: 'woff2',
       width,
       height,

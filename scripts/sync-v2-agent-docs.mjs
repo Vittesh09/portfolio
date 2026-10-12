@@ -36,7 +36,7 @@ export function collectFacts() {
   const profile = read('src/config/v2/profile.ts');
   const studies = read('src/config/v2/caseStudies.ts');
   const titles = grabTitles(studies).filter((title) =>
-    ['Future City VR + EEG', 'FleetTrack', 'Cloud Cost Optimization'].includes(title)
+    ['Future City VR + EEG', 'Fleet Track Management'].includes(title)
   );
   const profileBlock = /export const profile = \{([\s\S]*?)\n\} as const/.exec(profile)?.[1] ?? '';
 
@@ -71,16 +71,14 @@ export function buildAgentDocs(facts) {
     'Case studies:',
     ...facts.caseTitles.map(
       (title) =>
-        `- ${title}: https://www.vittesh.com/v2/work/${
+        `- ${title}: https://www.vittesh.com/work/${
           title === 'Future City VR + EEG'
             ? 'vr-eeg-analytics'
-            : title === 'FleetTrack'
-              ? 'fleet-command-center'
-              : 'cloud-cost-optimization'
+            : 'fleet-command-center'
         }/`
     ),
     '',
-    'Machine-readable profile: https://www.vittesh.com/v2/machine/',
+    'Machine-readable profile: https://www.vittesh.com/machine/',
     'Full markdown: https://www.vittesh.com/machine.md',
     'JSON: https://www.vittesh.com/machine.json',
     `LinkedIn: ${facts.linkedin}`,
@@ -135,8 +133,8 @@ if (process.argv[1] && process.argv[1].endsWith('sync-v2-agent-docs.mjs')) {
         employers: facts.employers,
         caseStudies: facts.caseTitles,
         links: {
-          home: 'https://www.vittesh.com/v2/',
-          machine: 'https://www.vittesh.com/v2/machine/',
+          home: 'https://www.vittesh.com/',
+          machine: 'https://www.vittesh.com/machine/',
           linkedin: facts.linkedin,
           behance: facts.behance
         }

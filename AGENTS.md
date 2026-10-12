@@ -1,11 +1,12 @@
-# AGENTS.md — Portfolio v2
+# AGENTS.md — Portfolio (vittesh.com)
 
 ## Critical
 
-- Live production routes (`/`, `/about`, `/work`, …) must stay untouched.
-- Preview archive lives under `app/v2/` + `src/components/v2/`.
-- Primary homepage is the singularity landing (`LandingExperienceSingularity` + `src/components/v2/singularity/`).
-- Classic orbit / particle landing is preserved at `/v2/classic`.
+- **Production** routes live in `app/(site)/` (URLs at `/`, `/about/`, `/work/[slug]/`, …).
+- **Legacy backup** (previous site) is at `/legacy/` (`app/legacy/`, `robots: noindex`).
+- Do not break live `/` without explicit intent; lab tools stay under `/classic`, `/singularity`, `/workbench`.
+- Primary homepage: singularity landing (`LandingExperienceSingularity` + `src/components/v2/singularity/`).
+- Classic orbit / particle landing: `/classic`.
 
 ## Sources of truth
 
@@ -19,11 +20,11 @@ Living design archive:
 - Warm archival paper + bright red primary (`#F23828`); dark alternate
 - Four-column research grid, oversized geometric display type, compact mono labels
 - About / work / machine in `src/components/v2/archive/`
-- Classic lab: `/v2/classic` (orbit landing), `/v2/classic/workbench`
+- Classic lab: `/classic` (orbit landing), `/classic/workbench`
 - Homepage hero: singularity (bloom + lensing + drag / return) in `src/components/v2/singularity/`
-- Singularity lab tool: `/v2/singularity` (`SingularityLabExperience`) — live bloom / disk / lens / color controls
+- Singularity lab: `/singularity` (`SingularityLabExperience`)
 - Styles: `src/styles/v2.css` + `src/styles/singularity.css`
-- About portrait: `/assets/images/profile.png` only — do **not** use `about.png`
+- About portrait: `profile.png` only — **not** `about.png`. Pages load `profile-192.webp` (hero) and `profile-1400.webp` (about).
 
 ## Homepage structure (Flux)
 
@@ -33,14 +34,17 @@ Hero → Trust → Why → Work → About → CTA
 
 | Path | Purpose |
 |------|---------|
-| `/v2` | **Primary homepage** (singularity landing) |
-| `/v2/classic` | Archived orbit / particle landing (lab) |
-| `/v2/classic/workbench` | Archived workbench (lab) |
-| `/v2/about` | About (`profile.png`) |
-| `/v2/work/[slug]` | Three curated case studies |
-| `/v2/singularity` | Interactive singularity playground (lab tool) |
-| `/v2/machine` | Plain-text agent bio |
-| `/v2/workbench` | Redirect → `/v2/classic/workbench` |
+| `/` | **Primary homepage** (singularity landing) |
+| `/classic` | Archived orbit / particle landing (lab) |
+| `/classic/workbench` | Archived workbench (lab) |
+| `/about` | About |
+| `/work/[slug]` | Curated case studies (published slugs in `caseStudies.ts`) |
+| `/singularity` | Interactive singularity playground (lab) |
+| `/machine` | Plain-text agent bio |
+| `/workbench` | Redirect → `/classic/workbench` |
+| `/legacy/` | Previous production site (backup, noindex) |
+
+Old `/v2/*` URLs redirect to `/` via `public/.htaccess`.
 
 ## Preview
 
@@ -48,6 +52,6 @@ Hero → Trust → Why → Work → About → CTA
 npm run dev
 ```
 
-- Primary: `http://localhost:3000/v2`
-- Classic landing: `http://localhost:3000/v2/classic`
-- Classic workbench: `http://localhost:3000/v2/classic/workbench`
+- Primary: `http://localhost:3000/`
+- Classic: `http://localhost:3000/classic`
+- Legacy backup: `http://localhost:3000/legacy/`

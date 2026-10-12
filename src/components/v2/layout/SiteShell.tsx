@@ -1,16 +1,36 @@
 'use client';
 
+import dynamic from 'next/dynamic';
 import { usePathname } from 'next/navigation';
-import { ArchiveHeader } from '@/src/components/v2/archive/ArchiveHeader';
-import { ArchiveFooter } from '@/src/components/v2/archive/ArchiveFooter';
 import { KissModeProvider } from '@/src/components/v2/layout/KissModeProvider';
 import { ThemeProvider } from '@/src/components/v2/layout/ThemeProvider';
-import { ExperienceMotion } from '@/src/components/v2/motion/ExperienceMotion';
 import { HorizonTransition } from '@/src/components/v2/motion/HorizonTransition';
 import { useScrollToHashOnMount } from '@/src/components/v2/ui/HashNavLink';
-import { BackgroundMusic } from '@/src/components/v2/ui/BackgroundMusic';
-import { ButtonHoverSound } from '@/src/components/v2/ui/ButtonHoverSound';
-import { MenuClickSound } from '@/src/components/v2/ui/MenuClickSound';
+
+const ArchiveHeader = dynamic(
+  () => import('@/src/components/v2/archive/ArchiveHeader').then((mod) => mod.ArchiveHeader),
+  { ssr: true }
+);
+const ArchiveFooter = dynamic(
+  () => import('@/src/components/v2/archive/ArchiveFooter').then((mod) => mod.ArchiveFooter),
+  { ssr: true }
+);
+const ExperienceMotion = dynamic(
+  () => import('@/src/components/v2/motion/ExperienceMotion').then((mod) => mod.ExperienceMotion),
+  { ssr: false }
+);
+const BackgroundMusic = dynamic(
+  () => import('@/src/components/v2/ui/BackgroundMusic').then((mod) => mod.BackgroundMusic),
+  { ssr: false }
+);
+const ButtonHoverSound = dynamic(
+  () => import('@/src/components/v2/ui/ButtonHoverSound').then((mod) => mod.ButtonHoverSound),
+  { ssr: false }
+);
+const MenuClickSound = dynamic(
+  () => import('@/src/components/v2/ui/MenuClickSound').then((mod) => mod.MenuClickSound),
+  { ssr: false }
+);
 
 function SkipLink() {
   return (
@@ -28,9 +48,13 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
 
   return (
     <ThemeProvider>
-      <MenuClickSound />
-      <ButtonHoverSound />
-      <BackgroundMusic />
+      {isMachine ? null : (
+        <>
+          <MenuClickSound />
+          <ButtonHoverSound />
+          <BackgroundMusic />
+        </>
+      )}
       <HorizonTransition>
         {isMachine ? (
           <>

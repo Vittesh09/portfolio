@@ -257,29 +257,6 @@ export function RevealOnScroll({
   );
 }
 
-/** Staggered on-load fade for the kiss / mobile hero (CSS-driven, no hydration flash). */
-export function useKissHeroIntro() {
-  const heroRef = useRef<HTMLElement>(null);
-  const [introReady, setIntroReady] = useState(false);
-
-  useEffect(() => {
-    const hero = heroRef.current;
-    if (!hero) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      hero.classList.add('is-kiss-in');
-      setIntroReady(true);
-      return;
-    }
-    const id = window.requestAnimationFrame(() => {
-      hero.classList.add('is-kiss-in');
-      setIntroReady(true);
-    });
-    return () => window.cancelAnimationFrame(id);
-  }, []);
-
-  return { heroRef, introReady };
-}
-
 type MobileHeroSublineProps = {
   play: boolean;
   className?: string;

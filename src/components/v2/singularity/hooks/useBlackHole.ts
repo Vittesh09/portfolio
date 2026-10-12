@@ -7,6 +7,7 @@ import { EffectComposer } from 'three/addons/postprocessing/EffectComposer.js';
 import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
+import { Pass } from 'three/addons/postprocessing/Pass.js';
 import { captureWarpSource, measureWarpBox } from '../lib/captureWarp';
 import { OverlayScenePass } from '../lib/OverlayScenePass';
 import {
@@ -33,9 +34,36 @@ import {
   textPlaneFragmentShader,
   textPlaneVertexShader
 } from '../lib/shaders';
+import { buildStarField } from '../lib/starField';
 
 function prefersReducedMotion() {
   return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+}
+
+/** Stars composite after bloom so the glow cannot sparkle each point. */
+class StarFieldPass extends Pass {
+  private readonly starScene: THREE.Scene;
+  private readonly camera: THREE.Camera;
+
+  constructor(starScene: THREE.Scene, camera: THREE.Camera) {
+    super();
+    this.starScene = starScene;
+    this.camera = camera;
+    this.needsSwap = false;
+    this.clear = false;
+  }
+
+  render(
+    renderer: THREE.WebGLRenderer,
+    _writeBuffer: THREE.WebGLRenderTarget,
+    readBuffer: THREE.WebGLRenderTarget
+  ) {
+    const prevAutoClear = renderer.autoClear;
+    renderer.autoClear = false;
+    renderer.setRenderTarget(this.renderToScreen ? null : readBuffer);
+    renderer.render(this.starScene, this.camera);
+    renderer.autoClear = prevAutoClear;
+  }
 }
 
 function isMobileViewport() {
@@ -315,6 +343,9 @@ export function useBlackHole(
       isLab ? labDefaults.bloomRadius : 0.7,
       isLab ? labDefaults.bloomThreshold : 0.8
     ));
+    const starScene = new THREE.Scene();
+    starScene.fog = scene.fog;
+    composer.addPass(new StarFieldPass(starScene, camera));
     const overlayPass = new OverlayScenePass(overlayScene, overlayCamera);
     composer.addPass(overlayPass);
 
@@ -351,40 +382,12 @@ export function useBlackHole(
     }
 
     // --- Stars ---
-    const starCount = mobile ? 14000 : 42000;
+    const starCount = mobile ? 4000 : 12000;
     const starGeometry = new THREE.BufferGeometry();
-    const starPositions = new Float32Array(starCount * 3);
-    const starColors = new Float32Array(starCount * 3);
-    const starSizes = new Float32Array(starCount);
-    const starTwinkle = new Float32Array(starCount);
-    const palette = [
-      new THREE.Color(COLORS.starWarm),
-      new THREE.Color(COLORS.starCool),
-      new THREE.Color(COLORS.starEmber),
-      new THREE.Color(0xffffff)
-    ];
-    const starFieldRadius = 2000;
-
-    for (let i = 0; i < starCount; i += 1) {
-      const i3 = i * 3;
-      const phi = Math.acos(-1 + (2 * i) / starCount);
-      const theta = Math.sqrt(starCount * Math.PI) * phi;
-      const radius = Math.cbrt(Math.random()) * starFieldRadius + 100;
-      starPositions[i3] = radius * Math.sin(phi) * Math.cos(theta);
-      starPositions[i3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
-      starPositions[i3 + 2] = radius * Math.cos(phi);
-      const c = palette[Math.floor(Math.random() * palette.length)].clone();
-      c.multiplyScalar(0.3 + Math.random() * 0.7);
-      starColors[i3] = c.r;
-      starColors[i3 + 1] = c.g;
-      starColors[i3 + 2] = c.b;
-      starSizes[i] = THREE.MathUtils.randFloat(0.6, 3.0);
-      starTwinkle[i] = Math.random() * Math.PI * 2;
-    }
-    starGeometry.setAttribute('position', new THREE.BufferAttribute(starPositions, 3));
-    starGeometry.setAttribute('color', new THREE.BufferAttribute(starColors, 3));
-    starGeometry.setAttribute('size', new THREE.BufferAttribute(starSizes, 1));
-    starGeometry.setAttribute('twinkle', new THREE.BufferAttribute(starTwinkle, 1));
+    const starField = buildStarField(starCount);
+    starGeometry.setAttribute('position', new THREE.BufferAttribute(starField.positions, 3));
+    starGeometry.setAttribute('color', new THREE.BufferAttribute(starField.colors, 3));
+    starGeometry.setAttribute('size', new THREE.BufferAttribute(starField.sizes, 1));
 
     const starMaterial = new THREE.ShaderMaterial({
       uniforms: {
@@ -399,7 +402,7 @@ export function useBlackHole(
       depthWrite: false
     });
     const stars = new THREE.Points(starGeometry, starMaterial);
-    scene.add(stars);
+    starScene.add(stars);
 
     // --- Singularity (primary + optional lab twin) ---
     const horizonGeo = new THREE.SphereGeometry(BLACK_HOLE_RADIUS * 1.05, 128, 64);
@@ -523,6 +526,26 @@ export function useBlackHole(
     grabProxy.setAttribute('role', 'presentation');
     overlayHost.appendChild(grabProxy);
 
+    const HINT_KEY = 'v2-bh-drag-hint';
+    let hintDismissed = isLab || reduceMotion;
+    try {
+      if (sessionStorage.getItem(HINT_KEY) === '1') hintDismissed = true;
+    } catch {
+      /* private mode: still show the hint once this load */
+    }
+    const hintEl = hintDismissed ? null : document.createElement('div');
+    if (hintEl) {
+      hintEl.className = 'bh-drag-hint';
+      hintEl.setAttribute('aria-hidden', 'true');
+      hintEl.innerHTML =
+        '<div class="bh-drag-hint-bubble"><p class="bh-drag-hint-say">You can move me.</p><p class="bh-drag-hint-how">Hold and drag.</p></div>';
+      overlayHost.appendChild(hintEl);
+    }
+    let hinting = false;
+    let nudgeAt = 0;
+    const nudgeFrom = new THREE.Vector3();
+    const nudgeTo = new THREE.Vector3();
+
     let disposed = false;
     let raf = 0;
     let running = true;
@@ -630,6 +653,38 @@ export function useBlackHole(
       grabProxy.style.height = `${size}px`;
       grabProxy.style.left = `${focusScreen.x - focusScreen.radius}px`;
       grabProxy.style.top = `${focusScreen.y - focusScreen.radius}px`;
+
+      if (hintEl && !hintDismissed) {
+        hintEl.style.left = `${focusScreen.x - focusScreen.radius * 0.35}px`;
+        hintEl.style.top = `${focusScreen.y - focusScreen.radius - 14}px`;
+      }
+    };
+
+    const dismissHint = () => {
+      if (hintDismissed) return;
+      hintDismissed = true;
+      hinting = false;
+      hintEl?.classList.remove('is-in');
+      try {
+        sessionStorage.setItem(HINT_KEY, '1');
+      } catch {
+        /* ignore */
+      }
+    };
+
+    const armHint = () => {
+      if (!hintEl || hintDismissed || holding) return;
+      updateHoleScreen();
+      hintEl.classList.add('is-in');
+      camera.updateMatrixWorld();
+      camRight.setFromMatrixColumn(camera.matrixWorld, 0);
+      if (camRight.lengthSq() < 1e-8) return;
+      camRight.normalize();
+      nudgeFrom.copy(holeA.home);
+      const shift = BLACK_HOLE_RADIUS * (40 / Math.max(holeScreen.radius, 80));
+      nudgeTo.copy(holeA.home).addScaledVector(camRight, -shift);
+      nudgeAt = performance.now() + 600;
+      hinting = true;
     };
 
     const pickHoleAt = (clientX: number, clientY: number): Hole | null => {
@@ -786,11 +841,17 @@ export function useBlackHole(
     };
 
     let resizeCaptureTimer = 0;
+    let layoutWidth = 0;
+    let qualityCap = mobile ? 1.5 : 2;
+    let qualitySamples = 0;
+    let qualityAccum = 0;
 
     const resize = () => {
       const width = Math.max(1, mount.clientWidth);
       const height = Math.max(1, mount.clientHeight);
-      const dpr = Math.min(window.devicePixelRatio || 1, mobile ? 1.5 : 2);
+      const widthChanged = Math.abs(width - layoutWidth) > 1;
+      layoutWidth = width;
+      const dpr = Math.min(window.devicePixelRatio || 1, qualityCap);
       camera.aspect = width / Math.max(1, height);
       applyHomeForViewport(width, height);
       // applyRightFrame already updated projection; keep aspect in sync
@@ -806,9 +867,11 @@ export function useBlackHole(
       updateHoleScreen();
       // Debounce recapture on resize so text doesn't thrash mid-drag
       window.clearTimeout(resizeCaptureTimer);
-      resizeCaptureTimer = window.setTimeout(() => {
-        if (textReady) void refreshWarpTexture(true);
-      }, 280);
+      if (widthChanged) {
+        resizeCaptureTimer = window.setTimeout(() => {
+          if (textReady) void refreshWarpTexture(true);
+        }, 280);
+      }
     };
 
     // ---------------------------------------------------------------------------
@@ -888,6 +951,7 @@ export function useBlackHole(
       completeIntroVisuals();
       holeA.core.position.copy(holeA.home);
       if (!holding && !returning) enableOrbitIfAllowed();
+      armHint();
     };
 
     if (isLab || reduceMotion) {
@@ -905,10 +969,6 @@ export function useBlackHole(
     } else {
       controls.enabled = false;
       grabProxy.style.pointerEvents = 'none';
-      // Ensure copy-in even if LandingExperience rAF hasn't fired yet
-      if (hero && !hero.classList.contains('is-copy-in')) {
-        window.requestAnimationFrame(() => hero.classList.add('is-copy-in'));
-      }
     }
 
     const clearHoldUi = () => {
@@ -991,6 +1051,7 @@ export function useBlackHole(
       if (!drag.dragging) {
         if (dist < DRAG_THRESHOLD_PX) return;
         drag.dragging = true;
+        dismissHint();
         mount.classList.add('is-dragging');
         mount.classList.remove('is-grabbing');
         grabProxy.classList.add('is-dragging');
@@ -1138,15 +1199,15 @@ export function useBlackHole(
           }
         }
 
-        // Sky drift you can see. One revolution is about 48s. The disk stays
+        // Slow sky drift. One revolution is about 8 minutes. The disk stays
         // on shader flow so the horizon does not spin with the stars.
         if (!reduceMotion && !isLab) {
-          const skyTurn = elapsed * ((Math.PI * 2) / 48);
+          const skyTurn = elapsed * ((Math.PI * 2) / (8 * 60));
           stars.rotation.y = skyTurn;
           stars.rotation.x = skyTurn * 0.12;
         }
         diskMaterial.uniforms.uTime.value = elapsed * timeScale;
-        starMaterial.uniforms.uTime.value = elapsed * timeScale;
+        if (!reduceMotion) starMaterial.uniforms.uTime.value = elapsed;
         horizonMat.uniforms.uTime.value = elapsed * timeScale;
         horizonMat.uniforms.uCameraPosition.value.copy(camera.position);
 
@@ -1154,8 +1215,10 @@ export function useBlackHole(
         const lensDrag = Math.min(0.4, lensIdle + 0.04);
 
         if (!introDone) {
-          if (!introBootAt) introBootAt = performance.now();
-          const sinceBoot = performance.now() - introBootAt;
+          if (!introBootAt) {
+            introBootAt = performance.now();
+          }
+          const sinceBoot = introBootAt ? performance.now() - introBootAt : 0;
 
           // Hold the void collapsed until copy has started (~140ms)
           if (sinceBoot < INTRO_BH_DELAY_MS) {
@@ -1207,6 +1270,23 @@ export function useBlackHole(
           stepReturnHome();
         } else if (orbitCoasting) {
           stepOrbitCoast();
+        } else if (hinting) {
+          const sinceNudge = performance.now() - nudgeAt;
+          const nudgeT = sinceNudge < 0 ? 0 : Math.min(1, sinceNudge / 1600);
+          holeA.core.position.lerpVectors(
+            nudgeFrom,
+            nudgeTo,
+            sinceNudge < 0 ? 0 : Math.sin(Math.PI * nudgeT)
+          );
+          controls.target.copy(HOME);
+          if (!mobile && !reduceMotion) {
+            controls.enabled = true;
+            controls.update();
+          }
+          if (nudgeT >= 1) {
+            hinting = false;
+            holeA.core.position.copy(holeA.home);
+          }
         } else if (holeCountLive < 2) {
           if (holeA.core.position.distanceToSquared(holeA.home) > 1e-6) {
             holeA.core.position.copy(holeA.home);
@@ -1297,6 +1377,18 @@ export function useBlackHole(
 
         composer.render();
         mount.classList.add('is-ready');
+        if (introDone && qualitySamples < 90) {
+          qualitySamples += 1;
+          qualityAccum += delta;
+          if (qualitySamples === 90) {
+            const averageMs = (qualityAccum / 90) * 1000;
+            const nextCap = qualityCap > 1.5 ? 1.5 : 1.25;
+            if (averageMs > 18 && qualityCap > nextCap) {
+              qualityCap = nextCap;
+              resize();
+            }
+          }
+        }
       } catch (err) {
         console.warn('[singularity] frame error', err);
       }
@@ -1413,10 +1505,10 @@ export function useBlackHole(
       camera.clearViewOffset();
       hero?.classList.remove('is-bh-dragging');
       hero?.classList.remove('is-intro-done');
-      hero?.classList.remove('is-copy-in');
       hero?.classList.remove('bh-copy-fallback');
       mount.classList.remove('is-intro-done');
       if (grabProxy.parentNode) grabProxy.parentNode.removeChild(grabProxy);
+      if (hintEl?.parentNode) hintEl.parentNode.removeChild(hintEl);
 
       starGeometry.dispose();
       starMaterial.dispose();

@@ -12,8 +12,9 @@ export function v2Robots() {
 
 export function v2Canonical(path = '/') {
   const suffix = path.startsWith('/') ? path : `/${path}`;
-  if (suffix === '/' || suffix === '') return `${SITE_URL}${V2_BASE}/`;
-  return `${SITE_URL}${V2_BASE}${suffix.endsWith('/') ? suffix : `${suffix}/`}`;
+  const tail = suffix === '/' || suffix === '' ? '/' : suffix.endsWith('/') ? suffix : `${suffix}/`;
+  const base = V2_BASE.replace(/\/$/, '');
+  return `${SITE_URL}${base}${tail}`;
 }
 
 export const v2DefaultTitle = `${profile.name} | ${profile.title}`;

@@ -21,7 +21,7 @@ export function MachinePageView({ text }: MachinePageViewProps) {
           <a href={`${SITE_URL}/machine.json`}>/machine.json</a>
         </p>
         <div className="v2-machine-actions">
-          <Link href="/v2/" className="v2-machine-back">
+          <Link href="/" className="v2-machine-back">
             ← Back to portfolio
           </Link>
           <MachineCopyButton text={text} />

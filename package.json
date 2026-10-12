@@ -5,7 +5,8 @@
     "dev": "next dev",
     "build": "npm run sync:v2-agent && npm run check:v2 && next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
+    "measure": "next build && node scripts/measure-out.mjs",
     "check:v2": "node scripts/check-v2-consistency.mjs",
     "sync:v2-agent": "node scripts/sync-v2-agent-docs.mjs",
     "test:v2-viewport": "playwright test"
@@ -27,7 +28,10 @@
     "@types/react-dom": "^18.3.5",
     "@types/three": "^0.185.1",
     "autoprefixer": "^10.5.4",
+    "eslint": "^9.39.5",
+    "eslint-config-next": "^16.4.0",
     "postcss": "^8.5.23",
+    "sharp": "^0.35.5",
     "tailwindcss": "^3.4.19",
     "typescript": "^5.7.3"
   }

@@ -24,7 +24,7 @@ export function scrollToHash(hash: string, behavior: ScrollBehavior = 'smooth') 
   return true;
 }
 
-/** After client navigations to `/v2/#work`, scroll once the section exists. */
+/** After client navigations to `/#work`, scroll once the section exists. */
 export function useScrollToHashOnMount() {
   const pathname = usePathname();
 

@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export const metadata = {
   title: '404 — Page not found'
 };
@@ -12,7 +14,9 @@ export default function NotFound() {
         <div className="notfound-code fade-up">404</div>
         <h2 className="notfound-title fade-up delay-1">It seems you’re&nbsp;lost</h2>
         <p className="fade-up delay-2">Only those who wander discover what they’re&nbsp;seeking.</p>
-        <a href="/" className="coming-button fade-up delay-3" aria-label="Back to home">Back to home</a>
+        <Link href="/" className="coming-button fade-up delay-3" aria-label="Back to home">
+          Back to home
+        </Link>
       </div>
     </div>
   );

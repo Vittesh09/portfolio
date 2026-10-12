@@ -14,7 +14,7 @@ export function HeroPortrait({
       <div className="v2-hero-portrait-ring">
         <div className="v2-hero-portrait-inner">
           <Image
-            src="/assets/images/profile.png"
+            src="/assets/images/profile-192.webp"
             alt={`Portrait of ${siteConfig.name}`}
             width={96}
             height={96}

@@ -1,6 +1,6 @@
 export const workbenchMeta = {
   title: 'Workbench',
-  path: '/v2/classic/workbench/',
+  path: '/classic/workbench/',
   status: 'Archived lab (not the primary homepage). Kept for components and experiments.',
   description:
     'Archived lab of components, side explorations, and writing drafts. Not the live homepage.'

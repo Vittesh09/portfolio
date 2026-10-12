@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { BlackHoleLazy } from '@/src/components/v2/singularity/BlackHoleLazy';
 import { useKissMode } from '@/src/components/v2/layout/KissModeProvider';
@@ -17,7 +17,7 @@ import { HeroCloser, HeroHeadlineLines, HeroKicker } from '@/src/components/v2/a
 import { HeroPortrait } from '@/src/components/v2/archive/HeroPortrait';
 import { HeroMeta } from '@/src/components/v2/archive/HeroMeta';
 import { ProjectCard } from '@/src/components/v2/archive/ProjectCard';
-import { projects } from '@/src/config/v2/caseStudies';
+import { type ProjectCardData } from '@/src/config/v2/caseStudies';
 import { heroCloser, heroHeadline, heroKicker } from '@/src/config/v2/profile';
 import { siteConfig, trustLogos, trustSignals } from '@/src/config/v2/site';
 
@@ -33,7 +33,7 @@ function Label({ children }: { children: React.ReactNode }) {
   return <p className="archive-label text-text-muted">{children}</p>;
 }
 
-export function LandingExperienceSingularity() {
+export function LandingExperienceSingularity({ cards }: { cards: ProjectCardData[] }) {
   const heroRef = useRef<HTMLElement>(null);
   const borderGlow = useBorderGlow();
   const isMobileMedia = useMobileLanding();
@@ -54,20 +54,16 @@ export function LandingExperienceSingularity() {
   const isMobile = clientReady && isMobileMedia;
   const useKiss = isMobile || (hydrated && kissMode);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const hero = heroRef.current;
     if (!hero || useKiss) return;
+    hero.classList.add('is-copy-in');
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
-      hero.classList.add('is-copy-in', 'is-intro-done');
-      return;
+      hero.classList.add('is-intro-done');
     }
-    const id = window.requestAnimationFrame(() => {
-      hero.classList.add('is-copy-in');
-    });
-    return () => window.cancelAnimationFrame(id);
   }, [useKiss]);
 
-  if (useKiss) return <LandingExperienceKiss />;
+  if (useKiss) return <LandingExperienceKiss cards={cards} />;
 
   return (
     <>
@@ -173,7 +169,7 @@ export function LandingExperienceSingularity() {
                 Work that shipped.
               </h2>
             </div>
-            {projects.map((project, index) => (
+            {cards.map((project, index) => (
               <motion.article
                 key={project.slug}
                 className="col-span-full md:grid md:grid-cols-subgrid md:items-center"
@@ -182,7 +178,7 @@ export function LandingExperienceSingularity() {
                 viewport={{ once: true, margin: '-50px' }}
                 transition={{ delay: index * 0.06 }}
               >
-                <ProjectCard project={project} />
+                <ProjectCard project={project} index={index} />
               </motion.article>
             ))}
           </div>
@@ -193,7 +189,7 @@ export function LandingExperienceSingularity() {
         <div className="mx-auto grid max-w-[1600px] grid-cols-12 items-center md:items-stretch">
           <div className="relative col-span-4 h-36 self-center overflow-hidden bg-bg-muted md:col-span-5 md:h-auto md:min-h-[36rem] md:self-stretch">
             <Image
-              src="/assets/images/profile.png"
+              src="/assets/images/profile-1400.webp"
               alt={`Portrait of ${siteConfig.name}`}
               fill
               loading="lazy"
@@ -211,7 +207,7 @@ export function LandingExperienceSingularity() {
               <p className="text-sm leading-relaxed text-text-secondary">{siteConfig.aboutShort}</p>
               <div className="flex items-end md:justify-end">
                 <Link
-                  href="/v2/about/"
+                  href="/about/"
                   className="archive-label border border-text-primary px-5 py-3 transition-colors hover:bg-text-primary hover:text-bg-primary"
                 >
                   More about me →

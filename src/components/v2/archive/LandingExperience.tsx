@@ -13,7 +13,7 @@ import { ResumeDownload } from '@/src/components/v2/ui/ResumeDownload';
 import { HeroCloser, HeroHeadlineLines, HeroKicker } from '@/src/components/v2/archive/HeroIntroCopy';
 import { HeroMeta } from '@/src/components/v2/archive/HeroMeta';
 import { ProjectCard } from '@/src/components/v2/archive/ProjectCard';
-import { projects } from '@/src/config/v2/caseStudies';
+import { type ProjectCardData } from '@/src/config/v2/caseStudies';
 import {
   processSteps,
   siteConfig,
@@ -88,14 +88,14 @@ function AnimatedStat({ value }: { value: string }) {
   );
 }
 
-export function LandingExperience() {
+export function LandingExperience({ cards }: { cards: ProjectCardData[] }) {
   const { kissMode, hydrated } = useKissMode();
   // Avoid SSR/client tree swap from sessionStorage until after mount.
-  if (hydrated && kissMode) return <LandingExperienceKiss />;
-  return <LandingExperienceArchive />;
+  if (hydrated && kissMode) return <LandingExperienceKiss cards={cards} />;
+  return <LandingExperienceArchive cards={cards} />;
 }
 
-function LandingExperienceArchive() {
+function LandingExperienceArchive({ cards }: { cards: ProjectCardData[] }) {
   return (
     <>
       <section className="v2-hero-stage v2-black-hole-hero border-b border-white/10">
@@ -242,7 +242,7 @@ function LandingExperienceArchive() {
                 Work that shipped.
               </h2>
             </div>
-            {projects.map((project, index) => (
+            {cards.map((project, index) => (
               <motion.article
                 key={project.slug}
                 className="col-span-full md:grid md:grid-cols-subgrid md:items-center"
@@ -251,7 +251,7 @@ function LandingExperienceArchive() {
                 viewport={{ once: true, margin: '-50px' }}
                 transition={{ delay: index * 0.06 }}
               >
-                <ProjectCard project={project} />
+                <ProjectCard project={project} index={index} />
               </motion.article>
             ))}
           </div>
@@ -262,7 +262,7 @@ function LandingExperienceArchive() {
         <div className="mx-auto grid max-w-[1600px] grid-cols-12 items-center md:items-stretch">
           <div className="relative col-span-4 h-36 self-center overflow-hidden bg-bg-muted md:col-span-5 md:h-auto md:min-h-[36rem] md:self-stretch">
             <Image
-              src="/assets/images/profile.png"
+              src="/assets/images/profile-1400.webp"
               alt={`Portrait of ${siteConfig.name}`}
               fill
               className="archive-image object-cover"
@@ -278,7 +278,7 @@ function LandingExperienceArchive() {
               <p className="text-sm leading-relaxed text-text-secondary">{siteConfig.aboutShort}</p>
               <div className="flex items-end md:justify-end">
                 <Link
-                  href="/v2/about/"
+                  href="/about/"
                   className="archive-label border border-text-primary px-5 py-3 transition-colors hover:bg-text-primary hover:text-bg-primary"
                 >
                   More about me →

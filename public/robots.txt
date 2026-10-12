@@ -20,7 +20,7 @@ User-agent: Google-Extended
 Allow: /
 
 # Keep machine-readable surfaces crawlable.
-Allow: /v2/machine/
+Allow: /machine/
 Allow: /llms.txt
 Allow: /machine.md
 Allow: /machine.json

@@ -1,14 +1,9 @@
 'use client';
 
-import { useEffect, useLayoutEffect, useState } from 'react';
-import { AnimatePresence, motion, useMotionValue, useSpring } from 'framer-motion';
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useKissMode } from '@/src/components/v2/layout/KissModeProvider';
 import { useLenisSmoothScroll } from '@/src/components/v2/motion/useLenisSmoothScroll';
-
-type GatePhase = 'loading' | 'ready' | 'exit' | 'hidden';
-
-const INTRO_STORAGE_KEY = 'v2-auto-intro';
 
 function collectScrollTitles(root: ParentNode) {
   return Array.from(
@@ -109,54 +104,120 @@ function useSectionReveals(enabled: boolean) {
   }, [enabled]);
 }
 
+/** Touch stand-in for card hover: the thumb settles and takes colour as it rises into view. */
+function useProjectScrollFocus() {
+  useEffect(() => {
+    const touch =
+      window.matchMedia('(hover: none)').matches || window.matchMedia('(pointer: coarse)').matches;
+    if (!touch) return;
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const eased = new WeakMap<HTMLElement, number>();
+    let frame = 0;
+    let last = performance.now();
+
+    const targetFor = (card: HTMLElement) => {
+      const thumb = card.querySelector('.archive-project-thumb');
+      if (!thumb) return 0;
+      const rect = thumb.getBoundingClientRect();
+      const vh = window.innerHeight;
+      const center = rect.top + rect.height / 2;
+      const raw = (vh - center) / (vh * 0.45);
+      const t = Math.min(1, Math.max(0, raw));
+      return t * t * (3 - 2 * t);
+    };
+
+    const tick = (now: number) => {
+      frame = window.requestAnimationFrame(tick);
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      const follow = reduce ? 1 : 1 - Math.exp(-4.5 * dt);
+      document
+        .querySelectorAll<HTMLElement>('.archive-project-card:not(.is-locked)')
+        .forEach((card) => {
+          const target = targetFor(card);
+          const prev = eased.get(card) ?? target;
+          const next = Math.abs(target - prev) < 0.001 ? target : prev + (target - prev) * follow;
+          if (Math.abs(next - prev) < 0.0005 && eased.has(card)) return;
+          eased.set(card, next);
+          card.style.setProperty('--focus', next.toFixed(4));
+          card.classList.toggle('is-focused', next > 0.82);
+        });
+    };
+
+    frame = window.requestAnimationFrame(tick);
+    return () => window.cancelAnimationFrame(frame);
+  }, []);
+}
+
 function AmbientCursor({ enabled }: { enabled: boolean }) {
-  const x = useMotionValue(-100);
-  const y = useMotionValue(-100);
-  const ringX = useSpring(x, { stiffness: 980, damping: 52, mass: 0.22 });
-  const ringY = useSpring(y, { stiffness: 980, damping: 52, mass: 0.22 });
+  const ringRef = useRef<HTMLDivElement>(null);
+  const dotRef = useRef<HTMLDivElement>(null);
   const [pressed, setPressed] = useState(false);
   const [interactive, setInteractive] = useState(false);
   const [nativeGrab, setNativeGrab] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const scaleRef = useRef(1);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
   useEffect(() => {
-    const media = window.matchMedia('(prefers-reduced-motion: reduce)');
-    const snap = () => {
-      if (!media.matches) return;
-      ringX.jump(x.get());
-      ringY.jump(y.get());
-    };
-    const stopX = x.on('change', snap);
-    const stopY = y.on('change', snap);
-    return () => {
-      stopX();
-      stopY();
-    };
-  }, [ringX, ringY, x, y]);
+    if (!enabled || !mounted) return;
+    if (
+      window.matchMedia('(pointer: coarse)').matches ||
+      window.matchMedia('(max-width: 768px)').matches
+    ) {
+      return;
+    }
+    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const target = { x: -100, y: -100 };
+    const ring = { x: -100, y: -100, scale: 1 };
+    let frame = 0;
 
-  useEffect(() => {
-    if (!enabled || window.matchMedia('(pointer: coarse)').matches) return;
+    const place = () => {
+      const dot = dotRef.current;
+      const halo = ringRef.current;
+      if (dot) dot.style.transform = `translate3d(${target.x}px, ${target.y}px, 0)`;
+      if (halo) {
+        halo.style.transform = `translate3d(${ring.x}px, ${ring.y}px, 0) scale(${ring.scale})`;
+      }
+    };
+
+    let last = performance.now();
+    const tick = (now: number) => {
+      frame = window.requestAnimationFrame(tick);
+      if (!Number.isFinite(ring.x) || !Number.isFinite(ring.y)) {
+        ring.x = target.x;
+        ring.y = target.y;
+      }
+      if (reduce) {
+        ring.x = target.x;
+        ring.y = target.y;
+      } else {
+        const dt = Math.min(0.05, (now - last) / 1000);
+        const follow = 1 - Math.exp(-14 * dt);
+        ring.x += (target.x - ring.x) * follow;
+        ring.y += (target.y - ring.y) * follow;
+        ring.scale += (scaleRef.current - ring.scale) * follow;
+      }
+      last = now;
+      place();
+    };
+    frame = window.requestAnimationFrame(tick);
+
     const move = (event: PointerEvent) => {
-      x.set(event.clientX - 18);
-      y.set(event.clientY - 18);
-      const target = event.target;
+      target.x = event.clientX - 18;
+      target.y = event.clientY - 18;
+      const node = event.target;
       const overHole =
-        target instanceof Element &&
-        Boolean(
-          target.closest('.bh-grab') ||
-            document.querySelector('.bh-hero.is-bh-dragging')
-        );
+        node instanceof Element &&
+        Boolean(node.closest('.bh-grab') || document.querySelector('.bh-hero.is-bh-dragging'));
       setNativeGrab(overHole);
       setInteractive(
         !overHole &&
-          target instanceof Element &&
-          Boolean(
-            target.closest('a, button, [role="button"], input, textarea, select, label')
-          )
+          node instanceof Element &&
+          Boolean(node.closest('a, button, [role="button"], input, textarea, select, label'))
       );
     };
     const down = () => setPressed(true);
@@ -165,43 +226,41 @@ function AmbientCursor({ enabled }: { enabled: boolean }) {
     window.addEventListener('pointerdown', down);
     window.addEventListener('pointerup', up);
     return () => {
+      window.cancelAnimationFrame(frame);
       window.removeEventListener('pointermove', move);
       window.removeEventListener('pointerdown', down);
       window.removeEventListener('pointerup', up);
     };
-  }, [enabled, x, y]);
+  }, [enabled, mounted]);
+
+  const orbit = pressed && !interactive && !nativeGrab;
+  const scale = nativeGrab ? 1 : pressed ? 0.88 : interactive ? 1.55 : 1;
+
+  useEffect(() => {
+    scaleRef.current = scale;
+  }, [scale]);
 
   if (!mounted || !enabled) return null;
 
-  /* Orbit only while pressed and not over a CTA */
-  const orbit = pressed && !interactive && !nativeGrab;
-
   return (
     <>
-      <motion.div
+      <div
+        ref={ringRef}
         aria-hidden
         className="v2-ambient-cursor-ring"
         data-interactive={interactive}
         data-native-grab={nativeGrab}
-        initial={false}
-        style={{ x: ringX, y: ringY }}
-        animate={{
-          scale: nativeGrab ? 1 : pressed ? 0.88 : interactive ? 1.55 : 1,
-          opacity: nativeGrab ? 0 : 1
-        }}
-        transition={{ duration: 0.18 }}
+        style={{ opacity: nativeGrab ? 0 : 1, transition: 'opacity 0.18s ease' }}
       />
-      <motion.div
+      <div
+        ref={dotRef}
         aria-hidden
         className="v2-ambient-cursor"
         data-interactive={interactive}
         data-native-grab={nativeGrab}
         data-pressed={pressed}
         data-orbit={orbit}
-        initial={false}
-        style={{ x, y }}
-        animate={{ opacity: nativeGrab ? 0 : 1 }}
-        transition={{ duration: 0.18 }}
+        style={{ opacity: nativeGrab ? 0 : 1, transition: 'opacity 0.18s ease' }}
       >
         <span className="v2-ambient-cursor-orbit" aria-hidden>
           <span className="v2-ambient-cursor-trail" data-trail="4" />
@@ -210,107 +269,46 @@ function AmbientCursor({ enabled }: { enabled: boolean }) {
           <span className="v2-ambient-cursor-trail" data-trail="1" />
           <span className="v2-ambient-cursor-core" />
         </span>
-      </motion.div>
+      </div>
     </>
-  );
-}
-
-function EntryGate({ phase }: { phase: GatePhase }) {
-  const visible = phase !== 'hidden';
-
-  return (
-    <AnimatePresence>
-      {visible ? (
-        <motion.div
-          key="entry-gate"
-          className="v2-entry-gate"
-          data-phase={phase}
-          initial={false}
-          animate={
-            phase === 'exit'
-              ? { opacity: 0, scale: 1.12 }
-              : { opacity: 1, scale: 1 }
-          }
-          exit={{ opacity: 0 }}
-          transition={{
-            duration: phase === 'exit' ? 0.75 : 0.25,
-            ease: [0.16, 1, 0.3, 1]
-          }}
-        >
-          <div className="v2-entry-orbits" aria-hidden>
-            <span className="v2-entry-orbit v2-entry-orbit-1" />
-            <span className="v2-entry-orbit v2-entry-orbit-2" />
-            <span className="v2-entry-orbit v2-entry-orbit-3" />
-          </div>
-
-          <div className="v2-entry-core" aria-hidden>
-            <span className="v2-entry-void" />
-            <span className="v2-entry-ring" />
-            <span className="v2-entry-progress" />
-          </div>
-
-          <p className="archive-label v2-entry-status">
-            {phase === 'ready' || phase === 'exit' ? 'Vittesh Sinha' : 'Entering archive'}
-          </p>
-          <p className="archive-label v2-entry-caption">Product designer · India</p>
-        </motion.div>
-      ) : null}
-    </AnimatePresence>
   );
 }
 
 export function ExperienceMotion() {
   const pathname = usePathname();
-  const isHome = pathname === '/v2' || pathname === '/v2/';
   const isMachine = pathname?.includes('/machine') ?? false;
   const { kissMode } = useKissMode();
-  // Keep SSR and first client paint identical; intro runs only after mount.
-  const [phase, setPhase] = useState<GatePhase>('hidden');
 
   useLayoutEffect(() => {
     const root = document.querySelector('.v2-root');
-
-    if (!isHome) {
-      setPhase('hidden');
-      root?.classList.remove('v2-intro-active', 'v2-intro-reveal');
-      return;
-    }
-
-    // Primary /v2 uses the singularity load intro — skip the old orbit entry gate
-    window.sessionStorage.setItem(INTRO_STORAGE_KEY, 'true');
-    setPhase('hidden');
-    root?.classList.remove('v2-intro-active');
     root?.classList.add('v2-intro-reveal');
     window.dispatchEvent(new CustomEvent('v2-cosmos-reveal'));
-  }, [isHome]);
+  }, []);
 
-  const gateOpen = isHome && phase !== 'hidden';
-
-  useEffect(() => {
-    if (!gateOpen) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = previous;
-    };
-  }, [gateOpen]);
-
-  const experienceReady = phase === 'hidden';
-  useLenisSmoothScroll(experienceReady && !isMachine);
-  useSectionReveals(experienceReady);
-  useTitleReveals(experienceReady, pathname, kissMode);
+  useLenisSmoothScroll(!isMachine);
+  useSectionReveals(true);
+  useTitleReveals(true, pathname, kissMode);
+  useProjectScrollFocus();
+  const [cursorOn, setCursorOn] = useState(false);
 
   useEffect(() => {
     const root = document.querySelector('.v2-root');
-    if (!root || window.matchMedia('(pointer: coarse)').matches) return;
-    root.classList.toggle('v2-custom-cursor-active', experienceReady);
-    return () => root.classList.remove('v2-custom-cursor-active');
-  }, [experienceReady]);
+    const narrow = window.matchMedia('(max-width: 768px)');
+    const coarse = window.matchMedia('(pointer: coarse)');
+    const sync = () => {
+      const on = !narrow.matches && !coarse.matches;
+      setCursorOn(on);
+      root?.classList.toggle('v2-custom-cursor-active', on);
+    };
+    sync();
+    narrow.addEventListener('change', sync);
+    coarse.addEventListener('change', sync);
+    return () => {
+      narrow.removeEventListener('change', sync);
+      coarse.removeEventListener('change', sync);
+      root?.classList.remove('v2-custom-cursor-active');
+    };
+  }, []);
 
-  return (
-    <>
-      {isHome && !kissMode ? <EntryGate phase={phase} /> : null}
-      <AmbientCursor enabled={experienceReady} />
-    </>
-  );
+  return <AmbientCursor enabled={cursorOn} />;
 }

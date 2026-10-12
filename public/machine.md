@@ -15,8 +15,7 @@ Employers:
 - Cult.fit
 
 Case studies:
-- FleetTrack
+- Fleet Track Management
 - Future City VR + EEG
-- Cloud Cost Optimization
 
 This file is a snapshot for crawlers. The live generator is src/config/v2/agentDocuments.ts.

@@ -76,7 +76,7 @@ export function getMachineRecord() {
       detail: job.detail,
       metrics: job.metrics
     })),
-    caseStudies: projects.map((project) => ({
+    caseStudies: projects.filter((project) => !project.comingSoon).map((project) => ({
       title: project.title,
       company: project.company,
       role: project.role,

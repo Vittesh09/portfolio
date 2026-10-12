@@ -87,6 +87,64 @@
   cursor: grabbing;
 }
 
+.v2-root .bh-drag-hint {
+  left: 0;
+  opacity: 0;
+  pointer-events: none;
+  position: fixed;
+  top: 0;
+  transform: translate(-62%, calc(-100% + 6px));
+  transition:
+    opacity 0.55s cubic-bezier(0.16, 1, 0.3, 1),
+    transform 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 100;
+}
+
+.v2-root .bh-drag-hint.is-in {
+  opacity: 1;
+  transform: translate(-62%, -100%);
+  transition-delay: 0.45s;
+}
+
+.v2-root .bh-drag-hint-bubble {
+  background: #f4efe6;
+  border-radius: 18px;
+  box-shadow: 0 14px 36px rgb(0 0 0 / 0.32);
+  color: #1a120e;
+  padding: 0.75rem 1rem 0.7rem;
+  position: relative;
+  width: max-content;
+}
+
+.v2-root .bh-drag-hint-bubble::after {
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-top: 10px solid #f4efe6;
+  bottom: -9px;
+  content: '';
+  position: absolute;
+  right: 18%;
+}
+
+.v2-root .bh-drag-hint-say {
+  font-family: var(--font-instrument), Georgia, serif;
+  font-size: 1.35rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.05;
+  margin: 0;
+}
+
+.v2-root .bh-drag-hint-how {
+  color: #6d645e;
+  font-family: var(--font-jetbrains), monospace;
+  font-size: 0.625rem;
+  letter-spacing: 0.12em;
+  line-height: 1.3;
+  margin: 0.4rem 0 0;
+  text-transform: uppercase;
+}
+
 .v2-root .bh-hero > .relative {
   pointer-events: none;
   position: relative;

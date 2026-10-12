@@ -86,6 +86,8 @@ export type Project = {
   cardImages?: string[];
   /** Fill the wide thumbnail. Later frames are not letterboxed. */
   cardCover?: boolean;
+  /** Shown on the homepage, with no case study page yet. */
+  comingSoon?: boolean;
   images: { src: string; alt: string }[];
 };
 
@@ -95,7 +97,7 @@ export const projects: Project[] = [
 {
     slug: 'fleet-command-center',
     index: '01',
-    title: 'FleetTrack',
+    title: 'Fleet Track Management',
     summary:
       'I redesigned the FleetTrack dashboard so a fleet manager can find a problem, see why it happened, and close it in one workspace.',
     company: 'LB Technology',
@@ -259,9 +261,9 @@ export const projects: Project[] = [
     ],
     measurementNote:
       'These are changes in the product. I do not have a counted before-and-after for time saved, events caught, or fuel reduced, so none is stated here.',
-    image: asset('Frame 1000005391.svg'),
+    image: asset('fleet-card.webp'),
     cardImages: [
-      asset('Frame 1000005391.svg'),
+      asset('fleet-card.webp'),
       asset('fleet-cameras-device.webp'),
       asset('fleet-thumb-video.jpg')
     ],
@@ -369,7 +371,7 @@ export const projects: Project[] = [
       problemClose:
         'How might we enable normal citizens to experience a future city immersively and capture their emotional responses in a structured, scalable way?',
       solutionImage: {
-        src: asset('4.svg'),
+        src: asset('cloud-diagram.webp'),
         alt: 'The solution: an immersive VR experience, passive EEG capture while questions are asked, then centralised insights for the team.'
       },
       ideaTitle: '',
@@ -455,13 +457,13 @@ export const projects: Project[] = [
           title: 'The VR experience of the city',
           body: 'A small group moved through the areas assigned to them, on foot or by teleport, across flat ground, stairs, and slopes. The other people in the group were visible nearby, and a virtual population filled the streets. Questions appeared in the place and were answered by voice. The same walk kept a record of where they were, the light and sound there, and the raw EEG. The controller guide stayed in the city, and a journey card held the current area, the destination, and the time spent.',
           image: {
-            src: asset('future-controller.png'),
+            src: asset('future-controller.webp'),
             alt: 'Walking through the virtual city with other people, across paths, stairs, and slopes.'
           },
           video: asset('future-city-walk.mp4'),
           pair: [
             {
-              src: asset('future-controller.png'),
+              src: asset('future-controller.webp'),
               alt: 'Controller guide in the virtual city, marking the triggers for the interface and the microphone.'
             },
             {
@@ -482,7 +484,7 @@ export const projects: Project[] = [
       scale:
         'The screens were different. The workflow was not. Admins managed access. Participants prepared and entered the city. Raw Data Providers kept the EEG record available for the people downstream. Urban planners set the world, the people, the time, and the environment.',
       capabilityImage: {
-        src: asset('5.svg'),
+        src: asset('vr-diagram.webp'),
         alt: 'The capability: citizens experience the unbuilt city, emotional and cognitive data is captured, and one dashboard holds it for the team.'
       },
       resultsTitle: 'Learnings',
@@ -521,7 +523,7 @@ export const projects: Project[] = [
     cardImages: [
       asset('future-city.jpg'),
       asset('future-headset.jpg'),
-      asset('future-controller.png'),
+      asset('future-controller.webp'),
       asset('future-configure.png')
     ],
     images: [
@@ -538,7 +540,7 @@ export const projects: Project[] = [
         alt: 'System connection checks, with the EEG device marked checked.'
       },
       {
-        src: asset('future-controller.png'),
+        src: asset('future-controller.webp'),
         alt: 'Controller guide in the virtual city, marking the triggers for the interface and the microphone.'
       },
       {
@@ -562,12 +564,12 @@ export const projects: Project[] = [
 {
     slug: 'cloud-cost-optimization',
     index: '03',
-    title: 'Cloud Cost Optimization',
-    summary:
-      'I designed a FinOps workspace that turns messy AWS usage into ranked recommendations teams can act on.',
+    comingSoon: true,
+    title: 'Redesigning a Global B2B Product Configurator',
+    summary: 'Modernising legacy configuration software for an international market.',
     company: 'TODO: [FILL: case 03 company]',
     cardRole: 'Senior Product Designer',
-    outcomeLine: 'Waste diagnosis got 30% faster.\nAcross 20+ AWS services.',
+    outcomeLine: 'Modernising legacy configuration software for an international market.',
     outcomeEvidence: [
       {
         metric: '30% faster waste diagnosis across 20+ AWS services',
@@ -624,7 +626,8 @@ export const projects: Project[] = [
       'Consolidated more than 20 infrastructure services and funnels.',
       'Turned passive cost reporting into an action-oriented optimization workflow.'
     ],
-    image: asset('cloud-rds.png'),
+    image: asset('configurator-preview.jpg'),
+    cardCover: true,
     images: [
       { src: asset('cloud-rds.png'), alt: 'RDS cost optimization recommendations' },
       { src: asset('cloud-ec2.png'), alt: 'EC2 service recommendation table' },
@@ -633,12 +636,32 @@ export const projects: Project[] = [
   }
 ];
 
+export type ProjectCardData = Pick<
+  Project,
+  'slug' | 'title' | 'cardRole' | 'year' | 'outcomeLine' | 'image' | 'cardImages' | 'cardCover' | 'comingSoon'
+>;
+
+/** Card fields only. Server pages pass this into client landings so story copy stays off the homepage bundle. */
+export function getProjectCards(): ProjectCardData[] {
+  return projects.map((project) => ({
+    slug: project.slug,
+    title: project.title,
+    cardRole: project.cardRole,
+    year: project.year,
+    outcomeLine: project.outcomeLine,
+    image: project.image,
+    cardImages: project.cardImages,
+    cardCover: project.cardCover,
+    comingSoon: project.comingSoon
+  }));
+}
+
 export function getProject(slug: string) {
   return projects.find((project) => project.slug === slug);
 }
 
 export function getAllSlugs() {
-  return projects.map((project) => project.slug);
+  return projects.filter((project) => !project.comingSoon).map((project) => project.slug);
 }
 
 export function howMeasured(project: Project) {

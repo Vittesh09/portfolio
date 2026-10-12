@@ -7,28 +7,13 @@
     <loc>https://www.vittesh.com/about/</loc>
   </url>
   <url>
-    <loc>https://www.vittesh.com/work/</loc>
+    <loc>https://www.vittesh.com/machine/</loc>
   </url>
   <url>
-    <loc>https://www.vittesh.com/work-pages/virtual-humans/</loc>
+    <loc>https://www.vittesh.com/work/vr-eeg-analytics/</loc>
   </url>
   <url>
-    <loc>https://www.vittesh.com/v2/</loc>
-  </url>
-  <url>
-    <loc>https://www.vittesh.com/v2/about/</loc>
-  </url>
-  <url>
-    <loc>https://www.vittesh.com/v2/machine/</loc>
-  </url>
-  <url>
-    <loc>https://www.vittesh.com/v2/work/vr-eeg-analytics/</loc>
-  </url>
-  <url>
-    <loc>https://www.vittesh.com/v2/work/fleet-command-center/</loc>
-  </url>
-  <url>
-    <loc>https://www.vittesh.com/v2/work/cloud-cost-optimization/</loc>
+    <loc>https://www.vittesh.com/work/fleet-command-center/</loc>
   </url>
   <url>
     <loc>https://www.vittesh.com/llms.txt</loc>
@@ -38,5 +23,8 @@
   </url>
   <url>
     <loc>https://www.vittesh.com/machine.json</loc>
+  </url>
+  <url>
+    <loc>https://www.vittesh.com/legacy/</loc>
   </url>
 </urlset>

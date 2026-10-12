@@ -8,7 +8,7 @@ page.on('console', (m) => {
   console.log('CONSOLE', m.type(), m.text());
 });
 
-await page.goto('http://localhost:3000/v2/', { waitUntil: 'domcontentloaded', timeout: 60000 });
+await page.goto('http://localhost:3000/', { waitUntil: 'domcontentloaded', timeout: 60000 });
 await page.waitForTimeout(5000);
 
 let info = await page.evaluate(() => window.__bhWarp?.());

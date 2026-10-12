@@ -9,6 +9,7 @@ import { triggerHaptic } from '@/src/components/v2/ui/haptics';
 import { IosHapticSwitch } from '@/src/components/v2/ui/IosHapticSwitch';
 import { ThemeToggle } from '@/src/components/v2/ui/ThemeToggle';
 import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
+import { RollText } from '@/src/components/v2/ui/RollText';
 import { useMobileLanding } from '@/src/components/v2/ui/useMobileLanding';
 
 const navOptionClass =
@@ -22,7 +23,7 @@ export function ArchiveHeader() {
   const [open, setOpen] = useState(false);
   const [visible, setVisible] = useState(true);
   const pathname = usePathname();
-  const isHome = pathname === '/v2' || pathname === '/v2/';
+  const isHome = pathname === '/';
   const isMobile = useMobileLanding();
   const lastY = useRef(0);
   const openRef = useRef(open);
@@ -41,7 +42,7 @@ export function ArchiveHeader() {
     event.preventDefault();
     window.scrollTo({ top: 0, behavior: 'smooth' });
     if (window.location.hash) {
-      window.history.replaceState(null, '', '/v2/');
+      window.history.replaceState(null, '', '/');
     }
   };
 
@@ -91,6 +92,11 @@ export function ArchiveHeader() {
 
     lastY.current = window.scrollY;
 
+    const showHeader = (next: boolean) => {
+      if (visibleRef.current === next) return;
+      setVisible(next);
+    };
+
     const onScrollActivity = (event?: Event) => {
       const y = window.scrollY;
       const goingDown = y > lastY.current + 2;
@@ -98,7 +104,7 @@ export function ArchiveHeader() {
       lastY.current = y;
 
       if (openRef.current || y <= TOP_STAY_PX) {
-        setVisible(true);
+        showHeader(true);
         return;
       }
 
@@ -113,8 +119,8 @@ export function ArchiveHeader() {
         (velocity !== null ? velocity > 0.04 : false);
 
       if (!moving) return;
-      if (goingDown) setVisible(false);
-      else setVisible(true);
+      if (goingDown) showHeader(false);
+      else showHeader(true);
     };
 
     const fromHeader = (event: Event) => {
@@ -133,8 +139,8 @@ export function ArchiveHeader() {
     const onLenis = (event: Event) => onScrollActivity(event);
 
     const onPointerMove = (event: PointerEvent) => {
-      if (event.clientY > PEEK_PX) return;
-      setVisible(true);
+      if (event.clientY > PEEK_PX || visibleRef.current) return;
+      showHeader(true);
     };
 
     window.addEventListener('scroll', onScroll, { passive: true });
@@ -165,11 +171,11 @@ export function ArchiveHeader() {
       >
         <div className="v2-archive-header-bar mx-auto flex max-w-[1600px] items-center justify-between px-4 py-3 md:px-8">
           <Link
-            href="/v2/"
+            href="/"
             onClick={goHome}
-            className={`${navOptionClass} v2-archive-wordmark font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2${isHome ? ' max-md:hidden' : ''}`}
+            className={`${navOptionClass} v2-archive-wordmark font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 max-md:hidden`}
           >
-            Vittesh Sinha®
+            <RollText>Vittesh Sinha®</RollText>
             <span className="v2-visually-hidden"> — Home</span>
           </Link>
           <nav className="hidden items-center gap-7 md:flex" aria-label="Primary">
@@ -178,7 +184,7 @@ export function ArchiveHeader() {
               const NavTag = isHash ? HashNavLink : Link;
               const isCurrent =
                 item.label === 'About'
-                  ? Boolean(pathname?.startsWith('/v2/about'))
+                  ? Boolean(pathname?.startsWith('/about'))
                   : item.label === 'Home'
                     ? isHome
                     : false;
@@ -186,11 +192,11 @@ export function ArchiveHeader() {
                 <NavTag
                   key={item.href}
                   href={item.href}
-                  onClick={item.href === '/v2/' ? goHome : undefined}
+                  onClick={item.href === '/' ? goHome : undefined}
                   className={navOptionClass}
                   aria-current={isCurrent ? 'page' : undefined}
                 >
-                  {item.label}
+                  <RollText>{item.label}</RollText>
                 </NavTag>
               );
             })}
@@ -201,7 +207,7 @@ export function ArchiveHeader() {
               aria-label={profile.agentNav.title}
               aria-current={pathname?.includes('/machine') ? 'page' : undefined}
             >
-              {profile.agentNav.label}
+              <RollText>{profile.agentNav.label}</RollText>
             </Link>
             <ThemeToggle />
           </nav>
@@ -240,7 +246,7 @@ export function ArchiveHeader() {
                     key={item.href}
                     href={item.href}
                     onClick={(event) => {
-                      if (item.href === '/v2/') {
+                      if (item.href === '/') {
                         goHome(event);
                         return;
                       }

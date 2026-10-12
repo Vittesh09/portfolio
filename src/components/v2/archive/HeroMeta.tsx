@@ -36,7 +36,7 @@ export function HeroMeta({ workHrefClassName }: HeroMetaProps) {
       </div>
       <div className="flex items-end md:col-span-3 md:justify-end">
         <HashNavLink
-          href="/v2/#work"
+          href="/#work"
           className={
             workHrefClassName ??
             'archive-label inline-flex items-center gap-3 bg-white px-5 py-3 text-black'

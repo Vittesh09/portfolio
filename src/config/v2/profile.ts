@@ -1,6 +1,6 @@
 /**
  * Single source of truth for V2 identity, employment, stats, and contact.
- * Unpublished `TODO: [FILL: …]` values stay in this file and on /v2/machine.
+ * Unpublished `TODO: [FILL: …]` values stay in this file and on /machine.
  * Visitor-facing pages never interpolate those strings.
  */
 
@@ -10,7 +10,8 @@ export function isUnconfirmed(value: string | null | undefined) {
 }
 
 export const SITE_URL = 'https://www.vittesh.com';
-export const V2_BASE = '/v2';
+/** Public site routes (vittesh.com root). Legacy preview lived under /v2 before launch. */
+export const V2_BASE = '';
 
 export const lastUpdated = '2026-09-21';
 
@@ -178,14 +179,14 @@ export const profile = {
     liveHome: '/'
   },
   nav: [
-    { label: 'Home', href: '/v2/' },
-    { label: 'Work', href: '/v2/#work' },
-    { label: 'About', href: '/v2/about/' },
-    { label: 'Contact', href: '/v2/#contact' }
+    { label: 'Home', href: '/' },
+    { label: 'Work', href: '/#work' },
+    { label: 'About', href: '/about/' },
+    { label: 'Contact', href: '/#contact' }
   ],
   agentNav: {
     label: 'For agents',
-    href: '/v2/machine/',
+    href: '/machine/',
     title: 'Machine-readable version of this portfolio for AI agents'
   }
 } as const;
