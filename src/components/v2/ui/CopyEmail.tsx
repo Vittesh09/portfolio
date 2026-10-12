@@ -22,7 +22,7 @@ export function CopyEmail({
 
   useEffect(() => {
     if (!copied) return;
-    const timer = window.setTimeout(() => setCopied(false), 2200);
+    const timer = window.setTimeout(() => setCopied(false), 2000);
     return () => window.clearTimeout(timer);
   }, [copied]);
 

@@ -7,7 +7,7 @@ const pages = [
   'index.html',
   'v2/index.html',
   'v2/about/index.html',
-  'v2/work/fleet-command-center/index.html',
+  'v2/work/fleet-track/index.html',
   'v2/classic/index.html',
   'v2/machine/index.html'
 ];

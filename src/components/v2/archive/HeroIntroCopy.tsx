@@ -1,10 +1,11 @@
 import type { CSSProperties } from 'react';
-import { heroCloser, heroHeadline, heroName } from '@/src/config/v2/profile';
+import { heroCloser, heroHeadline, heroKicker } from '@/src/config/v2/profile';
 
 export function HeroKicker({ className, style }: { className?: string; style?: CSSProperties }) {
+  if (!heroKicker) return null;
   return (
     <p className={`v2-hero-kicker text-text-secondary ${className ?? ''}`} style={style}>
-      Hey, I am <span className="text-accent-pop">{heroName}</span>. Product Designer.
+      {heroKicker}
     </p>
   );
 }

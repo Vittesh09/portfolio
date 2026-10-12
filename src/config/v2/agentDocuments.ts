@@ -76,7 +76,7 @@ export function getMachineRecord() {
       detail: job.detail,
       metrics: job.metrics
     })),
-    caseStudies: projects.filter((project) => !project.comingSoon).map((project) => ({
+    caseStudies: projects.filter((project) => project.published !== false && !project.comingSoon).map((project) => ({
       title: project.title,
       company: project.company,
       role: project.role,
@@ -119,7 +119,7 @@ export function getLlmsTxt() {
   return [
     `# ${record.name}`,
     '',
-    `${record.title}. ${profile.heroHeadline}`,
+    `${record.title}. ${profile.heroCloser}`,
     ...factLine('Location', record.location),
     ...factLine('Availability', record.availability),
     `Email: ${record.email}`,

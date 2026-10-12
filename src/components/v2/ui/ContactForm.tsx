@@ -210,7 +210,7 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
       ) : null}
 
       <div className="v2-visually-hidden" aria-hidden="true">
-        <label htmlFor={HONEYPOT_ID}>Company website</label>
+        <label htmlFor={HONEYPOT_ID}>Leave this blank</label>
         <input
           id={HONEYPOT_ID}
           name="company_website"
@@ -327,7 +327,7 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
             role="status"
             className="v2-contact-alert outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-pop"
           >
-            Thanks — your message was sent. I’ll get back to you soon.
+            Thanks — your message was sent. If this doesn’t go through, email {siteConfig.email}.
           </p>
         ) : null}
       </div>

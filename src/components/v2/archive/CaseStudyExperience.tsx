@@ -6,7 +6,7 @@ import type { CaseStory, Project } from '@/src/config/v2/caseStudies';
 import { HashNavLink, scrollToHash } from '@/src/components/v2/ui/HashNavLink';
 import { triggerHaptic } from '@/src/components/v2/ui/haptics';
 import { IosHapticSwitch } from '@/src/components/v2/ui/IosHapticSwitch';
-import { isUnconfirmed } from '@/src/config/v2/profile';
+import { isUnconfirmed, v2Path } from '@/src/config/v2/profile';
 
 function ChoicePanel({
   label,
@@ -559,7 +559,7 @@ function Moments({ story }: { story: CaseStory }) {
                 {moment.pair ? (
                   <div className="v2-story-pair-shots">
                     {moment.pair.map((shot) => (
-                      <ZoomImage key={shot.src} src={shot.src} alt={shot.alt} showCaption={false} />
+                      <ZoomImage key={shot.src} src={shot.src} alt={shot.alt} showCaption />
                     ))}
                   </div>
                 ) : null}
@@ -573,13 +573,13 @@ function Moments({ story }: { story: CaseStory }) {
                     />
                   </div>
                 ) : moment.pair ? null : (
-                  <ZoomImage src={moment.image.src} alt={moment.image.alt} showCaption={false} />
+                  <ZoomImage src={moment.image.src} alt={moment.image.alt} showCaption />
                 )}
                 {moment.pair
                   ? null
                   : moment.also?.map((shot) => (
                       <div key={shot.src} className="mt-8">
-                        <ZoomImage src={shot.src} alt={shot.alt} showCaption={false} />
+                        <ZoomImage src={shot.src} alt={shot.alt} showCaption />
                       </div>
                     ))}
               </div>
@@ -620,7 +620,7 @@ function StoryBody({ story }: { story: CaseStory }) {
             <div className="mt-16">
               <p className="archive-label text-accent-pop">The solution</p>
               <div className="mt-8">
-                <ZoomImage src={story.solutionImage.src} alt={story.solutionImage.alt} showCaption={false} wide />
+                <ZoomImage src={story.solutionImage.src} alt={story.solutionImage.alt} showCaption wide />
               </div>
             </div>
           ) : null}
@@ -651,7 +651,7 @@ function StoryBody({ story }: { story: CaseStory }) {
               <h3 className="archive-serif mt-3 text-[clamp(1.75rem,2.8vw,2.5rem)] leading-tight">{story.plan.title}</h3>
               <p className={`mt-4 ${storyCopy}`}>{story.plan.body}</p>
               <div className="mt-8">
-                <ZoomImage src={story.plan.image.src} alt={story.plan.image.alt} showCaption={false} />
+                <ZoomImage src={story.plan.image.src} alt={story.plan.image.alt} showCaption />
               </div>
             </article>
           ) : null}
@@ -686,7 +686,7 @@ function StoryBody({ story }: { story: CaseStory }) {
             <div className="mb-16">
               <p className="archive-label text-accent-pop">The capability</p>
               <div className="mt-8">
-                <ZoomImage src={story.capabilityImage.src} alt={story.capabilityImage.alt} showCaption={false} wide />
+                <ZoomImage src={story.capabilityImage.src} alt={story.capabilityImage.alt} showCaption wide />
               </div>
             </div>
           ) : null}
@@ -840,7 +840,7 @@ export function CaseStudyExperience({
       <section className="border-b border-border-subtle">
         <div className={`${band} py-8 md:py-12`}>
           <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-4">
-            <HashNavLink href="/#work" className="archive-label text-text-muted hover:text-accent-pop">
+            <HashNavLink href={v2Path('/#work')} className="archive-label text-text-muted hover:text-accent-pop">
               ← Back to work
             </HashNavLink>
           </div>
@@ -902,7 +902,7 @@ export function CaseStudyExperience({
       </div>
       <section className={project.story ? 'v2-story-next border-b border-border-subtle' : 'border-b border-border-subtle'}>
         <Link
-          href={`/work/${next.slug}/`}
+          href={v2Path(`/work/${next.slug}/`)}
           className={`group ${wrap} flex items-end justify-between gap-6 py-14 md:py-20`}
         >
           <div>

@@ -130,7 +130,7 @@ function useProjectScrollFocus() {
       frame = window.requestAnimationFrame(tick);
       const dt = Math.min(0.05, (now - last) / 1000);
       last = now;
-      const follow = reduce ? 1 : 1 - Math.exp(-4.5 * dt);
+      const follow = reduce ? 1 : 1 - Math.exp(-12 * dt);
       document
         .querySelectorAll<HTMLElement>('.archive-project-card')
         .forEach((card) => {

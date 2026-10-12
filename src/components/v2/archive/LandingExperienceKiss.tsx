@@ -15,6 +15,7 @@ import { HeroMeta } from '@/src/components/v2/archive/HeroMeta';
 import { ProjectCard } from '@/src/components/v2/archive/ProjectCard';
 import { type ProjectCardData } from '@/src/config/v2/caseStudies';
 import { siteConfig, trustLogos, trustSignals } from '@/src/config/v2/site';
+import { v2Path } from '@/src/config/v2/profile';
 
 function Label({ children }: { children: React.ReactNode }) {
   return <p className="archive-label text-text-muted">{children}</p>;
@@ -65,7 +66,7 @@ export function LandingExperienceKiss({ cards }: { cards: ProjectCardData[] }) {
             <ResumeDownload variant="surface" className="v2-kiss-resume" />
           </div>
           <div className="flex justify-center pt-14 md:hidden">
-            <HashNavLink href="/#work" className="archive-label inline-flex items-center gap-2">
+            <HashNavLink href={v2Path('/#work')} className="archive-label inline-flex items-center gap-2">
               Selected work
               <span className="v2-kiss-work-arrow" aria-hidden="true">
                 ↓
@@ -105,8 +106,14 @@ export function LandingExperienceKiss({ cards }: { cards: ProjectCardData[] }) {
                 delay={index * 0.06}
                 className="flex flex-row items-baseline justify-between gap-5 md:flex-col md:items-stretch md:justify-center md:gap-0"
               >
-                <p className="archive-display archive-display--stat text-xl text-accent-pop md:text-3xl lg:text-4xl">
-                  <AnimatedStat value={signal.value} />
+                <p
+                  className={
+                    signal.plain
+                      ? 'max-w-[16ch] text-sm leading-snug text-text-primary'
+                      : 'archive-display archive-display--stat text-xl text-accent-pop md:text-3xl lg:text-4xl'
+                  }
+                >
+                  {signal.plain ? signal.value : <AnimatedStat value={signal.value} />}
                 </p>
                 <p className="v2-trust-fact-label mt-0 text-text-secondary md:mt-3">
                   {signal.label}
@@ -116,7 +123,7 @@ export function LandingExperienceKiss({ cards }: { cards: ProjectCardData[] }) {
           </div>
           <div className="v2-trust-row grid grid-cols-1 md:grid-cols-4 md:gap-0">
             <RevealOnScroll className="flex flex-col justify-center md:col-span-1">
-              <Label>I&apos;ve worked with</Label>
+              <Label>Where I&apos;ve worked</Label>
             </RevealOnScroll>
             {trustLogos.map((company, index) => (
               <RevealOnScroll
@@ -141,7 +148,7 @@ export function LandingExperienceKiss({ cards }: { cards: ProjectCardData[] }) {
                     company.current ? 'text-text-muted' : 'is-past'
                   }`}
                 >
-                  {company.period}
+                  {company.role} · {company.period}
                 </p>
               </RevealOnScroll>
             ))}
@@ -155,7 +162,7 @@ export function LandingExperienceKiss({ cards }: { cards: ProjectCardData[] }) {
             <div className="md:col-span-8">
               <p className="archive-label text-text-muted">01 / Selected work</p>
               <h2 id="kiss-work-heading" className="archive-display mt-3 text-[clamp(2rem,5vw,3.5rem)]">
-                Work that shipped.
+                Selected work.
               </h2>
             </div>
             <p className="text-sm leading-relaxed text-text-secondary md:col-span-4">
@@ -210,7 +217,7 @@ export function LandingExperienceKiss({ cards }: { cards: ProjectCardData[] }) {
               <p className="text-sm leading-relaxed text-text-secondary">{siteConfig.aboutShort}</p>
               <div className="flex items-end md:justify-end">
                 <Link
-                  href="/about/"
+                  href={v2Path('/about/')}
                   className="archive-label border border-text-primary px-5 py-3 transition-colors hover:bg-text-primary hover:text-bg-primary"
                 >
                   More about me →

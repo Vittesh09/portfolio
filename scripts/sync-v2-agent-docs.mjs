@@ -13,9 +13,9 @@ function write(rel, contents) {
 }
 
 function grabExport(src, name) {
-  const match = src.match(new RegExp(`export const ${name} = '([^']*)'`));
+  const match = src.match(new RegExp(`export const ${name} = (?:'([^']*)'|"([^"]*)")`));
   if (!match) throw new Error(`Could not find export ${name}`);
-  return match[1];
+  return match[1] ?? match[2];
 }
 
 function grabProfileField(src, name) {
@@ -36,7 +36,7 @@ export function collectFacts() {
   const profile = read('src/config/v2/profile.ts');
   const studies = read('src/config/v2/caseStudies.ts');
   const titles = grabTitles(studies).filter((title) =>
-    ['Future City VR + EEG', 'Fleet Track Management'].includes(title)
+    ['Future City VR + EEG', 'FleetTrack'].includes(title)
   );
   const profileBlock = /export const profile = \{([\s\S]*?)\n\} as const/.exec(profile)?.[1] ?? '';
 
@@ -49,8 +49,11 @@ export function collectFacts() {
     availability: grabExport(profile, 'availability'),
     locationLine: /locationLine: '([^']+)'/.exec(profileBlock)?.[1] ?? 'India',
     heroHeadline: grabExport(profile, 'heroHeadline'),
+    heroCloser: /export const heroCloser =\s*\n\s*'([^']*)'/.exec(profile)?.[1] ?? '',
     linkedin: /linkedin: '([^']+)'/.exec(profile)?.[1] ?? '',
     behance: /behance: '([^']+)'/.exec(profile)?.[1] ?? '',
+    siteUrl: grabExport(profile, 'SITE_URL'),
+    v2Base: grabExport(profile, 'V2_BASE'),
     employers: [
       ...profile.matchAll(/name: '(Nagarro|Simple Energy|Cult\.fit)'/g)
     ].map((match) => match[1]),
@@ -62,7 +65,7 @@ export function buildAgentDocs(facts) {
   const llms = [
     `# ${facts.name}`,
     '',
-    `${facts.title}. ${facts.heroHeadline}`,
+    `${facts.title}. ${facts.heroCloser || facts.heroHeadline}`,
     `Location: ${facts.locationLine}`,
     ...(pending(facts.availability) ? [] : [`Availability: ${facts.availability}`]),
     `Email: ${facts.email}`,
@@ -71,16 +74,14 @@ export function buildAgentDocs(facts) {
     'Case studies:',
     ...facts.caseTitles.map(
       (title) =>
-        `- ${title}: https://www.vittesh.com/work/${
-          title === 'Future City VR + EEG'
-            ? 'vr-eeg-analytics'
-            : 'fleet-command-center'
+        `- ${title}: ${facts.siteUrl}${facts.v2Base}/work/${
+          title === 'Future City VR + EEG' ? 'vr-eeg-analytics' : 'fleet-track'
         }/`
     ),
     '',
-    'Machine-readable profile: https://www.vittesh.com/machine/',
-    'Full markdown: https://www.vittesh.com/machine.md',
-    'JSON: https://www.vittesh.com/machine.json',
+    `Machine-readable profile: ${facts.siteUrl}${facts.v2Base}/machine/`,
+    `Full markdown: ${facts.siteUrl}/machine.md`,
+    `JSON: ${facts.siteUrl}/machine.json`,
     `LinkedIn: ${facts.linkedin}`,
     `Behance: ${facts.behance}`,
     `Last updated: ${facts.lastUpdated}`,
@@ -133,8 +134,8 @@ if (process.argv[1] && process.argv[1].endsWith('sync-v2-agent-docs.mjs')) {
         employers: facts.employers,
         caseStudies: facts.caseTitles,
         links: {
-          home: 'https://www.vittesh.com/',
-          machine: 'https://www.vittesh.com/machine/',
+          home: `${facts.siteUrl}/`,
+          machine: `${facts.siteUrl}${facts.v2Base}/machine/`,
           linkedin: facts.linkedin,
           behance: facts.behance
         }

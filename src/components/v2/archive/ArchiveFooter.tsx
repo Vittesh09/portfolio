@@ -1,6 +1,6 @@
 import Link from 'next/link';
 import { siteConfig } from '@/src/config/v2/site';
-import { profile } from '@/src/config/v2/profile';
+import { profile, v2Path } from '@/src/config/v2/profile';
 import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
 import { FooterLandscape } from '@/src/components/v2/ui/GravityLens';
 
@@ -14,22 +14,28 @@ export function ArchiveFooter() {
               Explore
             </p>
             <div className="mt-4 flex flex-col gap-2 text-sm">
-              <Link href="/" className="underline-offset-4 hover:underline">
-                Home
-              </Link>
-              <HashNavLink href="/#work" className="underline-offset-4 hover:underline">
+              <HashNavLink href={v2Path('/#work')} className="underline-offset-4 hover:underline">
                 Work
               </HashNavLink>
-              <Link href="/about/" className="underline-offset-4 hover:underline">
+              <Link href={v2Path('/about/')} className="underline-offset-4 hover:underline">
                 About
               </Link>
-              <Link href={profile.agentNav.href} className="underline-offset-4 hover:underline">
-                {profile.agentNav.label}
-              </Link>
+              <a
+                href={siteConfig.links.resume}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline-offset-4 hover:underline"
+              >
+                Resume <span className="v2-visually-hidden">(opens in a new tab)</span>
+                <span aria-hidden> ↗</span>
+              </a>
+              <HashNavLink href={v2Path('/#contact')} className="underline-offset-4 hover:underline">
+                Contact
+              </HashNavLink>
             </div>
           </nav>
-          <nav className="v2-footer-nav v2-footer-nav--more" aria-label="Know more">
-            <p className="archive-label text-text-muted">Know more</p>
+          <nav className="v2-footer-nav v2-footer-nav--more" aria-label="Elsewhere">
+            <p className="archive-label text-text-muted">Elsewhere</p>
             <div className="mt-4 flex flex-col gap-2 text-sm">
               <a
                 href={siteConfig.links.linkedin}
@@ -49,26 +55,20 @@ export function ArchiveFooter() {
                 Behance <span className="v2-visually-hidden">(opens in a new tab)</span>
                 <span aria-hidden> ↗</span>
               </a>
-              <a
-                href={siteConfig.links.resume}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline-offset-4 hover:underline"
-              >
-                Resume <span className="v2-visually-hidden">(opens in a new tab)</span>
-                <span aria-hidden> ↗</span>
-              </a>
+            </div>
+          </nav>
+          <nav className="v2-footer-nav" aria-label="For agents">
+            <p className="archive-label text-text-muted">For agents</p>
+            <div className="mt-4 flex flex-col gap-2 text-sm">
+              <Link href={profile.agentNav.href} className="underline-offset-4 hover:underline">
+                Machine-readable version
+              </Link>
             </div>
           </nav>
         </div>
 
         <div className="v2-site-footer-brand" aria-label="Copyright">
-          <p className="v2-site-footer-mark" aria-hidden="true">
-            ˗ˏˋ ꒰ 🧡 ꒱ ˎˊ˗
-          </p>
-          <p className="v2-site-footer-copy">
-            <span className="v2-visually-hidden">With love. </span>© 2026 {siteConfig.name}
-          </p>
+          <p className="v2-site-footer-copy">© 2026 {siteConfig.name}</p>
         </div>
       </div>
 

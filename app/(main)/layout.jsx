@@ -9,10 +9,9 @@ const manrope = Manrope({
 
 export const metadata = {
   title: {
-    default: 'Legacy archive | Vittesh Sinha',
-    template: '%s | Legacy archive'
-  },
-  robots: { index: false, follow: false }
+    default: 'Vittesh | Product Designer',
+    template: '%s | Vittesh Sinha'
+  }
 };
 
 export default function LegacyLayout({ children }) {

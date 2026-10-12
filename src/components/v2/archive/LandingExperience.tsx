@@ -14,6 +14,7 @@ import { HeroCloser, HeroHeadlineLines, HeroKicker } from '@/src/components/v2/a
 import { HeroMeta } from '@/src/components/v2/archive/HeroMeta';
 import { ProjectCard } from '@/src/components/v2/archive/ProjectCard';
 import { type ProjectCardData } from '@/src/config/v2/caseStudies';
+import { v2Path } from '@/src/config/v2/profile';
 import {
   processSteps,
   siteConfig,
@@ -143,8 +144,14 @@ function LandingExperienceArchive({ cards }: { cards: ProjectCardData[] }) {
                 transition={{ delay: index * 0.07 }}
                 className="border-t border-border-subtle p-4 md:border-l md:border-t-0 md:p-8"
               >
-                <p className="archive-display archive-display--stat text-3xl text-accent-pop md:text-6xl">
-                  <AnimatedStat value={signal.value} />
+                <p
+                  className={
+                    signal.plain
+                      ? 'max-w-[18ch] text-sm leading-snug text-text-primary md:text-base'
+                      : 'archive-display archive-display--stat text-3xl text-accent-pop md:text-6xl'
+                  }
+                >
+                  {signal.plain ? signal.value : <AnimatedStat value={signal.value} />}
                 </p>
                 <p className="v2-trust-fact-label mt-5 text-text-secondary">{signal.label}</p>
               </motion.div>
@@ -152,7 +159,7 @@ function LandingExperienceArchive({ cards }: { cards: ProjectCardData[] }) {
           </div>
           <div className="v2-fluid-host grid grid-cols-3 items-center gap-x-3 gap-y-4 px-4 py-5 md:flex md:flex-wrap md:gap-x-10 md:px-8">
             <div className="col-span-3">
-              <Label>I&apos;ve worked with</Label>
+              <Label>Where I&apos;ve worked</Label>
             </div>
             {trustLogos.map((company) => (
               <a
@@ -171,7 +178,7 @@ function LandingExperienceArchive({ cards }: { cards: ProjectCardData[] }) {
                     company.current ? 'text-text-muted' : 'is-past'
                   }`}
                 >
-                  {company.period}
+                  {company.role} · {company.period}
                 </span>
               </a>
             ))}
@@ -239,7 +246,7 @@ function LandingExperienceArchive({ cards }: { cards: ProjectCardData[] }) {
                 id="classic-work-heading"
                 className="archive-display mt-5 text-[clamp(2.75rem,9vw,6.5rem)]"
               >
-                Work that shipped.
+                Selected work.
               </h2>
             </div>
             {cards.map((project, index) => (
@@ -278,7 +285,7 @@ function LandingExperienceArchive({ cards }: { cards: ProjectCardData[] }) {
               <p className="text-sm leading-relaxed text-text-secondary">{siteConfig.aboutShort}</p>
               <div className="flex items-end md:justify-end">
                 <Link
-                  href="/about/"
+                  href={v2Path('/about/')}
                   className="archive-label border border-text-primary px-5 py-3 transition-colors hover:bg-text-primary hover:text-bg-primary"
                 >
                   More about me →

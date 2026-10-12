@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { v2Path } from '@/src/config/v2/profile';
 import { useEffect, useRef, type MouseEvent } from 'react';
 import { BlackHoleLazy } from '@/src/components/v2/singularity/BlackHoleLazy';
 import {
@@ -113,9 +114,14 @@ export function NotFoundExperience() {
             <h1 className="archive-display notfound-title">It seems you’re lost</h1>
             <p className="notfound-line">Only those who wander discover what they’re seeking.</p>
           </div>
-          <Link href="/" className="archive-label notfound-home">
-            Back to home
-          </Link>
+          <div className="notfound-links">
+            <Link href={v2Path('/#work')} className="archive-label notfound-home">
+              Work
+            </Link>
+            <Link href={v2Path('/#contact')} className="archive-label notfound-home">
+              Contact
+            </Link>
+          </div>
         </div>
       </section>
     </div>

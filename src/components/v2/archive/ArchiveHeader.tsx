@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useRef, useState, type MouseEvent } from 'react';
 import { siteConfig } from '@/src/config/v2/site';
-import { profile } from '@/src/config/v2/profile';
+import { v2Path } from '@/src/config/v2/profile';
 import { triggerHaptic } from '@/src/components/v2/ui/haptics';
 import { IosHapticSwitch } from '@/src/components/v2/ui/IosHapticSwitch';
 import { ThemeToggle } from '@/src/components/v2/ui/ThemeToggle';
@@ -13,7 +13,7 @@ import { RollText } from '@/src/components/v2/ui/RollText';
 import { useMobileLanding } from '@/src/components/v2/ui/useMobileLanding';
 
 const navOptionClass =
-  'archive-label v2-nav-option group transition-colors hover:text-accent-pop';
+  'archive-label v2-nav-option group transition-colors hover:text-accent-pop focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-pop';
 
 /** Stay on screen at the top of the page. Hide only while scrolling down. */
 const TOP_STAY_PX = 12;
@@ -23,7 +23,7 @@ export function ArchiveHeader() {
   const [open, setOpen] = useState(false);
   const [visible, setVisible] = useState(true);
   const pathname = usePathname();
-  const isHome = pathname === '/';
+  const isHome = pathname === v2Path('/') || pathname === '/v2' || pathname === '/v2/';
   const isMobile = useMobileLanding();
   const lastY = useRef(0);
   const openRef = useRef(open);
@@ -42,7 +42,7 @@ export function ArchiveHeader() {
     event.preventDefault();
     window.scrollTo({ top: 0, behavior: 'smooth' });
     if (window.location.hash) {
-      window.history.replaceState(null, '', '/');
+      window.history.replaceState(null, '', v2Path('/'));
     }
   };
 
@@ -171,28 +171,38 @@ export function ArchiveHeader() {
       >
         <div className="v2-archive-header-bar mx-auto flex max-w-[1600px] items-center justify-between px-4 py-3 md:px-8">
           <Link
-            href="/"
+            href={v2Path('/')}
             onClick={goHome}
+            aria-label="Vittesh Sinha, home"
             className={`${navOptionClass} v2-archive-wordmark font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 max-md:hidden`}
           >
             <RollText>Vittesh Sinha®</RollText>
-            <span className="v2-visually-hidden"> — Home</span>
+            <span className="v2-visually-hidden">, home</span>
           </Link>
           <nav className="hidden items-center gap-7 md:flex" aria-label="Primary">
             {siteConfig.nav.map((item) => {
+              if (item.external) {
+                return (
+                  <a
+                    key={item.href}
+                    href={item.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className={navOptionClass}
+                  >
+                    <RollText>{item.label}</RollText>
+                    <span className="v2-visually-hidden"> (opens in a new tab)</span>
+                  </a>
+                );
+              }
               const isHash = item.href.includes('#');
               const NavTag = isHash ? HashNavLink : Link;
               const isCurrent =
-                item.label === 'About'
-                  ? Boolean(pathname?.startsWith('/about'))
-                  : item.label === 'Home'
-                    ? isHome
-                    : false;
+                item.label === 'About' ? Boolean(pathname?.includes('/about')) : false;
               return (
                 <NavTag
                   key={item.href}
                   href={item.href}
-                  onClick={item.href === '/' ? goHome : undefined}
                   className={navOptionClass}
                   aria-current={isCurrent ? 'page' : undefined}
                 >
@@ -200,15 +210,6 @@ export function ArchiveHeader() {
                 </NavTag>
               );
             })}
-            <Link
-              href={profile.agentNav.href}
-              className={navOptionClass}
-              title={profile.agentNav.title}
-              aria-label={profile.agentNav.title}
-              aria-current={pathname?.includes('/machine') ? 'page' : undefined}
-            >
-              <RollText>{profile.agentNav.label}</RollText>
-            </Link>
             <ThemeToggle />
           </nav>
           <div className="ml-auto flex items-center gap-1 md:hidden">
@@ -238,7 +239,27 @@ export function ArchiveHeader() {
             aria-label="Mobile"
           >
             <div className="flex flex-col">
-              {siteConfig.nav.map((item, index) => {
+              {[{ label: 'Home', href: v2Path('/'), external: false }, ...siteConfig.nav].map((item, index) => {
+                if (item.external) {
+                  return (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={() => setOpen(false)}
+                      className="v2-nav-mobile-row flex min-h-11 items-baseline justify-between border-b border-border-subtle"
+                    >
+                      <span className="text-2xl font-semibold tracking-tight">
+                        {item.label}
+                        <span className="v2-visually-hidden"> (opens in a new tab)</span>
+                      </span>
+                      <span className="archive-label text-accent-pop" aria-hidden>
+                        0{index + 1}
+                      </span>
+                    </a>
+                  );
+                }
                 const isHash = item.href.includes('#');
                 const NavTag = isHash ? HashNavLink : Link;
                 return (
@@ -246,7 +267,7 @@ export function ArchiveHeader() {
                     key={item.href}
                     href={item.href}
                     onClick={(event) => {
-                      if (item.href === '/') {
+                      if (item.href === v2Path('/') || item.href === '/') {
                         goHome(event);
                         return;
                       }
@@ -261,15 +282,6 @@ export function ArchiveHeader() {
                   </NavTag>
                 );
               })}
-              <Link
-                href={profile.agentNav.href}
-                onClick={() => setOpen(false)}
-                title={profile.agentNav.title}
-                aria-label={profile.agentNav.title}
-                className="v2-nav-mobile-row flex min-h-11 w-full border-b border-border-subtle text-left"
-              >
-                <span className="text-2xl font-semibold tracking-tight">{profile.agentNav.label}</span>
-              </Link>
               {isMobile ? (
                 <p className="archive-label px-1 py-4 text-text-muted">
                   Open on desktop for a better experience

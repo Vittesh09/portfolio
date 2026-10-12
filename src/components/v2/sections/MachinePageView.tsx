@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { MachineCopyButton } from '@/src/components/v2/sections/MachineCopyButton';
 import { machineMeta } from '@/src/config/v2/agentDocuments';
-import { SITE_URL } from '@/src/config/v2/profile';
+import { SITE_URL, v2Path } from '@/src/config/v2/profile';
 
 type MachinePageViewProps = {
   text: string;
@@ -21,7 +21,7 @@ export function MachinePageView({ text }: MachinePageViewProps) {
           <a href={`${SITE_URL}/machine.json`}>/machine.json</a>
         </p>
         <div className="v2-machine-actions">
-          <Link href="/" className="v2-machine-back">
+          <Link href={v2Path('/')} className="v2-machine-back">
             ← Back to portfolio
           </Link>
           <MachineCopyButton text={text} />

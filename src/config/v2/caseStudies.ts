@@ -88,6 +88,12 @@ export type Project = {
   cardCover?: boolean;
   /** Shown on the homepage, with no case study page yet. */
   comingSoon?: boolean;
+  /** Unpublished studies stay out of nav, cards, sitemap, and the machine page. */
+  published?: boolean;
+  /** Outcome-led card title. The page h1 stays `title`. */
+  cardTitle?: string;
+  domain?: string;
+  seoTitle?: string;
   images: { src: string; alt: string }[];
 };
 
@@ -95,9 +101,12 @@ const asset = (name: string) => `/assets/case-studies/${name}`;
 
 export const projects: Project[] = [
 {
-    slug: 'fleet-command-center',
+    slug: 'fleet-track',
     index: '01',
-    title: 'Fleet Track Management',
+    title: 'FleetTrack',
+    seoTitle: 'FleetTrack — one workspace for fleet events | Vittesh Sinha',
+    cardTitle: 'FleetTrack: from alert to action in one workspace',
+    domain: 'Logistics',
     summary:
       'I redesigned the FleetTrack dashboard so a fleet manager can find a problem, see why it happened, and close it in one workspace.',
     company: 'LB Technology',
@@ -110,7 +119,7 @@ export const projects: Project[] = [
     customers: 'Fleet managers',
     challenge:
       'A fleet manager starts from the fleet, not from a single truck.',
-    role: 'Product Designer',
+    role: 'Senior Product Designer',
     platforms: 'Web',
     year: '2025',
     metrics: [
@@ -151,12 +160,12 @@ export const projects: Project[] = [
     ],
     story: {
       eyebrow: 'Case study · Enterprise product design · Fleet telematics',
-      lede: 'One workspace to understand what is happening across the fleet and act on it.',
+      lede: 'One workspace where a fleet manager can find a problem, see why it happened, and close it.',
       support:
         'I redesigned the FleetTrack dashboard to connect fleet visibility, vehicle context, events and actions in one experience.',
       facts: [
-        { label: 'Role', value: 'Product Designer' },
-        { label: 'Scope', value: 'Entire dashboard redesign' },
+        { label: 'Role', value: 'Senior Product Designer' },
+        { label: 'Scope', value: 'Dashboard redesign: fleet, vehicle, trip, event, and action' },
         { label: 'Timeline', value: '4 months · 2025' }
       ],
       problemTitle: 'The data existed. The experience was fragmented.',
@@ -177,7 +186,7 @@ export const projects: Project[] = [
       problemClose: 'The redesign was about connecting context, not adding more data.',
       ideaTitle: 'From screens to a connected workflow',
       ideaFlow: ['Fleet', 'Vehicle', 'Trip', 'Event', 'Action'],
-      idea: 'Instead of treating the dashboard as a collection of separate screens, I designed the experience around how a fleet manager moves from an overview to a specific vehicle, then to an event, its context, and the next action.',
+      idea: 'Instead of treating the dashboard as a collection of separate screens, I designed the experience around how a fleet manager moves from an overview to a specific vehicle, then to an event, its context, and the next action. Vehicle and trip both sit inside Locate, so the five levels show up as four moments: see, locate, understand, and act.',
       questions: [
         { index: '01', body: 'What needs my attention?' },
         { index: '02', body: 'What happened, and where?' },
@@ -225,7 +234,7 @@ export const projects: Project[] = [
         }
       ],
       redesignClose: 'See it → locate it → understand it → act',
-      systemTitle: 'A consistent product needs a consistent language.',
+      systemTitle: 'A shared language for FleetTrack.',
       kit: 'A reusable kit, extended from the existing FleetTrack brand.',
       iconsTitle: 'Vehicle iconography',
       icons:
@@ -238,20 +247,20 @@ export const projects: Project[] = [
       resultsTitle: 'The result',
       results: [
         {
-          title: 'Connected',
-          body: 'Fleet, vehicle, trip and event context are brought into one workflow.'
+          title: 'One workflow',
+          body: 'An event now sits with its trip, route, and vehicle context, instead of a row with no place attached.'
         },
         {
-          title: 'Consistent',
-          body: 'The redesigned UI follows a shared visual and interaction language.'
+          title: 'One dashboard',
+          body: 'Safety, fuel, maintenance, and asset status share a starting screen, instead of a separate report for each question.'
         },
         {
-          title: 'Scalable',
-          body: 'The component system and vehicle iconography support a wider range of fleet configurations.'
+          title: 'A report that stays',
+          body: 'A report the manager built can stay on the dashboard as a tile for the next morning.'
         }
       ],
       honesty:
-        'No formal usability baseline or quantitative outcome measurement was captured during the project, so no numerical performance claims are being made.'
+        "There was no analytics baseline for this project, so I'm not claiming performance numbers. The notes above are changes in the product. Proposals I'd track next, not results: time from alert to resolution, the share of events closed in the panel, and how often widgets are configured.",
     },
 
     outcomes: [
@@ -267,8 +276,7 @@ export const projects: Project[] = [
       asset('fleet-cameras-device.webp'),
       asset('fleet-thumb-video.jpg')
     ],
-    imageAlt:
-      'Fleet Management System collage with the live map, cameras, geozone, and event list.',
+    imageAlt: 'FleetTrack collage showing the live map, cameras, geozone and event list.',
     images: [
       {
         src: asset('fleet-map.jpg'),
@@ -296,10 +304,13 @@ export const projects: Project[] = [
     slug: 'vr-eeg-analytics',
     index: '02',
     title: 'Future City VR + EEG',
+    seoTitle: 'Future City VR + EEG — analytics | Vittesh Sinha',
+    cardTitle: "Future City VR + EEG: walk the city before it's built",
+    domain: 'VR',
     summary:
-      'I was the sole UX designer, shaping the immersive VR experience and the analytics platform end to end.',
+      'I was the sole designer, shaping the immersive VR experience and the analytics platform end to end. A future city had to be walked before it was built.',
     company: 'TODO: [FILL: employer for Future City VR + EEG]',
-    cardRole: 'UX Designer',
+    cardRole: 'Senior Product Designer',
     outcomeLine: 'The city, the session, and the roles.\nOne system around the experience.',
     outcomeEvidence: [],
     tags: ['VR', 'Experience', 'Dashboards'],
@@ -308,7 +319,7 @@ export const projects: Project[] = [
     customers: 'Participants, urban planners, and the teams running the sessions',
     challenge:
       'A future city had to be walked in VR, while four roles still needed a way to prepare people, keep raw EEG data, and configure simulations.',
-    role: 'Sole UX designer',
+    role: 'Senior Product Designer · sole designer',
     platforms: 'VR headset · Web',
     year: '2024',
     metrics: [
@@ -350,9 +361,9 @@ export const projects: Project[] = [
       lede: 'An immersive walk through a future city, and a platform that captures, analyses, and visualises how people respond.',
       supportWide: true,
       support:
-        'A future city had to be walked before it was built. The VR session opened its key places and captured the response.\n\nI was the sole UX designer on the project, responsible for shaping the experience end to end. I worked closely with the product, engineering, and research teams, owning design decisions across both the immersive VR experience and the supporting analytics platform.',
+        'A future city had to be walked before it was built. The VR session opened its key places and captured the response.\n\nI was the sole designer on the project, responsible for shaping the experience end to end. I worked closely with the product, engineering, and research teams, owning design decisions across both the immersive VR experience and the supporting analytics platform.',
       facts: [
-        { label: 'Role', value: 'Sole UX designer' },
+        { label: 'Role', value: 'Senior Product Designer · sole designer' },
         { label: 'Scope', value: 'VR, participants, simulation, and dashboards' },
         { label: 'Timeline', value: '3 months' }
       ],
@@ -369,7 +380,7 @@ export const projects: Project[] = [
         }
       ],
       problemClose:
-        'How might we enable normal citizens to experience a future city immersively and capture their emotional responses in a structured, scalable way?',
+        'How might we let everyday residents experience a city that doesn’t exist yet? How might we capture how they feel in a form planners can trust and compare?',
       solutionImage: {
         src: asset('cloud-diagram.webp'),
         alt: 'The solution: an immersive VR experience, passive EEG capture while questions are asked, then centralised insights for the team.'
@@ -400,7 +411,7 @@ export const projects: Project[] = [
           }
         },
         {
-          label: 'Urban planners',
+          label: '02 / Configure',
           title: 'Configure the simulation',
           body: 'Planners chose a world, the areas and points of interest, who the virtual population was, how many, the period, and the situation for that session: time of day, light, cloud, and sound.',
           image: {
@@ -415,7 +426,7 @@ export const projects: Project[] = [
           ]
         },
         {
-          label: 'Participant',
+          label: '03 / Prepare',
           title: 'Track your progress',
           body: 'Participants had a separate dashboard to track their progress and update their profile, so the Urban Planner got accurate data.',
           image: {
@@ -429,12 +440,12 @@ export const projects: Project[] = [
           body: 'Once the headset is on, this is what they see. Diagnostics is open. The city stays closed until that step is done, and only then does the experience begin.',
           image: {
             src: asset('future-headset.jpg'),
-            alt: 'Inside the headset, Diagnostics is open and the city experience is still waiting.'
+            alt: 'Diagnostics runs first. The city stays closed until it passes.'
           },
           pair: [
             {
               src: asset('future-headset.jpg'),
-              alt: 'Inside the headset, Diagnostics is open and the city experience is still waiting.'
+              alt: 'Diagnostics runs first. The city stays closed until it passes.'
             },
             {
               src: asset('future-question.jpg'),
@@ -444,7 +455,7 @@ export const projects: Project[] = [
         },
         {
           label: '05 / Settle',
-          title: 'Onboarding for users, and guidance on how to use Quest 3 and the EEG device',
+          title: 'Settle in: headset fit, guidance and comfort check',
           body: 'Before the city, the participant confirmed the headset felt right, or stopped and called a moderator.',
           image: {
             src: asset('future-diagnostics.png'),
@@ -453,9 +464,9 @@ export const projects: Project[] = [
           video: asset('future-comfort.mp4')
         },
         {
-          label: '06 / The city',
+          label: '06 / Experience',
           title: 'The VR experience of the city',
-          body: 'A small group moved through the areas assigned to them, on foot or by teleport, across flat ground, stairs, and slopes. The other people in the group were visible nearby, and a virtual population filled the streets. Questions appeared in the place and were answered by voice. The same walk kept a record of where they were, the light and sound there, and the raw EEG. The controller guide stayed in the city, and a journey card held the current area, the destination, and the time spent.',
+          body: 'Moving. A small group moved through the areas assigned to them, on foot or by teleport, across flat ground, stairs, and slopes. Seeing others. The other people in the group were visible nearby, and a virtual population filled the streets. Answering. Questions appeared in the place and were answered by voice. Knowing where you are. The same walk kept a record of where they were, the light and sound there, and the raw EEG. The controller guide stayed in the city, and a journey card held the current area, the destination, and the time spent.',
           image: {
             src: asset('future-controller.webp'),
             alt: 'Walking through the virtual city with other people, across paths, stairs, and slopes.'
@@ -474,7 +485,7 @@ export const projects: Project[] = [
         }
       ],
       redesignClose: '',
-      systemTitle: 'A consistent product needs a consistent language.',
+      systemTitle: 'One kit for the web dashboards.',
       kit: 'A reusable kit for forms, tables, filters, and controls, shared by every dashboard.',
       iconsTitle: 'One visual language',
       icons: 'I also set the logo and the visual foundation, so the web tools and the VR moments read as one product.',
@@ -482,11 +493,7 @@ export const projects: Project[] = [
       scaleShared: ['Manage', 'Prepare', 'Experience', 'Capture', 'Configure'],
       scaleFlexible: ['Admin', 'Participant', 'Raw Data Provider', 'Urban Planner'],
       scale:
-        'The screens were different. The workflow was not. Admins managed access. Participants prepared and entered the city. Raw Data Providers kept the EEG record available for the people downstream. Urban planners set the world, the people, the time, and the environment.',
-      capabilityImage: {
-        src: asset('vr-diagram.webp'),
-        alt: 'The capability: citizens experience the unbuilt city, emotional and cognitive data is captured, and one dashboard holds it for the team.'
-      },
+        'Four roles, one shared data flow. Admins managed access. Participants prepared and entered the city. Raw Data Providers kept the EEG record available for the people downstream. Urban planners set the world, the people, the time, and the environment.',
       resultsTitle: 'Learnings',
       results: [
         {
@@ -562,9 +569,10 @@ export const projects: Project[] = [
     ]
   },
 {
-    slug: 'cloud-cost-optimization',
+    slug: 'b2b-configurator',
     index: '03',
     comingSoon: true,
+    published: false,
     title: 'Redesigning a Global B2B Product Configurator',
     summary: 'Modernising legacy configuration software for an international market.',
     company: 'TODO: [FILL: case 03 company]',
@@ -638,30 +646,48 @@ export const projects: Project[] = [
 
 export type ProjectCardData = Pick<
   Project,
-  'slug' | 'title' | 'cardRole' | 'year' | 'outcomeLine' | 'image' | 'cardImages' | 'cardCover' | 'comingSoon'
+  | 'slug'
+  | 'title'
+  | 'cardTitle'
+  | 'cardRole'
+  | 'domain'
+  | 'year'
+  | 'outcomeLine'
+  | 'image'
+  | 'imageAlt'
+  | 'cardImages'
+  | 'cardCover'
 >;
+
+export function isPublished(project: Project) {
+  return project.published !== false && !project.comingSoon;
+}
+
+export const publishedCaseStudyCount = projects.filter(isPublished).length;
 
 /** Card fields only. Server pages pass this into client landings so story copy stays off the homepage bundle. */
 export function getProjectCards(): ProjectCardData[] {
-  return projects.map((project) => ({
+  return projects.filter(isPublished).map((project) => ({
     slug: project.slug,
     title: project.title,
+    cardTitle: project.cardTitle,
     cardRole: project.cardRole,
+    domain: project.domain,
     year: project.year,
     outcomeLine: project.outcomeLine,
     image: project.image,
+    imageAlt: project.imageAlt,
     cardImages: project.cardImages,
-    cardCover: project.cardCover,
-    comingSoon: project.comingSoon
+    cardCover: project.cardCover
   }));
 }
 
 export function getProject(slug: string) {
-  return projects.find((project) => project.slug === slug);
+  return projects.find((project) => project.slug === slug && isPublished(project));
 }
 
 export function getAllSlugs() {
-  return projects.filter((project) => !project.comingSoon).map((project) => project.slug);
+  return projects.filter(isPublished).map((project) => project.slug);
 }
 
 export function howMeasured(project: Project) {

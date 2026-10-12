@@ -1,5 +1,6 @@
 import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
 import { siteConfig } from '@/src/config/v2/site';
+import { v2Path } from '@/src/config/v2/profile';
 
 function Label({ children }: { children: React.ReactNode }) {
   return <p className="archive-label text-text-muted">{children}</p>;
@@ -36,7 +37,7 @@ export function HeroMeta({ workHrefClassName }: HeroMetaProps) {
       </div>
       <div className="flex items-end md:col-span-3 md:justify-end">
         <HashNavLink
-          href="/#work"
+          href={v2Path('/#work')}
           className={
             workHrefClassName ??
             'archive-label inline-flex items-center gap-3 bg-white px-5 py-3 text-black'

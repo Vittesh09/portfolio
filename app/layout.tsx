@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react';
 
 export const metadata = {
-  metadataBase: new URL('https://www.vittesh.com'),
+  metadataBase: new URL('https://vittesh.com'),
   icons: {
     icon: '/favicon.png',
     apple: '/favicon.png'

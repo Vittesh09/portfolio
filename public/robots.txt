@@ -20,10 +20,10 @@ User-agent: Google-Extended
 Allow: /
 
 # Keep machine-readable surfaces crawlable.
-Allow: /machine/
+Allow: /v2/machine/
 Allow: /llms.txt
 Allow: /machine.md
 Allow: /machine.json
 Allow: /sitemap.xml
 
-Sitemap: https://www.vittesh.com/sitemap.xml
+Sitemap: https://vittesh.com/sitemap.xml

@@ -37,7 +37,7 @@ Prospects must answer quickly: who is this, can I see work, how do I contact.
 - Prefer asymmetrical whitespace and grid lines over card-heavy dashboards
 - Case studies: clear problem → approach → outcome; metrics in brackets or bordered blocks
 - About portrait: `/assets/images/profile.png` only — never `about.png`
-- Live production routes (`/`, `/about`, `/work`) stay untouched; ship preview under `/v2`
+- Live production routes (`/`, `/about`, `/work`, `/work-pages`) are the previous portfolio in `app/(main)/`. The newer site lives at `/v2`.
 
 ## References for craft (not copy-paste themes)
 

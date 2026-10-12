@@ -1,17 +1,17 @@
 # Vittesh Sinha
 
-Senior Product Designer. Experience is at the heart of being human.
+Senior Product Designer. I make data-heavy products clear enough to act on, from fleet dashboards to VR research tools.
 Location: India
 Email: hello@vittesh.com
-Years: 7+
+Years: 8
 
 Case studies:
-- Fleet Track Management: https://www.vittesh.com/work/fleet-command-center/
-- Future City VR + EEG: https://www.vittesh.com/work/vr-eeg-analytics/
+- FleetTrack: https://vittesh.com/v2/work/fleet-track/
+- Future City VR + EEG: https://vittesh.com/v2/work/vr-eeg-analytics/
 
-Machine-readable profile: https://www.vittesh.com/machine/
-Full markdown: https://www.vittesh.com/machine.md
-JSON: https://www.vittesh.com/machine.json
+Machine-readable profile: https://vittesh.com/v2/machine/
+Full markdown: https://vittesh.com/machine.md
+JSON: https://vittesh.com/machine.json
 LinkedIn: https://www.linkedin.com/in/vitteshsinha/
 Behance: https://www.behance.net/vitteshsinha
-Last updated: 2026-09-21
+Last updated: 2026-10-13

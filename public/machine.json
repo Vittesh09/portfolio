@@ -1,9 +1,9 @@
 {
-  "lastUpdated": "2026-09-21",
+  "lastUpdated": "2026-10-13",
   "name": "Vittesh Sinha",
   "title": "Senior Product Designer",
   "email": "hello@vittesh.com",
-  "yearsExperience": "7+",
+  "yearsExperience": "8",
   "location": "India",
   "employers": [
     "Nagarro",
@@ -11,12 +11,12 @@
     "Cult.fit"
   ],
   "caseStudies": [
-    "Fleet Track Management",
+    "FleetTrack",
     "Future City VR + EEG"
   ],
   "links": {
-    "home": "https://www.vittesh.com/",
-    "machine": "https://www.vittesh.com/machine/",
+    "home": "https://vittesh.com/",
+    "machine": "https://vittesh.com/v2/machine/",
     "linkedin": "https://www.linkedin.com/in/vitteshsinha/",
     "behance": "https://www.behance.net/vitteshsinha"
   }

@@ -17,10 +17,10 @@ function normalizePath(path: string) {
 }
 
 function routeLabel(path: string) {
-  const p = normalizePath(path);
-  if (p === '/') return 'Home';
-  if (p.startsWith('/about')) return 'About';
-  if (p.startsWith('/work/')) return 'Work';
+  const p = normalizePath(path).replace(/^\/v2(?=\/)/, '') || '/';
+  if (p === '/' || p === '/v2/') return 'Home';
+  if (p.startsWith('/about') || p.startsWith('/v2/about')) return 'About';
+  if (p.startsWith('/work/') || p.startsWith('/v2/work/')) return 'Work';
   if (p.startsWith('/machine')) return 'Machine';
   if (p.startsWith('/classic/workbench')) return 'Workbench';
   if (p.startsWith('/classic')) return 'Classic';

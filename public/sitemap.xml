@@ -1,30 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://www.vittesh.com/</loc>
+    <loc>https://vittesh.com/</loc>
   </url>
   <url>
-    <loc>https://www.vittesh.com/about/</loc>
+    <loc>https://vittesh.com/about/</loc>
   </url>
   <url>
-    <loc>https://www.vittesh.com/machine/</loc>
+    <loc>https://vittesh.com/v2/machine/</loc>
   </url>
   <url>
-    <loc>https://www.vittesh.com/work/vr-eeg-analytics/</loc>
+    <loc>https://vittesh.com/llms.txt</loc>
   </url>
   <url>
-    <loc>https://www.vittesh.com/work/fleet-command-center/</loc>
+    <loc>https://vittesh.com/machine.md</loc>
   </url>
   <url>
-    <loc>https://www.vittesh.com/llms.txt</loc>
+    <loc>https://vittesh.com/machine.json</loc>
   </url>
   <url>
-    <loc>https://www.vittesh.com/machine.md</loc>
+    <loc>https://vittesh.com/work/</loc>
   </url>
   <url>
-    <loc>https://www.vittesh.com/machine.json</loc>
+    <loc>https://vittesh.com/work-pages/virtual-humans/</loc>
   </url>
   <url>
-    <loc>https://www.vittesh.com/legacy/</loc>
+    <loc>https://vittesh.com/v2/</loc>
+  </url>
+  <url>
+    <loc>https://vittesh.com/v2/about/</loc>
+  </url>
+  <url>
+    <loc>https://vittesh.com/v2/work/fleet-track/</loc>
+  </url>
+  <url>
+    <loc>https://vittesh.com/v2/work/vr-eeg-analytics/</loc>
   </url>
 </urlset>

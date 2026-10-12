@@ -3,36 +3,39 @@
  * Unpublished `TODO: [FILL: …]` values stay in this file and on /machine.
  * Visitor-facing pages never interpolate those strings.
  */
+import { publishedCaseStudyCount } from '@/src/config/v2/caseStudies';
 
 export function isUnconfirmed(value: string | null | undefined) {
   if (!value) return true;
   return /TODO|\[FILL:/.test(value);
 }
 
-export const SITE_URL = 'https://www.vittesh.com';
-/** Public site routes (vittesh.com root). Legacy preview lived under /v2 before launch. */
-export const V2_BASE = '';
+export const SITE_URL = 'https://vittesh.com';
+/** Archive preview. Production `/` stays the previous portfolio. */
+export const V2_BASE = '/v2';
 
-export const lastUpdated = '2026-09-21';
+export function v2Path(path = '/') {
+  const base = V2_BASE.replace(/\/$/, '');
+  if (path.startsWith('http') || path.startsWith('/assets/')) return path;
+  const [raw, hash] = path.split('#');
+  const suffix = raw === '' || raw === '/' ? '/' : raw.startsWith('/') ? raw : `/${raw}`;
+  const url = `${base}${suffix === '/' ? '/' : suffix.endsWith('/') ? suffix : `${suffix}/`}`;
+  return hash ? `${url}#${hash}` : url;
+}
 
-/** Suggested domains from the change spec — confirm before treating as final. */
-export const domains = [
-  'Automotive',
-  'Enterprise / Logistics',
-  'Cloud / FinOps',
-  'VR / Neuro-tech'
-] as const;
+export const lastUpdated = '2026-10-13';
 
-/** Confirm 7+ vs 8+ before locking. Last published visitor copy is 7+. */
-export const yearsExperience = '7+';
+/** Canonical domain vocabulary and order. Cloud stays until a published case study confirms or drops it. */
+export const domains = ['Automotive', 'Logistics', 'Cloud', 'VR'] as const;
+
+/** Oct 2018 → Oct 2026. */
+export const yearsExperience = '8';
 export const city = 'TODO: [FILL: city]';
 export const timezone = 'TODO: [FILL: timezone]';
 export const openTo = 'TODO: [FILL: open to remote / relocation]';
 export const availability = 'TODO: [FILL: full-time / freelance / both / not looking]';
 export const replyTime = 'TODO: [FILL: e.g. within 2 business days]';
-export const selectedCaseStudyCount = 3;
 export const factualStatLabel = 'Selected case studies';
-export const factualStatValue = String(selectedCaseStudyCount);
 export const curefitEarlierWork =
   'TODO: [FILL: what you designed at Curefit and the result]';
 export const cultFitEndDateNote = 'TODO: [FILL: confirm Jan vs Feb 2022]';
@@ -50,15 +53,21 @@ export const taskFlowComplexityDefinition =
   'TODO: [FILL: define task-flow complexity — steps, taps, or time?]';
 
 export const heroName = 'Vittesh';
-export const heroKicker = `Hey, I am ${heroName}. Product Designer.`;
-export const heroHeadline = 'Experience is at the heart of being human.';
-export const heroCloser = 'I try to make it a little better everyday';
+/**
+ * Alternate headlines, unused:
+ * 1. Senior product designer for enterprise, automotive and immersive products.
+ * 2. I make powerful products easier to use.
+ */
+export const heroKicker = '';
+export const heroHeadline = "I'm Vittesh, a senior product designer.";
+export const heroCloser =
+  'I make data-heavy products clear enough to act on, from fleet dashboards to VR research tools.';
 export const heroHeadlineLines = [heroHeadline] as const;
 
 export const heroIntro = heroCloser;
 
 export const metaDescription =
-  'Vittesh Sinha, product designer for cars, VR, cloud tools, and enterprise software. I make powerful products easier to use.';
+  'I make powerful products easier to use. I turn fleets, VR research platforms, and vehicle interfaces into products people can act on.';
 
 export type MetricEvidence = {
   metric: string;
@@ -89,7 +98,7 @@ export const employers: {
     start: '2023-11',
     end: null,
     detail:
-      'End-to-end UX for enterprise, logistics, and fitness platforms — real-time KPI dashboards, VR emotion insights, research-led prioritization, and AI-assisted prototyping.',
+      'Led design for FleetTrack, a fleet telematics dashboard, and was the sole designer on Future City VR + EEG.',
     metrics: []
   },
   {
@@ -101,7 +110,7 @@ export const employers: {
     start: '2022-02',
     end: '2023-11',
     detail:
-      'Owned the cross-platform design system (apps, internal tools, scooter HMI). Shipped the Simple One app and e-scooter HMI, cutting task-flow complexity by 10–15%.',
+      'Owned the cross-platform design system across the app, internal tools and scooter HMI. Shipped the Simple One app and the e-scooter HMI.',
     metrics: [
       {
         metric: '10–15% lower task-flow complexity on Simple One / e-scooter HMI',
@@ -120,7 +129,7 @@ export const employers: {
     start: '2018-10',
     end: '2022-01',
     detail:
-      'Research, journeys, and interfaces for fitness and wellness. Designed half-hour class flows (+15% NPS across 100+ centers) and field research for in-center experiences.',
+      'Research, journeys, and interfaces for fitness and wellness, including class flows and field research for in-center experiences.',
     metrics: [
       {
         metric: '+15% NPS across 100+ centers on half-hour class flows',
@@ -150,7 +159,7 @@ export const profile = {
   locationLine: 'India',
   yearsExperience,
   domains: [...domains],
-  industries: 'Automotive, Logistics, Cloud, VR',
+  industries: 'Automotive · Logistics · Cloud · VR',
   availability,
   replyTime,
   toolsAndSkills,
@@ -165,9 +174,10 @@ export const profile = {
   valueProposition: metaDescription,
   tagline: metaDescription,
   statement:
-    'I care about the part of design that’s hard to explain: when something works and feels right.',
-  aboutShort: `Across automotive, SaaS, and enterprise, I’ve designed products where how something looks, feels, and works is a single decision.`,
-  about: `Across ${domains.join(', ')}, I’ve shipped product design in scrappy teams and high-stakes environments. Years: ${yearsExperience}. Currently at ${currentEmployer.name}.`,
+    'Complex systems fail at the handoffs — between screens, roles and moments. I design the connections.',
+  aboutShort:
+    'Across automotive, logistics, cloud and VR, I take products with a lot of data and many roles and make the next action obvious.',
+  about: `I'm a senior product designer with ${yearsExperience} years across automotive, logistics, cloud and VR. I work from research through launch, and I'm most useful when a product has a lot of data, several user roles and a messy workflow that needs one clear path.`,
   personality: workingStyle.join(' '),
   heroHeadline,
   heroIntro,
@@ -179,14 +189,14 @@ export const profile = {
     liveHome: '/'
   },
   nav: [
-    { label: 'Home', href: '/' },
-    { label: 'Work', href: '/#work' },
-    { label: 'About', href: '/about/' },
-    { label: 'Contact', href: '/#contact' }
+    { label: 'Work', href: v2Path('/#work'), external: false },
+    { label: 'About', href: v2Path('/about/'), external: false },
+    { label: 'Resume', href: '/assets/resume/Vittesh_Sinha_Resume.pdf', external: true },
+    { label: 'Contact', href: v2Path('/#contact'), external: false }
   ],
   agentNav: {
     label: 'For agents',
-    href: '/machine/',
+    href: v2Path('/machine/'),
     title: 'Machine-readable version of this portfolio for AI agents'
   }
 } as const;
@@ -211,13 +221,14 @@ export const siteConfig = {
 } as const;
 
 export const trustSignals = [
-  { label: 'Years shipping', value: yearsExperience },
-  { label: 'Domains', value: String(domains.length) },
-  { label: factualStatLabel, value: factualStatValue }
+  { label: 'Years in product design', value: yearsExperience, plain: false },
+  { label: 'Domains', value: domains.join(' · '), plain: true },
+  { label: factualStatLabel, value: String(publishedCaseStudyCount), plain: false }
 ] as const;
 
 export const trustLogos = employers.map((job) => ({
   name: job.name,
+  role: job.role,
   period: job.period,
   href: job.href,
   current: job.current
@@ -263,7 +274,7 @@ export const experience = employers.map((job) => ({
 }));
 
 export const unresolvedPlaceholders = [
-  '[FILL: 7+ or 8+]',
+  '[FILL: years confirmed as 8]',
   '[FILL: city]',
   '[FILL: timezone]',
   '[FILL: open to remote / relocation]',

@@ -2,11 +2,10 @@
 
 ## Critical
 
-- **Production** routes live in `app/(site)/` (URLs at `/`, `/about/`, `/work/[slug]/`, …).
-- **Legacy backup** (previous site) is at `/legacy/` (`app/legacy/`, `robots: noindex`).
-- Do not break live `/` without explicit intent; lab tools stay under `/classic`, `/singularity`, `/workbench`.
-- Primary homepage: singularity landing (`LandingExperienceSingularity` + `src/components/v2/singularity/`).
-- Classic orbit / particle landing: `/classic`.
+- **Production** is the previous portfolio in `app/(main)/` (`/`, `/about/`, `/work/`, `/work-pages/virtual-humans/`).
+- **Newer site** lives under `/v2/` (`app/(site)/v2/`). Lab tools stay under `/v2/classic`, `/v2/singularity`, `/v2/workbench`.
+- Do not replace live `/` with the singularity landing unless asked. Case studies to edit are the pages under `app/(main)/`.
+- Classic orbit / particle landing: `/v2/classic`.
 
 ## Sources of truth
 
@@ -34,17 +33,18 @@ Hero → Trust → Why → Work → About → CTA
 
 | Path | Purpose |
 |------|---------|
-| `/` | **Primary homepage** (singularity landing) |
-| `/classic` | Archived orbit / particle landing (lab) |
-| `/classic/workbench` | Archived workbench (lab) |
-| `/about` | About |
-| `/work/[slug]` | Curated case studies (published slugs in `caseStudies.ts`) |
-| `/singularity` | Interactive singularity playground (lab) |
-| `/machine` | Plain-text agent bio |
-| `/workbench` | Redirect → `/classic/workbench` |
-| `/legacy/` | Previous production site (backup, noindex) |
-
-Old `/v2/*` URLs redirect to `/` via `public/.htaccess`.
+| `/` | **Primary homepage** (previous portfolio) |
+| `/about` | About (previous portfolio) |
+| `/work` | Selected work (previous portfolio) |
+| `/work-pages/virtual-humans` | Virtual Humans case study |
+| `/v2` | Newer singularity homepage |
+| `/v2/about` | Newer about page |
+| `/v2/work/[slug]` | Newer case-study templates (published slugs in `caseStudies.ts`) |
+| `/v2/classic` | Archived orbit / particle landing (lab) |
+| `/v2/classic/workbench` | Archived workbench (lab) |
+| `/v2/singularity` | Interactive singularity playground (lab) |
+| `/v2/machine` | Plain-text agent bio |
+| `/legacy/` | Redirects to `/` |
 
 ## Preview
 
@@ -53,5 +53,6 @@ npm run dev
 ```
 
 - Primary: `http://localhost:3000/`
-- Classic: `http://localhost:3000/classic`
-- Legacy backup: `http://localhost:3000/legacy/`
+- Case study: `http://localhost:3000/work-pages/virtual-humans/`
+- Newer site: `http://localhost:3000/v2/`
+- Classic: `http://localhost:3000/v2/classic/`

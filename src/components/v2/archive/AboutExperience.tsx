@@ -4,10 +4,10 @@ import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { ContactPanel } from '@/src/components/v2/ui/ContactPanel';
 import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
-import { yearsExperience } from '@/src/config/v2/profile';
+import { yearsExperience, v2Path } from '@/src/config/v2/profile';
 import { experience, siteConfig } from '@/src/config/v2/site';
 
-const ABOUT_INTRO = `${yearsExperience} years designing products across ${siteConfig.industries}. I work from research through launch—clarity, systems, and interfaces that hold up in production.`;
+const ABOUT_INTRO = `I'm a senior product designer with ${yearsExperience} years across automotive, logistics, cloud and VR. I work from research through launch, and I'm most useful when a product has a lot of data, several user roles and a messy workflow that needs one clear path.`;
 
 export function AboutExperience() {
   return (
@@ -20,11 +20,9 @@ export function AboutExperience() {
               id="about-hero-heading"
               initial={false}
               animate={{ opacity: 1, y: 0 }}
-              className="archive-display archive-display--hero my-12 text-[clamp(2.75rem,10vw,7rem)] md:my-16"
+              className="archive-display archive-display--hero my-12 text-[clamp(2.25rem,5.5vw,4.75rem)] md:my-16"
             >
-              <span className="text-accent-pop">Designer by day.</span>
-              <br />
-              <span className="text-text-primary">Gamer at night.</span>
+              I design the hard parts: dense data, many roles, real-time moments.
             </motion.h1>
             <div className="border-t border-border-subtle pt-6">
               <p className="max-w-[42ch] text-sm leading-relaxed text-text-secondary">{ABOUT_INTRO}</p>
@@ -84,7 +82,7 @@ export function AboutExperience() {
           </div>
           <div className="mt-10 flex flex-wrap gap-3">
             <HashNavLink
-              href="/#work"
+              href={v2Path('/#work')}
               className="archive-label bg-text-primary px-5 py-3 text-bg-primary"
             >
               See selected work →

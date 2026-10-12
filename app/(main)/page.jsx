@@ -1,7 +1,7 @@
 import HomeClient from './home-client';
 
 export const metadata = {
-  title: 'Vittesh | Product Designer',
+  title: { absolute: 'Vittesh | Product Designer' },
   description:
     'Vittesh Sinha is a product designer focused on building calm, trustworthy systems that solve complex problems.',
   alternates: {

@@ -1,12 +1,12 @@
 # Vittesh Sinha
 
 This page is a machine-readable version of the portfolio for AI agents.
-Last updated: 2026-09-21
+Last updated: 2026-10-13
 
 Name: Vittesh Sinha
 Title: Senior Product Designer
 Email: hello@vittesh.com
-Years: 7+
+Years: 8
 Location: India
 
 Employers:
@@ -15,7 +15,7 @@ Employers:
 - Cult.fit
 
 Case studies:
-- Fleet Track Management
+- FleetTrack
 - Future City VR + EEG
 
 This file is a snapshot for crawlers. The live generator is src/config/v2/agentDocuments.ts.
