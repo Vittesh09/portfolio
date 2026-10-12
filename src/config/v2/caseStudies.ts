@@ -112,7 +112,7 @@ export const projects: Project[] = [
       'A fleet manager starts from the fleet, not from a single truck.',
     role: 'Product Designer',
     platforms: 'Web',
-    year: '2024',
+    year: '2025',
     metrics: [
       { label: 'Who it is for', value: 'Manager' },
       { label: 'Timeline', value: '4+ mo' },
@@ -157,7 +157,7 @@ export const projects: Project[] = [
       facts: [
         { label: 'Role', value: 'Product Designer' },
         { label: 'Scope', value: 'Entire dashboard redesign' },
-        { label: 'Timeline', value: '4 months · 2024' }
+        { label: 'Timeline', value: '4 months · 2025' }
       ],
       problemTitle: 'The data existed. The experience was fragmented.',
       problemPoints: [
@@ -586,7 +586,7 @@ export const projects: Project[] = [
       'Help teams find cloud waste without drowning in billing CSVs and six different AWS consoles.',
     role: 'Senior Product Designer',
     platforms: 'Enterprise web SaaS',
-    year: '2025',
+    year: '2026',
     metrics: [
       { label: 'Diagnosis speed', value: '+30%' },
       { label: 'AWS services', value: '20+' },

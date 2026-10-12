@@ -132,7 +132,7 @@ function useProjectScrollFocus() {
       last = now;
       const follow = reduce ? 1 : 1 - Math.exp(-4.5 * dt);
       document
-        .querySelectorAll<HTMLElement>('.archive-project-card:not(.is-locked)')
+        .querySelectorAll<HTMLElement>('.archive-project-card')
         .forEach((card) => {
           const target = targetFor(card);
           const prev = eased.get(card) ?? target;
