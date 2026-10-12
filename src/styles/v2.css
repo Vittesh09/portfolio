@@ -1,6 +1,24 @@
 @tailwind components;
 @tailwind utilities;
 
+html,
+body {
+  margin: 0;
+  padding: 0;
+  background: #eef1f5;
+  min-height: 100%;
+}
+
+html {
+  overflow-x: clip;
+}
+
+html:has(.v2-root.dark),
+body:has(.v2-root.dark) {
+  background: #000;
+  color-scheme: dark;
+}
+
 /* V2 direction D — a bright-red research archive on cool gray-blue. */
 .v2-root {
   --v2-bg-primary: #eef1f5;
@@ -16,6 +34,7 @@
   color: var(--v2-text-primary);
   font-family: var(--font-jakarta), system-ui, sans-serif;
   min-height: 100svh;
+  width: 100%;
   -webkit-font-smoothing: antialiased;
   color-scheme: light;
 }
