@@ -5,6 +5,7 @@ import {
   domains,
   education,
   employers,
+  heroCloser,
   isUnconfirmed,
   lastUpdated,
   profile,
@@ -119,7 +120,7 @@ export function getLlmsTxt() {
   return [
     `# ${record.name}`,
     '',
-    `${record.title}. ${profile.heroCloser}`,
+    `${record.title}. ${heroCloser}`,
     ...factLine('Location', record.location),
     ...factLine('Availability', record.availability),
     `Email: ${record.email}`,
