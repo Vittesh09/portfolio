@@ -50,7 +50,7 @@ export const DEFAULT_SINGULARITY_PARAMS: SingularityParams = {
   holeCount: 1
 };
 
-export type SingularityMode = 'hero' | 'lab';
+export type SingularityMode = 'hero' | 'lab' | 'center';
 
 export type BlackHoleOptions = {
   mode?: SingularityMode;

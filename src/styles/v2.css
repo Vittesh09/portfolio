@@ -2965,26 +2965,74 @@ html.v2-disc-lock .v2-root .v2-page-enter {
 
 .v2-root .notfound-stage {
   background: #000002;
+  height: 100svh;
   min-height: 100svh;
   position: relative;
 }
 
+.v2-root .notfound-stage .bh-mount,
+.v2-root .notfound-stage .bh-canvas {
+  cursor: grab;
+}
+
 .v2-root .notfound-stage .bh-mount {
-  transform: translateY(-16vh) scale(0.66);
-  transform-origin: center center;
+  opacity: 0;
+  transition: opacity 1.4s ease;
+}
+
+.v2-root .notfound-stage .bh-mount.is-ready {
+  opacity: 1;
+}
+
+@keyframes notfound-copy-in {
+  from {
+    opacity: 0;
+    transform: translate(-50%, 0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translate(-50%, 0);
+  }
+}
+
+/* Live copy is the capture source. The lensed plane is what you see. */
+.v2-root .notfound-stage .notfound-warp {
+  opacity: 0;
+  pointer-events: none;
+  user-select: none;
+}
+
+.v2-root .notfound-stage.bh-copy-fallback .notfound-warp {
+  opacity: 1;
 }
 
 .v2-root .notfound-copy {
+  animation: notfound-copy-in 1.4s cubic-bezier(0.16, 1, 0.3, 1) 1.6s both;
   bottom: max(4.5vh, 1.75rem);
   color: #f2efe6;
-  text-shadow: 0 0 24px #000, 0 2px 16px #000;
   left: 50%;
   pointer-events: none;
   position: absolute;
   text-align: center;
+  text-shadow: 0 0 24px #000, 0 2px 16px #000;
   transform: translateX(-50%);
   width: min(36rem, calc(100% - 2.5rem));
-  z-index: 6;
+  /* Above the fixed drag target so the home link stays clickable. */
+  z-index: 90;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .v2-root .notfound-stage .notfound-warp {
+    opacity: 1;
+  }
+
+  .v2-root .notfound-copy {
+    animation: none;
+  }
+
+  .v2-root .notfound-stage .bh-mount {
+    transition: none;
+  }
 }
 
 .v2-root .notfound-code {

@@ -73,6 +73,26 @@ function isMobileViewport() {
   );
 }
 
+/** setPointerCapture throws if that pointer is already gone. */
+function guardPointerCapture(element: HTMLElement) {
+  const capture = element.setPointerCapture.bind(element);
+  const release = element.releasePointerCapture.bind(element);
+  element.setPointerCapture = (pointerId: number) => {
+    try {
+      capture(pointerId);
+    } catch {
+      /* no active pointer with this id */
+    }
+  };
+  element.releasePointerCapture = (pointerId: number) => {
+    try {
+      release(pointerId);
+    } catch {
+      /* no active pointer with this id */
+    }
+  };
+}
+
 function isInteractiveTarget(target: EventTarget | null) {
   return (
     target instanceof Element &&
@@ -91,7 +111,8 @@ export function useBlackHole(
   options: BlackHoleOptions = {}
 ) {
   const { mode = 'hero', paramsRef } = options;
-  const isLab = mode === 'lab';
+  const isLab = mode === 'lab' || mode === 'center';
+  const spinScene = mode === 'center';
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -115,8 +136,18 @@ export function useBlackHole(
     scene.background = new THREE.Color(isLab ? labDefaults.background : 0x000002);
 
     const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 4000);
+    // 404 rest stays close enough that the horizon reads as a disk, from a
+    // lower side angle. The reveal eases out to this pose, then stays there.
+    const CENTER_REST = new THREE.Vector3(-4.6, 3.2, 16.8);
+    const CENTER_REVEAL_MS = 10000;
+    /** How far the 404 camera backs off on narrow screens; lensing shrinks to match. */
+    let centerFit = 1;
     const placeCamera = () => {
-      if (isLab) {
+      if (spinScene) {
+        // Narrow screens back the camera off so the whole disk fits the width.
+        centerFit = THREE.MathUtils.clamp(1.35 / Math.max(0.1, camera.aspect), 1, 2.6);
+        camera.position.copy(HOME).addScaledVector(CENTER_REST, centerFit);
+      } else if (isLab) {
         camera.position.set(HOME.x - 0.4, HOME.y + 2.8, HOME.z + 12.5);
       } else {
         camera.position.set(HOME.x - 2.6, HOME.y + 3.85, HOME.z + 10.6);
@@ -137,6 +168,8 @@ export function useBlackHole(
     renderer.domElement.className = 'bh-canvas';
     renderer.domElement.setAttribute('aria-hidden', 'true');
     mount.appendChild(renderer.domElement);
+    // OrbitControls calls these directly. A pointer that already ended throws.
+    guardPointerCapture(renderer.domElement);
 
     // Orbit pivot = singularity center
     const controls = new OrbitControls(camera, renderer.domElement);
@@ -157,6 +190,20 @@ export function useBlackHole(
     controls.update();
     const homeCamPos = camera.position.clone();
     controls.saveState();
+    // Start a little closer, then dolly back to homeCamPos.
+    const centerStartPos = homeCamPos.clone().lerp(HOME, 0.34);
+    let centerRevealAt = 0;
+    let centerRevealDone = reduceMotion;
+    let centerTiltX = (-52 * Math.PI) / 180;
+    let centerTiltZ = (-34 * Math.PI) / 180;
+    let centerYaw = (36 * Math.PI) / 180;
+    const colorScratch = new THREE.Color();
+    let colorFrameAt = 0;
+    if (spinScene && !reduceMotion) {
+      camera.position.copy(centerStartPos);
+      camera.lookAt(HOME);
+      controls.enabled = false;
+    }
 
     /** Shift frustum so the orbit anchor reads on the right. Lab stays centered. */
     const applyRightFrame = (width: number, height: number) => {
@@ -405,14 +452,21 @@ export function useBlackHole(
     starScene.add(stars);
 
     // --- Singularity (primary + optional lab twin) ---
-    const horizonGeo = new THREE.SphereGeometry(BLACK_HOLE_RADIUS * 1.05, 128, 64);
-    const voidGeo = new THREE.SphereGeometry(BLACK_HOLE_RADIUS, 128, 64);
-    const diskGeo = new THREE.RingGeometry(DISK_INNER, DISK_OUTER, 256, 128);
+    const horizonMul = spinScene ? 1.4 : 1;
+    const diskInner = spinScene ? BLACK_HOLE_RADIUS * horizonMul + 0.22 : DISK_INNER;
+    const horizonGeo = new THREE.SphereGeometry(BLACK_HOLE_RADIUS * 1.05 * horizonMul, 128, 64);
+    const voidGeo = new THREE.SphereGeometry(BLACK_HOLE_RADIUS * horizonMul, 128, 64);
+    const diskGeo = new THREE.RingGeometry(diskInner, DISK_OUTER, 256, 128);
 
     const horizonMat = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
-        uCameraPosition: { value: camera.position.clone() }
+        uCameraPosition: { value: camera.position.clone() },
+        uGlowColor: {
+          value: spinScene
+            ? new THREE.Color(labDefaults.colorMid)
+            : new THREE.Color().setRGB(1.0, 0.4, 0.1, THREE.LinearSRGBColorSpace)
+        }
       },
       vertexShader: horizonVertexShader,
       fragmentShader: horizonFragmentShader,
@@ -443,7 +497,8 @@ export function useBlackHole(
         },
         uNoiseScale: { value: isLab ? labDefaults.noiseScale : 2.5 },
         uFlowSpeed: { value: isLab ? labDefaults.flowSpeed : 0.1 },
-        uDensity: { value: isLab || reduceMotion ? DISK_DENSITY_TARGET : 0 }
+        uDensity: { value: isLab || reduceMotion ? DISK_DENSITY_TARGET : 0 },
+        uDiskInner: { value: diskInner }
       },
       vertexShader: diskVertexShader,
       fragmentShader: diskFragmentShader,
@@ -632,7 +687,8 @@ export function useBlackHole(
       out.x = cx;
       out.y = cy;
 
-      rimPos.set(BLACK_HOLE_RADIUS, 0, 0).add(hole.core.position).project(camera);
+      const grabReach = spinScene ? BLACK_HOLE_RADIUS * 1.4 * 1.35 : BLACK_HOLE_RADIUS;
+      rimPos.set(grabReach, 0, 0).add(hole.core.position).project(camera);
       const rimClientX = (rimPos.x * 0.5 + 0.5) * mountRect.width + mountRect.left;
       const voidRadiusPx = Math.max(36, Math.abs(rimClientX - cx));
       out.radius = voidRadiusPx * 1.2 + (mobile ? 18 : 24);
@@ -826,6 +882,7 @@ export function useBlackHole(
       applyRightFrame(width, height);
       controls.target.copy(HOME);
       homeCamPos.copy(camera.position);
+      if (spinScene) centerStartPos.copy(homeCamPos).lerp(HOME, 0.34);
       controls.saveState();
       controls.update();
       if (!holding && introDone) {
@@ -895,6 +952,8 @@ export function useBlackHole(
 
     /** Snap OrbitControls + camera to the saved home framing (clears damping lock). */
     const settleHomeCamera = () => {
+      // The 404 zoom owns the camera until it settles.
+      if (spinScene && !centerRevealDone) return;
       camera.position.copy(homeCamPos);
       controls.target.copy(HOME);
       camera.lookAt(HOME);
@@ -907,7 +966,7 @@ export function useBlackHole(
     };
 
     const enableOrbitIfAllowed = () => {
-      if (!introDone || holding || returning || orbitCoasting) return;
+      if ((spinScene && !centerRevealDone) || !introDone || holding || returning || orbitCoasting) return;
       if (!mobile && !reduceMotion) controls.enabled = true;
       controls.target.copy(HOME);
       controls.update();
@@ -964,7 +1023,7 @@ export function useBlackHole(
         diskMaterial.uniforms.uDensity.value = DISK_DENSITY_TARGET;
         grabProxy.style.pointerEvents = '';
         mount.classList.add('is-intro-done');
-        enableOrbitIfAllowed();
+        if (!spinScene) enableOrbitIfAllowed();
       }
     } else {
       controls.enabled = false;
@@ -1029,10 +1088,13 @@ export function useBlackHole(
       activeHole.core.position.addScaledVector(returnMom, momFade);
       clampToPlayArea();
 
-      // Camera eases back to default framing in parallel (no instant snap)
-      camera.position.lerpVectors(returnCamFrom, homeCamPos, e);
-      controls.target.copy(HOME);
-      camera.lookAt(HOME);
+      // Camera eases back to default framing in parallel (no instant snap).
+      // During the 404 zoom the scripted camera stays in charge.
+      if (!spinScene || centerRevealDone) {
+        camera.position.lerpVectors(returnCamFrom, homeCamPos, e);
+        controls.target.copy(HOME);
+        camera.lookAt(HOME);
+      }
 
       if (t >= 1) {
         activeHole.core.position.copy(activeHole.home);
@@ -1163,11 +1225,22 @@ export function useBlackHole(
           diskMaterial.uniforms.uDensity.value = live.diskDensity;
           diskMaterial.uniforms.uFlowSpeed.value = live.flowSpeed;
           diskMaterial.uniforms.uNoiseScale.value = live.noiseScale;
-          diskMaterial.uniforms.uColorHot.value.set(live.colorHot);
-          diskMaterial.uniforms.uColorMid.value.set(live.colorMid);
-          diskMaterial.uniforms.uColorAccent.value.set(live.colorAccent);
-          diskMaterial.uniforms.uColorEmber.value.set(live.colorEmber);
-          diskMaterial.uniforms.uColorOuter.value.set(live.colorOuter);
+          // The 404 eases between palettes; the lab applies slider values directly.
+          // `delta` reads ~0 here (getElapsedTime consumes the clock delta), so time it locally.
+          const colorNow = performance.now();
+          const colorDt = colorFrameAt ? Math.min(0.05, (colorNow - colorFrameAt) / 1000) : 0;
+          colorFrameAt = colorNow;
+          const colorEase = spinScene && !reduceMotion ? 1 - Math.exp(-colorDt * 2.6) : 1;
+          const easeColor = (target: THREE.Color, hex: string) => {
+            if (colorEase >= 1) target.set(hex);
+            else target.lerp(colorScratch.set(hex), colorEase);
+          };
+          easeColor(diskMaterial.uniforms.uColorHot.value, live.colorHot);
+          easeColor(diskMaterial.uniforms.uColorMid.value, live.colorMid);
+          easeColor(diskMaterial.uniforms.uColorAccent.value, live.colorAccent);
+          easeColor(diskMaterial.uniforms.uColorEmber.value, live.colorEmber);
+          easeColor(diskMaterial.uniforms.uColorOuter.value, live.colorOuter);
+          if (spinScene) easeColor(horizonMat.uniforms.uGlowColor.value, live.colorMid);
           const tiltXLive = (live.diskTiltDeg * Math.PI) / 180;
           const tiltZLive = (live.diskBankDeg * Math.PI) / 180;
           holeA.diskTilt.rotation.x = tiltXLive;
@@ -1176,8 +1249,11 @@ export function useBlackHole(
             holeB.diskTilt.rotation.x = tiltXLive;
             holeB.diskTilt.rotation.z = tiltZLive;
           }
-          lensingPass.uniforms.lensingStrength.value = live.lensingStrength;
-          lensingPass.uniforms.lensingRadius.value = live.lensingRadius;
+          const lensFit = spinScene ? 1 / centerFit : 1;
+          // The 404 copy stays put while the hole is dragged. The homepage still lenses.
+          const lensStrength = spinScene ? 0 : live.lensingStrength * lensFit * lensFit;
+          lensingPass.uniforms.lensingStrength.value = lensStrength;
+          lensingPass.uniforms.lensingRadius.value = (spinScene ? 0.28 : live.lensingRadius) * lensFit;
           lensingPass.uniforms.chromaticAberration.value = live.chromaticAberration;
           renderer.toneMappingExposure = live.exposure;
           scene.background = new THREE.Color(live.background);
@@ -1199,12 +1275,52 @@ export function useBlackHole(
           }
         }
 
-        // Slow sky drift. One revolution is about 8 minutes. The disk stays
-        // on shader flow so the horizon does not spin with the stars.
+        // Slow sky drift on the homepage. One revolution is about 8 minutes.
+        // The 404 turns the star field a little faster. The hole stays put;
+        // only the horizon shader and disk flow move.
         if (!reduceMotion && !isLab) {
           const skyTurn = elapsed * ((Math.PI * 2) / (8 * 60));
           stars.rotation.y = skyTurn;
           stars.rotation.x = skyTurn * 0.12;
+        }
+        if (spinScene && !reduceMotion) {
+          const skyTurn = elapsed * ((Math.PI * 2) / (4 * 60));
+          stars.rotation.y = skyTurn;
+          stars.rotation.x = skyTurn * 0.06;
+        }
+        if (spinScene) {
+          const approachX = (-52 * Math.PI) / 180;
+          const approachZ = (-34 * Math.PI) / 180;
+          const approachYaw = (36 * Math.PI) / 180;
+          const settledX = (-74 * Math.PI) / 180;
+          const settledZ = (18 * Math.PI) / 180;
+          const settledYaw = (132 * Math.PI) / 180;
+          if (reduceMotion) {
+            camera.position.copy(homeCamPos);
+            centerTiltX = settledX;
+            centerTiltZ = settledZ;
+            centerYaw = settledYaw;
+            centerRevealDone = true;
+          } else if (!centerRevealDone) {
+            controls.enabled = false;
+            if (!centerRevealAt) centerRevealAt = performance.now();
+            const revealT = Math.min(1, (performance.now() - centerRevealAt) / CENTER_REVEAL_MS);
+            // Zoom and tilt share one curve, starting on the first frame.
+            const revealE = easeOutCubic(revealT);
+            camera.position.lerpVectors(centerStartPos, homeCamPos, revealE);
+            camera.lookAt(HOME);
+            centerTiltX = THREE.MathUtils.lerp(approachX, settledX, revealE);
+            centerTiltZ = THREE.MathUtils.lerp(approachZ, settledZ, revealE);
+            centerYaw = THREE.MathUtils.lerp(approachYaw, settledYaw, revealE);
+            if (revealT >= 1) {
+              centerRevealDone = true;
+              controls.target.copy(HOME);
+              controls.saveState();
+            }
+          }
+          holeA.diskTilt.rotation.x = centerTiltX;
+          holeA.diskTilt.rotation.z = centerTiltZ;
+          holeA.disk.rotation.z = centerYaw;
         }
         diskMaterial.uniforms.uTime.value = elapsed * timeScale;
         if (!reduceMotion) starMaterial.uniforms.uTime.value = elapsed;
@@ -1292,10 +1408,12 @@ export function useBlackHole(
             holeA.core.position.copy(holeA.home);
           }
           throwVel.set(0, 0, 0);
-          controls.target.copy(HOME);
-          if (!mobile && !reduceMotion) {
-            controls.enabled = true;
-            controls.update();
+          if (!spinScene || centerRevealDone) {
+            controls.target.copy(HOME);
+            if (!mobile && !reduceMotion) {
+              controls.enabled = true;
+              controls.update();
+            }
           }
         } else {
           // Dual mode: leave positions free so mutual gravity can warp them
@@ -1346,7 +1464,7 @@ export function useBlackHole(
 
         placeTextPlane();
         updateHoleScreen();
-        if (!isLab) syncTextWarpVisibility();
+        if (mode !== 'lab') syncTextWarpVisibility();
 
         // Dual-hole lensing: each singularity warps the field around the other
         screenPos.copy(holeA.core.position).project(camera);
@@ -1425,7 +1543,8 @@ export function useBlackHole(
       { rootMargin: '200px', threshold: 0 }
     );
 
-    warpNode = isLab
+    const warpEnabled = mode !== 'lab';
+    warpNode = !warpEnabled
       ? null
       : hero?.querySelector<HTMLElement>('[data-bh-warp]') ??
         mount.closest('.bh-hero')?.querySelector<HTMLElement>('[data-bh-warp]') ??
@@ -1463,7 +1582,7 @@ export function useBlackHole(
     window.addEventListener('blur', onWindowBlur);
 
     const captureTimers: number[] = [];
-    if (!isLab && !reduceMotion) {
+    if (warpEnabled && !reduceMotion) {
       captureTimers.push(
         window.setTimeout(() => void refreshWarpTexture(true), TEXT_CAPTURE_AFTER_COPY_MS),
         window.setTimeout(() => {
@@ -1531,5 +1650,5 @@ export function useBlackHole(
         mount.removeChild(renderer.domElement);
       }
     };
-  }, [mountRef, heroRef, isLab, paramsRef]);
+  }, [mountRef, heroRef, isLab, spinScene, paramsRef]);
 }

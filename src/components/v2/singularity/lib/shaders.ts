@@ -62,6 +62,7 @@ export const horizonVertexShader = /* glsl */ `
 export const horizonFragmentShader = /* glsl */ `
   uniform float uTime;
   uniform vec3 uCameraPosition;
+  uniform vec3 uGlowColor;
   varying vec3 vNormal;
   varying vec3 vWorldPos;
 
@@ -69,7 +70,7 @@ export const horizonFragmentShader = /* glsl */ `
     vec3 viewDirection = normalize(uCameraPosition - vWorldPos);
     float fresnel = 1.0 - abs(dot(vNormal, viewDirection));
     fresnel = pow(fresnel, 2.5);
-    vec3 glowColor = vec3(1.0, 0.4, 0.1);
+    vec3 glowColor = uGlowColor;
     float pulse = sin(uTime * 2.5) * 0.15 + 0.85;
     gl_FragColor = vec4(glowColor * fresnel * pulse, fresnel * 0.4);
   }
@@ -97,6 +98,7 @@ export const diskFragmentShader = /* glsl */ `
   uniform float uNoiseScale;
   uniform float uFlowSpeed;
   uniform float uDensity;
+  uniform float uDiskInner;
 
   varying vec2 vUv;
   varying float vRadius;
@@ -151,7 +153,7 @@ export const diskFragmentShader = /* glsl */ `
   }
 
   void main() {
-    float normalizedRadius = smoothstep(${DISK_INNER.toFixed(2)}, ${DISK_OUTER.toFixed(2)}, vRadius);
+    float normalizedRadius = smoothstep(uDiskInner, ${DISK_OUTER.toFixed(2)}, vRadius);
     vec2 dir = normalize(vPolar + 1e-6);
     float vAngle = atan(dir.y, dir.x);
 
