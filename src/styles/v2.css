@@ -2956,3 +2956,62 @@ html.v2-disc-lock .v2-root .v2-page-enter {
     transform: none !important;
   }
 }
+
+/* 404 — centered singularity, existing copy underneath */
+.v2-root.notfound-screen {
+  background: #000;
+  min-height: 100svh;
+}
+
+.v2-root .notfound-stage {
+  background: #000002;
+  min-height: 100svh;
+  position: relative;
+}
+
+.v2-root .notfound-stage .bh-mount {
+  transform: translateY(-16vh) scale(0.66);
+  transform-origin: center center;
+}
+
+.v2-root .notfound-copy {
+  bottom: max(4.5vh, 1.75rem);
+  color: #f2efe6;
+  text-shadow: 0 0 24px #000, 0 2px 16px #000;
+  left: 50%;
+  pointer-events: none;
+  position: absolute;
+  text-align: center;
+  transform: translateX(-50%);
+  width: min(36rem, calc(100% - 2.5rem));
+  z-index: 6;
+}
+
+.v2-root .notfound-code {
+  margin: 0 0 0.75rem;
+}
+
+.v2-root .notfound-title {
+  font-size: clamp(1.75rem, 4vw, 2.25rem);
+  margin: 0 0 0.75rem;
+}
+
+.v2-root .notfound-line {
+  color: #c4c4c4;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.v2-root .notfound-home {
+  border: 1px solid #f2efe6;
+  display: inline-flex;
+  margin-top: 1.5rem;
+  padding: 0.75rem 1.25rem;
+  pointer-events: auto;
+}
+
+.v2-root .notfound-home:hover {
+  background: #f2efe6;
+  color: #000;
+}
