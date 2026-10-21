@@ -240,8 +240,8 @@ export default function HomeClient() {
                         className={`menu-panel ${menuOpen ? 'show' : ''}`}
                         ref={menuPanelRef}
                       >
-                        <a href="/about/">About</a>
-                        <a href="/work/">Work</a>
+                        <a href="/legacy/about/">About</a>
+                        <a href="/legacy/work/">Work</a>
 
                         <div className="resume-row">
                           <a
@@ -348,8 +348,8 @@ export default function HomeClient() {
           </div>
 
           <nav className="mobile-pill-menu" aria-label="Primary">
-            <a href="/about/">About</a>
-            <a href="/work/">Work</a>
+            <a href="/legacy/about/">About</a>
+            <a href="/legacy/work/">Work</a>
             <a href="/assets/resume/Vittesh_Sinha_Resume.pdf" download>
               Resume
             </a>

@@ -2,10 +2,11 @@
 
 ## Critical
 
-- **Production** is the previous portfolio in `app/(main)/` (`/`, `/about/`, `/work/`, `/work-pages/virtual-humans/`).
-- **Newer site** lives under `/v2/` (`app/(site)/v2/`). Lab tools stay under `/v2/classic`, `/v2/singularity`, `/v2/workbench`.
-- Do not replace live `/` with the singularity landing unless asked. Case studies to edit are the pages under `app/(main)/`.
-- Classic orbit / particle landing: `/v2/classic`.
+- **Production** is the archive site at `/` (`app/(site)/`). Homepage is the singularity landing.
+- **Previous portfolio** lives under `/legacy/` (`app/legacy/`). Do not replace it.
+- Lab tools: `/classic`, `/singularity`, `/classic/workbench`. `/v2/*` redirects to the same paths without the prefix.
+- Case studies to edit are the pages under `app/(site)/work/` and copy in `src/config/v2/caseStudies.ts`.
+- Classic orbit / particle landing: `/classic`.
 
 ## Sources of truth
 
@@ -33,18 +34,18 @@ Hero → Trust → Why → Work → About → CTA
 
 | Path | Purpose |
 |------|---------|
-| `/` | **Primary homepage** (previous portfolio) |
-| `/about` | About (previous portfolio) |
-| `/work` | Selected work (previous portfolio) |
-| `/work-pages/virtual-humans` | Virtual Humans case study |
-| `/v2` | Newer singularity homepage |
-| `/v2/about` | Newer about page |
-| `/v2/work/[slug]` | Newer case-study templates (published slugs in `caseStudies.ts`) |
-| `/v2/classic` | Archived orbit / particle landing (lab) |
-| `/v2/classic/workbench` | Archived workbench (lab) |
-| `/v2/singularity` | Interactive singularity playground (lab) |
-| `/v2/machine` | Plain-text agent bio |
-| `/legacy/` | Redirects to `/` |
+| `/` | **Primary homepage** (singularity landing) |
+| `/about` | About |
+| `/work/[slug]` | Case-study templates (published slugs in `caseStudies.ts`) |
+| `/classic` | Archived orbit / particle landing (lab) |
+| `/classic/workbench` | Archived workbench (lab) |
+| `/singularity` | Interactive singularity playground (lab) |
+| `/machine` | Plain-text agent bio |
+| `/legacy/` | Previous portfolio |
+| `/legacy/about/` | Previous about |
+| `/legacy/work/` | Previous selected work |
+| `/legacy/work-pages/virtual-humans/` | Previous Virtual Humans case study |
+| `/v2/*` | Redirects to the same path without `/v2` |
 
 ## Preview
 
@@ -53,6 +54,7 @@ npm run dev
 ```
 
 - Primary: `http://localhost:3000/`
-- Case study: `http://localhost:3000/work-pages/virtual-humans/`
-- Newer site: `http://localhost:3000/v2/`
-- Classic: `http://localhost:3000/v2/classic/`
+- About: `http://localhost:3000/about/`
+- Case study: `http://localhost:3000/work/vr-eeg-analytics/`
+- Previous site: `http://localhost:3000/legacy/`
+- Classic: `http://localhost:3000/classic/`

@@ -7,7 +7,7 @@
     <loc>https://vittesh.com/about/</loc>
   </url>
   <url>
-    <loc>https://vittesh.com/v2/machine/</loc>
+    <loc>https://vittesh.com/machine/</loc>
   </url>
   <url>
     <loc>https://vittesh.com/llms.txt</loc>
@@ -19,21 +19,6 @@
     <loc>https://vittesh.com/machine.json</loc>
   </url>
   <url>
-    <loc>https://vittesh.com/work/</loc>
-  </url>
-  <url>
-    <loc>https://vittesh.com/work-pages/virtual-humans/</loc>
-  </url>
-  <url>
-    <loc>https://vittesh.com/v2/</loc>
-  </url>
-  <url>
-    <loc>https://vittesh.com/v2/about/</loc>
-  </url>
-  <url>
-    <loc>https://vittesh.com/v2/work/fleet-track/</loc>
-  </url>
-  <url>
-    <loc>https://vittesh.com/v2/work/vr-eeg-analytics/</loc>
+    <loc>https://vittesh.com/work/vr-eeg-analytics/</loc>
   </url>
 </urlset>

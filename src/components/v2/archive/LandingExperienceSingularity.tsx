@@ -7,11 +7,9 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { BlackHoleLazy } from '@/src/components/v2/singularity/BlackHoleLazy';
 import { useKissMode } from '@/src/components/v2/layout/KissModeProvider';
-import { AnimatedStat } from '@/src/components/v2/motion/landingMotion';
 import { ContactPanel } from '@/src/components/v2/ui/ContactPanel';
 import { CopyEmail } from '@/src/components/v2/ui/CopyEmail';
 import { ResumeDownload } from '@/src/components/v2/ui/ResumeDownload';
-import { useBorderGlow } from '@/src/components/v2/ui/useBorderGlow';
 import { useMobileLanding } from '@/src/components/v2/ui/useMobileLanding';
 import { HeroCloser, HeroHeadlineLines, HeroKicker } from '@/src/components/v2/archive/HeroIntroCopy';
 import { HeroPortrait } from '@/src/components/v2/archive/HeroPortrait';
@@ -19,7 +17,7 @@ import { HeroMeta } from '@/src/components/v2/archive/HeroMeta';
 import { ProjectCard } from '@/src/components/v2/archive/ProjectCard';
 import { type ProjectCardData } from '@/src/config/v2/caseStudies';
 import { heroCloser, heroHeadline, v2Path } from '@/src/config/v2/profile';
-import { siteConfig, trustLogos, trustSignals } from '@/src/config/v2/site';
+import { siteConfig } from '@/src/config/v2/site';
 
 const LandingExperienceKiss = dynamic(
   () =>
@@ -35,7 +33,6 @@ function Label({ children }: { children: React.ReactNode }) {
 
 export function LandingExperienceSingularity({ cards }: { cards: ProjectCardData[] }) {
   const heroRef = useRef<HTMLElement>(null);
-  const borderGlow = useBorderGlow();
   const isMobileMedia = useMobileLanding();
   const { kissMode, hydrated } = useKissMode();
   const [clientReady, setClientReady] = useState(false);
@@ -72,13 +69,13 @@ export function LandingExperienceSingularity({ cards }: { cards: ProjectCardData
 
         <div className="relative z-10 mx-auto flex max-w-[1600px] flex-col px-4 md:min-h-[calc(100svh-57px)] md:px-8 md:py-8">
           <div className="archive-hero relative flex min-h-[calc(100svh-57px)] flex-1 flex-col justify-center py-10 md:min-h-0 md:py-6">
-            <div className="relative z-10 max-w-[52rem] md:w-[68%]">
+            <div className="bh-copy-col relative z-10">
               <h1 className="bh-sr-only">{heroHeadline}</h1>
               <p className="bh-sr-only">{heroCloser}</p>
               <div className="bh-copy bh-copy-source" data-bh-warp aria-hidden="true">
                 <HeroPortrait className="mb-5" />
                 <HeroKicker />
-                <p className="archive-display archive-display--hero text-[clamp(2.35rem,4.1vw,4.15rem)]">
+                <p className="archive-display archive-display--hero text-[clamp(2.15rem,2.2vw+1.1rem,3.25rem)]">
                   <HeroHeadlineLines />
                 </p>
                 <HeroCloser />
@@ -102,75 +99,15 @@ export function LandingExperienceSingularity({ cards }: { cards: ProjectCardData
         </div>
       </section>
 
-      <section className="v2-trust-band border-b border-border-subtle">
-        <div className="v2-trust-band-inner v2-border-glow mx-auto w-full max-w-[1600px]" {...borderGlow}>
-          <div className="v2-trust-row grid grid-cols-1 md:grid-cols-4">
-            <div className="flex flex-col justify-center md:col-span-1">
-              <Label>Quick facts</Label>
-            </div>
-            {trustSignals.map((signal, index) => (
-              <motion.div
-                key={signal.label}
-                initial={false}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.07 }}
-                className="flex flex-row items-baseline justify-between gap-5 md:flex-col md:items-stretch md:justify-center md:gap-0"
-              >
-                <p
-                  className={
-                    signal.plain
-                      ? 'max-w-[16ch] text-sm leading-snug text-text-primary md:text-base'
-                      : 'archive-display archive-display--stat text-3xl text-accent-pop md:text-6xl lg:text-7xl'
-                  }
-                >
-                  {signal.plain ? signal.value : <AnimatedStat value={signal.value} />}
-                </p>
-                <p className="v2-trust-fact-label mt-0 text-text-secondary md:mt-6">{signal.label}</p>
-              </motion.div>
-            ))}
-          </div>
-          <div className="v2-trust-row grid grid-cols-1 md:grid-cols-4">
-            <div className="flex flex-col justify-center md:col-span-1">
-              <Label>Where I&apos;ve worked</Label>
-            </div>
-            {trustLogos.map((company) => (
-              <div key={company.name} className="flex flex-row items-baseline justify-between gap-5 md:flex-col md:items-stretch md:justify-center md:gap-0">
-                <a
-                  href={company.href}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className={`v2-company-link text-base md:text-lg lg:text-xl ${
-                    company.current ? 'is-current' : 'is-past'
-                  }`}
-                >
-                  {company.name}{' '}
-                  <span className="v2-visually-hidden">(opens in a new tab)</span>
-                  <span aria-hidden>↗</span>
-                </a>
-                <p
-                  className={`archive-label v2-company-period mt-0 md:mt-3 ${
-                    company.current ? 'text-text-muted' : 'is-past'
-                  }`}
-                >
-                  {company.role} · {company.period}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <section
         id="work"
         className="scroll-mt-16 border-b border-border-subtle"
         aria-labelledby="work-heading"
       >
-        <div className="mx-auto max-w-[1600px] px-4 py-16 md:min-h-[100svh] md:px-8 md:py-24">
+        <div className="mx-auto max-w-[1600px] px-4 pb-16 pt-16 md:min-h-[100svh] md:px-8 md:pb-24">
           <div className="grid gap-x-8 gap-y-20 md:grid-cols-12 md:items-center">
             <div className="md:col-span-8">
-              <Label>Selected work</Label>
-              <h2 id="work-heading" className="archive-display mt-5 text-[clamp(2.75rem,9vw,6.5rem)]">
+              <h2 id="work-heading" className="archive-display text-[clamp(2.75rem,9vw,6.5rem)]">
                 Selected work.
               </h2>
             </div>

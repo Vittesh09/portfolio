@@ -64,12 +64,12 @@ export function AboutExperience() {
                 initial={false}
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
-                className="grid gap-4 border-b border-border-subtle py-7 md:grid-cols-12"
+                className="grid gap-x-6 gap-y-1 border-b border-border-subtle py-5 md:grid-cols-12"
               >
                 <span className="archive-label text-accent-pop md:col-span-1">0{index + 1}</span>
                 <div className="md:col-span-3">
-                  <h3 className="text-xl font-semibold tracking-tight">{job.company}</h3>
-                  <p className="mt-1 text-sm text-text-secondary">{job.role}</p>
+                  <h3 className="text-xl font-semibold leading-none tracking-tight">{job.company}</h3>
+                  <p className="v2-job-role">{job.role}</p>
                 </div>
                 <p className="text-sm leading-relaxed text-text-secondary md:col-span-5">
                   {job.detail}

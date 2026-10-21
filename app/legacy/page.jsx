@@ -5,7 +5,7 @@ export const metadata = {
   description:
     'Vittesh Sinha is a product designer focused on building calm, trustworthy systems that solve complex problems.',
   alternates: {
-    canonical: '/'
+    canonical: '/legacy/'
   },
   openGraph: {
     title: 'Vittesh Sinha — Product Designer',

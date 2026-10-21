@@ -33,7 +33,7 @@ export function ContactPanel({
 
         <div className="v2-contact-aside">
           <h3 id={formHeadingId} className="archive-display v2-contact-form-title">
-            Send a message
+            Shoot me a message.
           </h3>
           <ContactForm labelledBy={formHeadingId} />
         </div>

@@ -3,7 +3,7 @@ export const metadata = {
   description:
     'Case study: Virtual Humans Experience Design — immersive VR city exploration with emotional analytics.',
   alternates: {
-    canonical: '/work-pages/virtual-humans/'
+    canonical: '/legacy/work-pages/virtual-humans/'
   },
   openGraph: {
     title: 'Virtual Humans Experience — Vittesh Sinha',
@@ -25,7 +25,7 @@ export default function VirtualHumansPage() {
       <div className="vh-page">
         <div className="vh-wrap">
           <div className="vh-top">
-            <a href="/work/" className="vh-back fade-up">← Back to work</a>
+            <a href="/legacy/work/" className="vh-back fade-up">← Back to work</a>
             <h1 className="fade-up delay-1">Virtual Humans Experience Design</h1>
             <div className="vh-subtitle fade-up delay-2">AR/VR · Emotional Analytics · Experience Design</div>
           </div>

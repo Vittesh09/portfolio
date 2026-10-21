@@ -7,18 +7,12 @@ ErrorDocument 404 /404.html
 </IfModule>
 
 Redirect 301 /sitemap /sitemap.xml
-RedirectMatch 301 ^/work/fleet-command-center/?$ /v2/work/fleet-track/
-RedirectMatch 301 ^/work/fleet-track/?$ /v2/work/fleet-track/
-RedirectMatch 301 ^/work/vr-eeg-analytics/?$ /v2/work/vr-eeg-analytics/
-RedirectMatch 301 ^/v2/work/fleet-command-center/?$ /v2/work/fleet-track/
-RedirectMatch 301 ^/machine/?$ /v2/machine/
-RedirectMatch 301 ^/classic/workbench/?$ /v2/classic/workbench/
-RedirectMatch 301 ^/classic/?$ /v2/classic/
-RedirectMatch 301 ^/singularity/?$ /v2/singularity/
-RedirectMatch 301 ^/workbench/?$ /v2/classic/workbench/
-
-RedirectMatch 301 ^/legacy/?$ /
-RedirectMatch 301 ^/legacy/(.+)/?$ /$1/
+RedirectMatch 301 ^/work/fleet-command-center/?$ /work/fleet-track/
+RedirectMatch 301 ^/v2/work/fleet-command-center/?$ /work/fleet-track/
+RedirectMatch 301 ^/workbench/?$ /classic/workbench/
+RedirectMatch 301 ^/work-pages/virtual-humans/?$ /legacy/work-pages/virtual-humans/
+RedirectMatch 301 ^/v2/?$ /
+RedirectMatch 301 ^/v2/(.+)$ /$1
 
 RedirectMatch 404 /\.git
 RedirectMatch 404 /\.env

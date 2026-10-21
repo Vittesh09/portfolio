@@ -1,12 +1,19 @@
-import { JetBrains_Mono, Plus_Jakarta_Sans } from 'next/font/google';
+import { Geist, JetBrains_Mono, Space_Grotesk } from 'next/font/google';
 import { NotFoundExperience } from '@/src/components/v2/archive/NotFoundExperience';
 import '@/src/styles/v2.css';
 import '@/src/styles/singularity.css';
 
-const jakarta = Plus_Jakarta_Sans({
+const geist = Geist({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  variable: '--font-jakarta',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-geist',
+  display: 'swap'
+});
+
+const space = Space_Grotesk({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-space',
   display: 'swap'
 });
 
@@ -23,7 +30,7 @@ export const metadata = {
 
 export default function NotFound() {
   return (
-    <div className={`${jakarta.variable} ${jetbrains.variable} ${jakarta.className}`}>
+    <div className={`v2-root ${geist.variable} ${space.variable} ${jetbrains.variable} ${geist.className}`}>
       <NotFoundExperience />
     </div>
   );

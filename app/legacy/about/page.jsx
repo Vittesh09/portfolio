@@ -5,7 +5,7 @@ export const metadata = {
   description:
     'About Vittesh Sinha, a product designer focused on calm, trustworthy systems for complex and high-stakes problems.',
   alternates: {
-    canonical: '/about/'
+    canonical: '/legacy/about/'
   },
   openGraph: {
     title: 'About — Vittesh Sinha',
@@ -32,7 +32,7 @@ export default function AboutPage() {
           <div className="about-wrap">
             <div className="about-header fade-up">
               <p className="playground-index-eyebrow">
-                <Link href="/" className="playground-eyebrow-back" aria-label="Go back home">
+                <Link href="/legacy/" className="playground-eyebrow-back" aria-label="Go back home">
                   <span className="playground-eyebrow-arrow" aria-hidden="true">
                     <img src="/assets/images/Arrow.svg" alt="" />
                   </span>

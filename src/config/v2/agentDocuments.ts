@@ -1,4 +1,4 @@
-import { howMeasured, projects } from '@/src/config/v2/caseStudies';
+import { howMeasured, isPublished, projects } from '@/src/config/v2/caseStudies';
 import {
   agentVoiceRule,
   curefitEarlierWork,
@@ -333,10 +333,11 @@ export function assertAgentFactsMatchPages() {
     if (job.period !== employers[index].period) errors.push(`Employer dates mismatch at ${index}`);
     if (job.role !== employers[index].role) errors.push(`Employer role mismatch at ${index}`);
   });
+  const published = projects.filter(isPublished);
   record.caseStudies.forEach((study, index) => {
-    if (study.title !== projects[index].title) errors.push(`Case study title mismatch at ${index}`);
-    if (study.role !== projects[index].role) errors.push(`Case study role mismatch at ${index}`);
-    if (study.outcome !== projects[index].outcomeLine.replace(/\n+/g, ' ')) {
+    if (study.title !== published[index].title) errors.push(`Case study title mismatch at ${index}`);
+    if (study.role !== published[index].role) errors.push(`Case study role mismatch at ${index}`);
+    if (study.outcome !== published[index].outcomeLine.replace(/\n+/g, ' ')) {
       errors.push(`Case study outcome mismatch at ${index}`);
     }
   });

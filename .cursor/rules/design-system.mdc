@@ -18,8 +18,9 @@ Do **not** restyle from `vittesh_portfolio_amaterasu_style.md` (sage/emerald) un
 ## Current visual direction
 
 - Cool gray-blue light surfaces + ink dark; accent `#F23828` / dark `#FF5447`
-- Oversized geometric display (Jakarta), Instrument serif for quotes, JetBrains Mono labels (`archive-label`)
+- Display: Space Grotesk. Body/UI: Geist. Quotes: Instrument Serif. Labels: JetBrains Mono (`archive-label`)
 - Type floor: never below **11px** (0.6875rem) on mobile; at 11px use **uppercase** (`archive-label`)
+- Never leave one word hanging on the last line of a sentence. Glue the last two words (`noOrphan`) or use `text-wrap: pretty`
 - Exception: Quick facts captions (`Years shipping`, etc.) stay **11px sentence case** (`.v2-trust-fact-label`)
 - Hairline `border-subtle` rules, four-column research grid, mono indexes (`01`, `↗`, `→`)
 - Theme: system default + paper / ink; CSS vars on `.v2-root` / `.v2-root.dark`
@@ -37,7 +38,7 @@ Prospects must answer quickly: who is this, can I see work, how do I contact.
 - Prefer asymmetrical whitespace and grid lines over card-heavy dashboards
 - Case studies: clear problem → approach → outcome; metrics in brackets or bordered blocks
 - About portrait: `/assets/images/profile.png` only — never `about.png`
-- Live production routes (`/`, `/about`, `/work`, `/work-pages`) are the previous portfolio in `app/(main)/`. The newer site lives at `/v2`.
+- Live production routes (`/`, `/about`, `/work/[slug]`) are the archive site in `app/(site)/`. The previous portfolio lives at `/legacy/`.
 
 ## References for craft (not copy-paste themes)
 

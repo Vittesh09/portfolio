@@ -433,6 +433,7 @@ export function FooterLandscape() {
         src="/assets/images/footer-landscape-light.jpg"
         alt=""
         fill
+        priority
         sizes="100vw"
         className="v2-footer-landscape-img v2-footer-landscape-img--light"
       />
@@ -440,6 +441,7 @@ export function FooterLandscape() {
         src="/assets/images/footer-landscape.jpg"
         alt=""
         fill
+        priority
         sizes="100vw"
         className="v2-footer-landscape-img v2-footer-landscape-img--dark"
       />

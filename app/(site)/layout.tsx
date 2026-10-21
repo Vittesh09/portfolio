@@ -1,8 +1,9 @@
 import {
   Bricolage_Grotesque,
+  Geist,
   Instrument_Serif,
   JetBrains_Mono,
-  Plus_Jakarta_Sans
+  Space_Grotesk
 } from 'next/font/google';
 import { SiteShell } from '@/src/components/v2/layout/SiteShell';
 import { getHomeJsonLd } from '@/src/config/v2/agentDocuments';
@@ -11,11 +12,17 @@ import { v2DefaultTitle, v2PageMetadata, v2Robots } from '@/src/config/v2/seo';
 import '@/src/styles/v2.css';
 import '@/src/styles/singularity.css';
 
-const jakarta = Plus_Jakarta_Sans({
+const geist = Geist({
   subsets: ['latin'],
-  weight: ['400', '500', '600'],
-  style: ['normal', 'italic'],
-  variable: '--font-jakarta',
+  weight: ['400', '500', '600', '700'],
+  variable: '--font-geist',
+  display: 'swap'
+});
+
+const space = Space_Grotesk({
+  subsets: ['latin'],
+  weight: ['300', '400', '500', '600', '700'],
+  variable: '--font-space',
   display: 'swap'
 });
 
@@ -79,7 +86,7 @@ const audioBoot = `
 export default function V2Layout({ children }: { children: React.ReactNode }) {
   return (
     <div
-      className={`v2-root ${jakarta.variable} ${instrument.variable} ${jetbrains.variable} ${bricolage.variable} ${jakarta.className}`}
+      className={`v2-root v2-media-pending ${geist.variable} ${space.variable} ${instrument.variable} ${jetbrains.variable} ${bricolage.variable} ${geist.className}`}
       lang="en"
       suppressHydrationWarning
     >

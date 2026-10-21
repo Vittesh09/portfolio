@@ -18,15 +18,31 @@
 .v2-root .bh-hero::after {
   background: linear-gradient(
     90deg,
-    rgba(0, 0, 0, 0.42) 0%,
-    rgba(0, 0, 0, 0.14) 36%,
-    transparent 58%
+    rgba(0, 0, 0, 0.78) 0%,
+    rgba(0, 0, 0, 0.5) 28%,
+    rgba(0, 0, 0, 0.18) 48%,
+    transparent 66%
   );
   content: '';
   inset: 0;
   pointer-events: none;
   position: absolute;
   z-index: 1;
+}
+
+/* Keep portrait + headline in a left lane so zoom-out cannot run them into the disk. */
+.v2-root .bh-copy-col {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 100%;
+  width: min(32rem, 38vw);
+}
+
+@media (max-width: 1100px) {
+  .v2-root .bh-copy-col {
+    width: min(32rem, 46vw);
+  }
 }
 
 .v2-root .bh-lab {
@@ -189,25 +205,11 @@
   z-index: 0;
 }
 
-/* If WebGL capture fails, show DOM copy as fallback with a soft fade-in */
+/* If WebGL capture fails or the layout just changed, show the live DOM copy. */
 .v2-root .bh-hero.bh-copy-fallback .bh-copy-source {
-  opacity: 0 !important;
+  opacity: 1 !important;
   pointer-events: auto;
   z-index: 2;
-  animation: bh-copy-fallback-in 1s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards;
-}
-
-@keyframes bh-copy-fallback-in {
-  from {
-    opacity: 0;
-    filter: blur(6px);
-    transform: translate3d(0, 0.85rem, 0);
-  }
-  to {
-    opacity: 1;
-    filter: blur(0);
-    transform: translate3d(0, 0, 0);
-  }
 }
 
 .v2-root .bh-copy .archive-display--hero,

@@ -32,11 +32,15 @@ body:has(.v2-root.dark) {
   --v2-accent-blue: #f23828;
   background: var(--v2-bg-primary);
   color: var(--v2-text-primary);
-  font-family: var(--font-jakarta), system-ui, sans-serif;
+  font-family: var(--font-geist), system-ui, sans-serif;
   min-height: 100svh;
   width: 100%;
   -webkit-font-smoothing: antialiased;
   color-scheme: light;
+}
+
+.v2-root.v2-media-pending {
+  opacity: 0;
 }
 
 .v2-root.dark {
@@ -163,6 +167,13 @@ body:has(.v2-root.dark) {
   max-width: 100%;
 }
 
+.v2-root p,
+.v2-root li,
+.v2-root dd,
+.v2-root blockquote {
+  text-wrap: pretty;
+}
+
 .v2-root .archive-label {
   font-family: var(--font-jetbrains), monospace;
   font-size: 0.6875rem; /* 11px floor; always uppercase */
@@ -172,10 +183,11 @@ body:has(.v2-root.dark) {
 }
 
 .v2-root .archive-display {
-  font-family: var(--font-jakarta), sans-serif;
+  font-family: var(--font-space), sans-serif;
   font-weight: 600;
   letter-spacing: -0.055em;
   line-height: 0.92;
+  margin: 0;
   text-wrap: balance;
 }
 
@@ -185,7 +197,7 @@ body:has(.v2-root.dark) {
   margin: 0;
   overflow: visible;
   padding-bottom: 0;
-  text-wrap: unset;
+  text-wrap: pretty;
 }
 
 .v2-root .v2-hero-kicker,
@@ -212,7 +224,7 @@ body:has(.v2-root.dark) {
 .v2-root .v2-hero-line {
   display: block;
   line-height: 1.12;
-  max-width: 16em;
+  max-width: 100%;
   overflow-wrap: break-word;
   padding-bottom: 0;
   text-wrap: pretty;
@@ -220,14 +232,23 @@ body:has(.v2-root.dark) {
 }
 
 .v2-root .v2-hero-plain {
-  font-family: var(--font-jakarta), sans-serif;
+  font-family: var(--font-space), sans-serif;
   font-style: normal;
   font-weight: 400;
   letter-spacing: -0.035em;
 }
 
+.v2-root .v2-job-role {
+  margin: 0.2rem 0 0;
+  color: var(--v2-text-muted);
+  font-size: 0.8125rem;
+  font-weight: 400;
+  letter-spacing: 0;
+  line-height: 1.25;
+}
+
 .v2-root .v2-hero-emphasis {
-  font-family: var(--font-bricolage), var(--font-jakarta), sans-serif;
+  font-family: var(--font-bricolage), var(--font-space), sans-serif;
   font-style: normal;
   font-weight: 700;
   letter-spacing: -0.04em;
@@ -416,7 +437,7 @@ body:has(.v2-root.dark) {
 }
 
 .v2-root .v2-site-footer-copy {
-  font-family: var(--font-jakarta), sans-serif;
+  font-family: var(--font-geist), sans-serif;
   font-size: 0.8125rem;
   letter-spacing: 0.01em;
   line-height: 1.4;
@@ -928,11 +949,34 @@ body:has(.v2-root.dark) {
   pointer-events: none;
   position: absolute;
   transition: opacity 1200ms cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 1;
 }
 
 .v2-root .archive-project-card.is-locked.group:hover .archive-project-thumb::after,
 .v2-root .archive-project-card.is-locked.group:focus-within .archive-project-thumb::after {
   opacity: 0;
+}
+
+.v2-root .archive-project-lock {
+  align-items: center;
+  background: rgb(0 0 0 / 0.62);
+  border-radius: 999px;
+  color: #fff;
+  display: grid;
+  height: 2.15rem;
+  place-items: center;
+  pointer-events: none;
+  position: absolute;
+  right: 0.85rem;
+  top: 0.85rem;
+  width: 2.15rem;
+  z-index: 3;
+}
+
+.v2-root .archive-project-lock svg {
+  display: block;
+  height: 1.05rem;
+  width: 1.05rem;
 }
 
 .v2-root .archive-project-tag {
@@ -1883,7 +1927,7 @@ html.v2-smooth-scroll body {
     line-height: 1.4;
     margin-top: 0;
     max-width: none;
-    text-wrap: wrap;
+    text-wrap: pretty;
   }
 
   .v2-root .v2-kiss-email .uppercase {
@@ -3052,6 +3096,7 @@ html.v2-disc-lock .v2-root .v2-page-enter {
   display: flex;
   flex-wrap: wrap;
   gap: 0.75rem;
+  justify-content: center;
   margin-top: 1.5rem;
   pointer-events: auto;
 }

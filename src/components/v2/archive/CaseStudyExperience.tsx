@@ -900,20 +900,22 @@ export function CaseStudyExperience({
       {project.story ? <StoryBody story={project.story} /> : <ClassicBody project={project} />}
 
       </div>
-      <section className={project.story ? 'v2-story-next border-b border-border-subtle' : 'border-b border-border-subtle'}>
-        <Link
-          href={v2Path(`/work/${next.slug}/`)}
-          className={`group ${wrap} flex items-end justify-between gap-6 py-14 md:py-20`}
-        >
-          <div>
-            <p className="archive-label text-text-muted">Next case study</p>
-            <h2 className="archive-serif mt-4 text-[clamp(2rem,5vw,3.75rem)] transition-colors group-hover:text-accent-pop">
-              {next.title}
-            </h2>
-          </div>
-          <span className="text-4xl text-accent-pop">→</span>
-        </Link>
-      </section>
+      {next.slug !== project.slug ? (
+        <section className={project.story ? 'v2-story-next border-b border-border-subtle' : 'border-b border-border-subtle'}>
+          <Link
+            href={v2Path(`/work/${next.slug}/`)}
+            className={`group ${wrap} flex items-end justify-between gap-6 py-14 md:py-20`}
+          >
+            <div>
+              <p className="archive-label text-text-muted">Next case study</p>
+              <h2 className="archive-serif mt-4 text-[clamp(2rem,5vw,3.75rem)] transition-colors group-hover:text-accent-pop">
+                {next.title}
+              </h2>
+            </div>
+            <span className="text-4xl text-accent-pop">→</span>
+          </Link>
+        </section>
+      ) : null}
     </article>
   );
 }

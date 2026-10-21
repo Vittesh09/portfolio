@@ -13,7 +13,11 @@ function write(rel, contents) {
 }
 
 function grabExport(src, name) {
-  const match = src.match(new RegExp(`export const ${name} = (?:'([^']*)'|"([^"]*)")`));
+  const match = src.match(
+    new RegExp(
+      `export const ${name} =\\s*(?:noOrphan\\(\\s*)?(?:'([^']*)'|"([^"]*)")`
+    )
+  );
   if (!match) throw new Error(`Could not find export ${name}`);
   return match[1] ?? match[2];
 }
@@ -49,7 +53,7 @@ export function collectFacts() {
     availability: grabExport(profile, 'availability'),
     locationLine: /locationLine: '([^']+)'/.exec(profileBlock)?.[1] ?? 'India',
     heroHeadline: grabExport(profile, 'heroHeadline'),
-    heroCloser: /export const heroCloser =\s*\n\s*'([^']*)'/.exec(profile)?.[1] ?? '',
+    heroCloser: grabExport(profile, 'heroCloser'),
     linkedin: /linkedin: '([^']+)'/.exec(profile)?.[1] ?? '',
     behance: /behance: '([^']+)'/.exec(profile)?.[1] ?? '',
     siteUrl: grabExport(profile, 'SITE_URL'),

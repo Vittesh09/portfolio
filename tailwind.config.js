@@ -24,7 +24,7 @@ module.exports = {
         'accent-blue': 'var(--v2-accent-blue)'
       },
       fontFamily: {
-        sans: ['var(--font-jakarta)', 'system-ui', 'sans-serif'],
+        sans: ['var(--font-geist)', 'system-ui', 'sans-serif'],
         serif: ['var(--font-instrument)', 'Georgia', 'serif'],
         mono: ['var(--font-jetbrains)', 'ui-monospace', 'monospace']
       },

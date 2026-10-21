@@ -86,9 +86,9 @@ export type Project = {
   cardImages?: string[];
   /** Fill the wide thumbnail. Later frames are not letterboxed. */
   cardCover?: boolean;
-  /** Shown on the homepage, with no case study page yet. */
+  /** Shown on the homepage as a locked card, with no case study page yet. */
   comingSoon?: boolean;
-  /** Unpublished studies stay out of nav, cards, sitemap, and the machine page. */
+  /** Unpublished studies stay out of nav, sitemap, and the machine page. */
   published?: boolean;
   /** Outcome-led card title. The page h1 stays `title`. */
   cardTitle?: string;
@@ -102,16 +102,17 @@ const asset = (name: string) => `/assets/case-studies/${name}`;
 export const projects: Project[] = [
 {
     slug: 'fleet-track',
-    index: '01',
-    title: 'FleetTrack',
-    seoTitle: 'FleetTrack — one workspace for fleet events | Vittesh Sinha',
-    cardTitle: 'FleetTrack: from alert to action in one workspace',
+    index: '02',
+    comingSoon: true,
+    title: 'Fleet Track management',
+    seoTitle: 'Fleet Track management — one workspace for fleet events | Vittesh Sinha',
+    cardTitle: 'Fleet Track management',
     domain: 'Logistics',
     summary:
       'I redesigned the FleetTrack dashboard so a fleet manager can find a problem, see why it happened, and close it in one workspace.',
     company: 'LB Technology',
     cardRole: 'Senior Product Designer',
-    outcomeLine: 'The fleet, the trip, and the event.\nOne workspace for the manager.',
+    outcomeLine: 'A management dashboard\nto maintain the whole fleet.',
     outcomeEvidence: [],
     tags: ['Fleet', 'Dashboard', 'Telematics'],
     industry: 'Fleet logistics',
@@ -302,7 +303,7 @@ export const projects: Project[] = [
   },
 {
     slug: 'vr-eeg-analytics',
-    index: '02',
+    index: '01',
     title: 'Future City VR + EEG',
     seoTitle: 'Future City VR + EEG — analytics | Vittesh Sinha',
     cardTitle: "Future City VR + EEG: walk the city before it's built",
@@ -311,7 +312,7 @@ export const projects: Project[] = [
       'I was the sole designer, shaping the immersive VR experience and the analytics platform end to end. A future city had to be walked before it was built.',
     company: 'TODO: [FILL: employer for Future City VR + EEG]',
     cardRole: 'Senior Product Designer',
-    outcomeLine: 'The city, the session, and the roles.\nOne system around the experience.',
+    outcomeLine: 'Building a VR city for users to explore\nand gather their emotional data.',
     outcomeEvidence: [],
     tags: ['VR', 'Experience', 'Dashboards'],
     industry: 'Urban development · Spatial computing',
@@ -657,29 +658,40 @@ export type ProjectCardData = Pick<
   | 'imageAlt'
   | 'cardImages'
   | 'cardCover'
+  | 'comingSoon'
 >;
 
 export function isPublished(project: Project) {
   return project.published !== false && !project.comingSoon;
 }
 
+function isHomepageCard(project: Project) {
+  return Boolean(project.comingSoon) || project.published !== false;
+}
+
+const homepageCardOrder = ['vr-eeg-analytics', 'fleet-track', 'b2b-configurator'];
+
 export const publishedCaseStudyCount = projects.filter(isPublished).length;
 
 /** Card fields only. Server pages pass this into client landings so story copy stays off the homepage bundle. */
 export function getProjectCards(): ProjectCardData[] {
-  return projects.filter(isPublished).map((project) => ({
-    slug: project.slug,
-    title: project.title,
-    cardTitle: project.cardTitle,
-    cardRole: project.cardRole,
-    domain: project.domain,
-    year: project.year,
-    outcomeLine: project.outcomeLine,
-    image: project.image,
-    imageAlt: project.imageAlt,
-    cardImages: project.cardImages,
-    cardCover: project.cardCover
-  }));
+  return projects
+    .filter(isHomepageCard)
+    .sort((a, b) => homepageCardOrder.indexOf(a.slug) - homepageCardOrder.indexOf(b.slug))
+    .map((project) => ({
+      slug: project.slug,
+      title: project.title,
+      cardTitle: project.cardTitle,
+      cardRole: project.cardRole,
+      domain: project.domain,
+      year: project.year,
+      outcomeLine: project.outcomeLine,
+      image: project.image,
+      imageAlt: project.imageAlt,
+      cardImages: project.cardImages,
+      cardCover: project.cardCover,
+      comingSoon: project.comingSoon
+    }));
 }
 
 export function getProject(slug: string) {

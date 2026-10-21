@@ -3,8 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { useEffect, useRef, useState } from 'react';
-import { animate, motion, useInView } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { BlackHoleLazy } from '@/src/components/v2/black-hole/BlackHoleLazy';
 import { useKissMode } from '@/src/components/v2/layout/KissModeProvider';
 import { CopyEmail } from '@/src/components/v2/ui/CopyEmail';
@@ -15,13 +14,7 @@ import { HeroMeta } from '@/src/components/v2/archive/HeroMeta';
 import { ProjectCard } from '@/src/components/v2/archive/ProjectCard';
 import { type ProjectCardData } from '@/src/config/v2/caseStudies';
 import { v2Path } from '@/src/config/v2/profile';
-import {
-  processSteps,
-  siteConfig,
-  trustLogos,
-  trustSignals,
-  whyPoints
-} from '@/src/config/v2/site';
+import { processSteps, siteConfig, whyPoints } from '@/src/config/v2/site';
 
 const LandingExperienceKiss = dynamic(
   () =>
@@ -33,60 +26,6 @@ const LandingExperienceKiss = dynamic(
 
 function Label({ children }: { children: React.ReactNode }) {
   return <p className="archive-label text-text-muted">{children}</p>;
-}
-
-function AnimatedStat({ value }: { value: string }) {
-  const ref = useRef<HTMLSpanElement>(null);
-  const inView = useInView(ref, { once: true, amount: 0.7 });
-  const match = value.match(/\d+/);
-  const target = match ? Number(match[0]) : null;
-  const [mounted, setMounted] = useState(false);
-  const [current, setCurrent] = useState(0);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    if (!mounted || !inView || target === null) return;
-    const controls = animate(0, target, {
-      duration: 2.4,
-      ease: [0.16, 1, 0.3, 1],
-      onUpdate: (latest) => setCurrent(Math.round(latest))
-    });
-    return () => controls.stop();
-  }, [mounted, inView, target]);
-
-  if (value.includes('TODO') || target === null) {
-    return (
-      <motion.span
-        ref={ref}
-        initial={false}
-        whileInView={{ clipPath: 'inset(0 0% 0 0)', opacity: 1 }}
-        viewport={{ once: true, amount: 0.7 }}
-        transition={{ duration: 1.8, ease: [0.16, 1, 0.3, 1] }}
-        className="inline-block"
-      >
-        {value}
-      </motion.span>
-    );
-  }
-
-  const digits = match?.[0] ?? '';
-  const prefix = value.slice(0, value.indexOf(digits));
-  const suffix = value.slice(value.indexOf(digits) + digits.length);
-  const shown = mounted ? current : target;
-  const displayed = digits.startsWith('0')
-    ? String(shown).padStart(digits.length, '0')
-    : String(shown);
-
-  return (
-    <span ref={ref} suppressHydrationWarning>
-      {prefix}
-      {displayed}
-      {suffix}
-    </span>
-  );
 }
 
 export function LandingExperience({ cards }: { cards: ProjectCardData[] }) {
@@ -125,63 +64,6 @@ function LandingExperienceArchive({ cards }: { cards: ProjectCardData[] }) {
 
           <div className="v2-hero-meta grid gap-5 border-t border-white/15 px-0 py-6 md:grid-cols-12 md:pb-0 md:pt-5">
             <HeroMeta />
-          </div>
-        </div>
-      </section>
-
-      <section className="border-b border-border-subtle">
-        <div className="mx-auto max-w-[1600px]">
-          <div className="v2-fluid-host grid grid-cols-3 border-b border-border-subtle md:grid-cols-4">
-            <div className="col-span-3 p-5 md:col-span-1 md:p-8">
-              <Label>Quick facts</Label>
-            </div>
-            {trustSignals.map((signal, index) => (
-              <motion.div
-                key={signal.label}
-                initial={false}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: index * 0.07 }}
-                className="border-t border-border-subtle p-4 md:border-l md:border-t-0 md:p-8"
-              >
-                <p
-                  className={
-                    signal.plain
-                      ? 'max-w-[18ch] text-sm leading-snug text-text-primary md:text-base'
-                      : 'archive-display archive-display--stat text-3xl text-accent-pop md:text-6xl'
-                  }
-                >
-                  {signal.plain ? signal.value : <AnimatedStat value={signal.value} />}
-                </p>
-                <p className="v2-trust-fact-label mt-5 text-text-secondary">{signal.label}</p>
-              </motion.div>
-            ))}
-          </div>
-          <div className="v2-fluid-host grid grid-cols-3 items-center gap-x-3 gap-y-4 px-4 py-5 md:flex md:flex-wrap md:gap-x-10 md:px-8">
-            <div className="col-span-3">
-              <Label>Where I&apos;ve worked</Label>
-            </div>
-            {trustLogos.map((company) => (
-              <a
-                key={company.name}
-                href={company.href}
-                target="_blank"
-                rel="noopener noreferrer"
-                className={`v2-company-link text-sm ${
-                  company.current ? 'is-current' : 'is-past'
-                }`}
-              >
-                {company.name}
-                <span className="v2-visually-hidden"> (opens in a new tab)</span>
-                <span
-                  className={`v2-company-period ml-2 archive-label font-normal ${
-                    company.current ? 'text-text-muted' : 'is-past'
-                  }`}
-                >
-                  {company.role} · {company.period}
-                </span>
-              </a>
-            ))}
           </div>
         </div>
       </section>
@@ -238,13 +120,12 @@ function LandingExperienceArchive({ cards }: { cards: ProjectCardData[] }) {
         className="scroll-mt-16 border-b border-border-subtle"
         aria-labelledby="classic-work-heading"
       >
-        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-8 md:py-24">
+        <div className="mx-auto max-w-[1600px] px-4 pb-16 pt-16 md:px-8 md:pb-24">
           <div className="grid gap-x-8 gap-y-20 md:grid-cols-12 md:items-center">
             <div className="md:col-span-8">
-              <Label>Selected work</Label>
               <h2
                 id="classic-work-heading"
-                className="archive-display mt-5 text-[clamp(2.75rem,9vw,6.5rem)]"
+                className="archive-display text-[clamp(2.75rem,9vw,6.5rem)]"
               >
                 Selected work.
               </h2>

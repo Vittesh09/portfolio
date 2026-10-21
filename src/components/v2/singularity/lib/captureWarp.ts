@@ -1,26 +1,62 @@
 /**
  * Capture size must match placeTextPlane.
- * Extra pad keeps descenders / the second headline line out of the crop.
  * Clone is forced fully visible — live DOM is never flashed for capture.
  */
-
-export const WARP_CAPTURE_PAD_X = 16;
-export const WARP_CAPTURE_PAD_Y = 36;
 
 let embeddedFonts: string | undefined;
 
 export function measureWarpBox(node: HTMLElement) {
   const rect = node.getBoundingClientRect();
-  const width = Math.max(1, Math.max(rect.width, node.scrollWidth) + WARP_CAPTURE_PAD_X);
-  const height = Math.max(1, Math.max(rect.height, node.scrollHeight) + WARP_CAPTURE_PAD_Y);
-  return { left: rect.left, top: rect.top, width, height };
+  return {
+    left: rect.left,
+    top: rect.top,
+    width: Math.max(1, rect.width),
+    height: Math.max(1, rect.height)
+  };
+}
+
+function canvasHasInk(canvas: HTMLCanvasElement) {
+  try {
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (!ctx) return false;
+    const { width, height } = canvas;
+    if (width < 2 || height < 2) return false;
+    const step = Math.max(1, Math.floor(Math.min(width, height) / 48));
+    const { data } = ctx.getImageData(0, 0, width, height);
+    for (let y = 0; y < height; y += step) {
+      for (let x = 0; x < width; x += step) {
+        if (data[(y * width + x) * 4 + 3] > 12) return true;
+      }
+    }
+    return false;
+  } catch {
+    return true;
+  }
+}
+
+async function waitForPageReveal() {
+  if (document.fonts?.status === 'loading') {
+    await document.fonts.ready;
+  }
+  const root = document.querySelector('.v2-root');
+  if (!root?.classList.contains('v2-media-pending')) return;
+  await new Promise<void>((resolve) => {
+    const finish = () => {
+      observer.disconnect();
+      window.clearTimeout(failSafe);
+      resolve();
+    };
+    const observer = new MutationObserver(() => {
+      if (!root.classList.contains('v2-media-pending')) finish();
+    });
+    observer.observe(root, { attributes: true, attributeFilter: ['class'] });
+    const failSafe = window.setTimeout(finish, 4000);
+  });
 }
 
 export async function captureWarpSource(node: HTMLElement): Promise<HTMLCanvasElement | null> {
   try {
-    if (document.fonts?.status === 'loading') {
-      await document.fonts.ready;
-    }
+    await waitForPageReveal();
 
     const images = [...node.querySelectorAll('img')];
     await Promise.all(
@@ -47,12 +83,12 @@ export async function captureWarpSource(node: HTMLElement): Promise<HTMLCanvasEl
 
     const root = document.querySelector('.v2-root');
     const rootStyle = root ? getComputedStyle(root) : null;
-    const fontVars = ['--font-jakarta', '--font-bricolage'] as const;
+    const fontVars = ['--font-geist', '--font-space', '--font-bricolage'] as const;
     const fontStyle = Object.fromEntries(
       fontVars.map((name) => [name, rootStyle?.getPropertyValue(name).trim() || ''])
     );
 
-    return await toCanvas(node, {
+    const canvas = await toCanvas(node, {
       pixelRatio: ratio,
       cacheBust: false,
       fontEmbedCSS: embeddedFonts,
@@ -79,6 +115,11 @@ export async function captureWarpSource(node: HTMLElement): Promise<HTMLCanvasEl
         return !domNode.classList.contains('bh-cta');
       }
     });
+    if (!canvasHasInk(canvas)) {
+      console.warn('[singularity] text capture was empty');
+      return null;
+    }
+    return canvas;
   } catch (error) {
     console.warn('[singularity] text capture failed', error);
     return null;

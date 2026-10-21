@@ -68,7 +68,12 @@ export function ArchiveFooter() {
         </div>
 
         <div className="v2-site-footer-brand" aria-label="Copyright">
-          <p className="v2-site-footer-copy">© 2026 {siteConfig.name}</p>
+          <p className="v2-site-footer-mark" aria-hidden="true">
+            ˗ˏˋ ꒰ 🧡 ꒱ ˎˊ˗
+          </p>
+          <p className="v2-site-footer-copy">
+            <span className="v2-visually-hidden">With love. </span>© 2026 {siteConfig.name}
+          </p>
         </div>
       </div>
 

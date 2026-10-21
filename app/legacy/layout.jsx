@@ -11,7 +11,8 @@ export const metadata = {
   title: {
     default: 'Vittesh | Product Designer',
     template: '%s | Vittesh Sinha'
-  }
+  },
+  robots: { index: false, follow: true }
 };
 
 export default function LegacyLayout({ children }) {

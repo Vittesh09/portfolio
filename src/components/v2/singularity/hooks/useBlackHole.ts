@@ -211,9 +211,10 @@ export function useBlackHole(
         camera.clearViewOffset();
         return;
       }
-      // Was 0.46 — parked the void against the right crop. Lower shift leaves
-      // outbound travel so drag isn't clipped by the frame.
-      const shift = mobile ? 0.22 : 0.3;
+      // Shift the void right of the copy lane. Wider / zoomed-out frames need
+      // more offset or the disk sits on the headline.
+      const aspect = width / Math.max(1, height);
+      const shift = mobile ? 0.2 : aspect > 1.7 ? 0.32 : aspect > 1.35 ? 0.28 : 0.26;
       const lift = mobile ? 0.06 : 0.08;
       camera.setViewOffset(
         width,
@@ -403,7 +404,7 @@ export function useBlackHole(
         holePos1: { value: new THREE.Vector2(0.72, 0.48) },
         holeCount: { value: 1 },
         lensingStrength: { value: isLab ? labDefaults.lensingStrength : mobile ? 0.09 : 0.12 },
-        lensingRadius: { value: isLab ? labDefaults.lensingRadius : 0.32 },
+        lensingRadius: { value: isLab ? labDefaults.lensingRadius : 0.46 },
         aspectRatio: { value: 1 },
         chromaticAberration: { value: isLab ? labDefaults.chromaticAberration : 0.0006 }
       },
@@ -760,6 +761,15 @@ export function useBlackHole(
       return hits[0].hole;
     };
 
+    let capturedW = 0;
+    let capturedH = 0;
+    let textStale = false;
+
+    const markTextStale = () => {
+      if (!textReady || textStale) return;
+      textStale = true;
+    };
+
     const placeTextPlane = () => {
       if (!warpNode) return;
 
@@ -847,6 +857,11 @@ export function useBlackHole(
         textTexture.magFilter = THREE.LinearFilter;
         textTexture.needsUpdate = true;
         textMaterial.uniforms.uMap.value = textTexture;
+        const box = measureWarpBox(warpNode);
+        capturedW = box.width;
+        capturedH = box.height;
+        textStale = false;
+        hero?.classList.remove('bh-copy-fallback');
         placeTextPlane();
 
         const firstReveal = !textReady;
@@ -899,6 +914,8 @@ export function useBlackHole(
 
     let resizeCaptureTimer = 0;
     let layoutWidth = 0;
+    let layoutHeight = 0;
+    let layoutDpr = 0;
     let qualityCap = mobile ? 1.5 : 2;
     let qualitySamples = 0;
     let qualityAccum = 0;
@@ -906,9 +923,15 @@ export function useBlackHole(
     const resize = () => {
       const width = Math.max(1, mount.clientWidth);
       const height = Math.max(1, mount.clientHeight);
-      const widthChanged = Math.abs(width - layoutWidth) > 1;
+      const nextDpr = window.devicePixelRatio || 1;
+      const layoutChanged =
+        Math.abs(width - layoutWidth) > 1 ||
+        Math.abs(height - layoutHeight) > 1 ||
+        Math.abs(nextDpr - layoutDpr) > 0.04;
       layoutWidth = width;
-      const dpr = Math.min(window.devicePixelRatio || 1, qualityCap);
+      layoutHeight = height;
+      layoutDpr = nextDpr;
+      const dpr = Math.min(nextDpr, qualityCap);
       camera.aspect = width / Math.max(1, height);
       applyHomeForViewport(width, height);
       // applyRightFrame already updated projection; keep aspect in sync
@@ -922,12 +945,14 @@ export function useBlackHole(
       lensingPass.uniforms.aspectRatio.value = width / height;
       starMaterial.uniforms.uPixelRatio.value = dpr;
       updateHoleScreen();
-      // Debounce recapture on resize so text doesn't thrash mid-drag
+      placeTextPlane();
+      // Debounce recapture on resize / browser zoom so text doesn't thrash mid-drag
       window.clearTimeout(resizeCaptureTimer);
-      if (widthChanged) {
+      if (layoutChanged) {
+        markTextStale();
         resizeCaptureTimer = window.setTimeout(() => {
-          if (textReady) void refreshWarpTexture(true);
-        }, 280);
+          void refreshWarpTexture(true);
+        }, 120);
       }
     };
 
@@ -1490,7 +1515,7 @@ export function useBlackHole(
             cur + (lensTarget - cur) * Math.min(1, delta * 8);
         }
         if (!live) {
-          lensingPass.uniforms.lensingRadius.value = 0.34;
+          lensingPass.uniforms.lensingRadius.value = 0.46;
         }
 
         composer.render();
@@ -1566,6 +1591,7 @@ export function useBlackHole(
     resize();
     observer.observe(mount);
     window.addEventListener('resize', resize, { passive: true });
+    window.visualViewport?.addEventListener('resize', resize, { passive: true });
     document.addEventListener('visibilitychange', onVisibility);
     // Grab proxy sits above hero copy; canvas remains for orbit on empty space
     grabProxy.addEventListener('pointerdown', onPointerDown);
@@ -1608,6 +1634,7 @@ export function useBlackHole(
       window.clearTimeout(resizeCaptureTimer);
       observer.disconnect();
       window.removeEventListener('resize', resize);
+      window.visualViewport?.removeEventListener('resize', resize);
       document.removeEventListener('visibilitychange', onVisibility);
       renderer.domElement.removeEventListener('pointerdown', onPointerDown, true);
       mount.removeEventListener('pointerdown', onPointerDown, true);

@@ -28,6 +28,10 @@ export default async function V2CaseStudyPage({ params }: PageProps) {
   const index = open.findIndex((item) => item.slug === project.slug);
   const next = open[(index + 1) % open.length];
   return (
-    <CaseStudyExperience project={project} nextProject={{ slug: next.slug, title: next.title }} />
+    <CaseStudyExperience
+      key={project.slug}
+      project={project}
+      nextProject={{ slug: next.slug, title: next.title }}
+    />
   );
 }

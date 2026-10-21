@@ -11,8 +11,8 @@ export function isUnconfirmed(value: string | null | undefined) {
 }
 
 export const SITE_URL = 'https://vittesh.com';
-/** Archive preview. Production `/` stays the previous portfolio. */
-export const V2_BASE = '/v2';
+/** Live site is at the origin. `/v2` URLs redirect here. */
+export const V2_BASE = '';
 
 export function v2Path(path = '/') {
   const base = V2_BASE.replace(/\/$/, '');
@@ -59,9 +59,19 @@ export const heroName = 'Vittesh';
  * 2. I make powerful products easier to use.
  */
 export const heroKicker = '';
-export const heroHeadline = "I'm Vittesh, a senior product designer.";
-export const heroCloser =
-  'I make data-heavy products clear enough to act on, from fleet dashboards to VR research tools.';
+
+/** Keep the last two words of a phrase on the same line. */
+export function noOrphan(text: string) {
+  const trimmed = text.trim();
+  const i = trimmed.lastIndexOf(' ');
+  if (i <= 0) return trimmed;
+  return `${trimmed.slice(0, i)}\u00A0${trimmed.slice(i + 1)}`;
+}
+
+export const heroHeadline = noOrphan("Hi, I'm Vittesh. Product Designer");
+export const heroCloser = noOrphan(
+  'Experience is at the heart of being human, I try to make it better everyday.'
+);
 export const heroHeadlineLines = [heroHeadline] as const;
 
 export const heroIntro = heroCloser;
@@ -175,8 +185,9 @@ export const profile = {
   tagline: metaDescription,
   statement:
     'Complex systems fail at the handoffs — between screens, roles and moments. I design the connections.',
-  aboutShort:
-    'Across automotive, logistics, cloud and VR, I take products with a lot of data and many roles and make the next action obvious.',
+  aboutShort: noOrphan(
+    'I take data-heavy products and make the next action obvious.'
+  ),
   about: `I'm a senior product designer with ${yearsExperience} years across automotive, logistics, cloud and VR. I work from research through launch, and I'm most useful when a product has a lot of data, several user roles and a messy workflow that needs one clear path.`,
   personality: workingStyle.join(' '),
   heroHeadline,

@@ -115,11 +115,8 @@ export function NotFoundExperience() {
             <p className="notfound-line">Only those who wander discover what they’re seeking.</p>
           </div>
           <div className="notfound-links">
-            <Link href={v2Path('/#work')} className="archive-label notfound-home">
-              Work
-            </Link>
-            <Link href={v2Path('/#contact')} className="archive-label notfound-home">
-              Contact
+            <Link href={v2Path('/')} className="archive-label notfound-home">
+              Home
             </Link>
           </div>
         </div>

@@ -4,7 +4,7 @@ export const metadata = {
   title: 'Selected Works',
   description: 'Selected work by Vittesh Sinha across enterprise, AI, and consumer product design.',
   alternates: {
-    canonical: '/work/'
+    canonical: '/legacy/work/'
   },
   openGraph: {
     title: 'Selected Works — Vittesh Sinha',
