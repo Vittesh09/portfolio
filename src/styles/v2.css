@@ -1739,11 +1739,6 @@ html.v2-smooth-scroll body {
   z-index: 1;
 }
 
-.v2-root .v2-footer-landscape.is-fluid .v2-footer-landscape-img,
-.v2-root .v2-footer-landscape.is-lens .v2-footer-landscape-img {
-  opacity: 0 !important;
-}
-
 .v2-root .v2-trust-row > :not(.v2-fluid-canvas) {
   min-width: 0;
   min-height: 0;

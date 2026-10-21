@@ -6,6 +6,12 @@ import dynamic from 'next/dynamic';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import { BlackHoleLazy } from '@/src/components/v2/singularity/BlackHoleLazy';
+import { useSingularityColorClick } from '@/src/components/v2/singularity/hooks/useSingularityColorClick';
+import { SINGULARITY_COLOR_SETS } from '@/src/components/v2/singularity/lib/palettes';
+import {
+  DEFAULT_SINGULARITY_PARAMS,
+  type SingularityParams
+} from '@/src/components/v2/singularity/lib/params';
 import { useKissMode } from '@/src/components/v2/layout/KissModeProvider';
 import { ContactPanel } from '@/src/components/v2/ui/ContactPanel';
 import { CopyEmail } from '@/src/components/v2/ui/CopyEmail';
@@ -33,6 +39,10 @@ function Label({ children }: { children: React.ReactNode }) {
 
 export function LandingExperienceSingularity({ cards }: { cards: ProjectCardData[] }) {
   const heroRef = useRef<HTMLElement>(null);
+  const paramsRef = useRef<SingularityParams>({
+    ...DEFAULT_SINGULARITY_PARAMS,
+    ...SINGULARITY_COLOR_SETS[0]
+  });
   const isMobileMedia = useMobileLanding();
   const { kissMode, hydrated } = useKissMode();
   const [clientReady, setClientReady] = useState(false);
@@ -50,6 +60,7 @@ export function LandingExperienceSingularity({ cards }: { cards: ProjectCardData
   // Mobile always uses Kiss; desktop SM toggles Kiss via KissModeProvider.
   const isMobile = clientReady && isMobileMedia;
   const useKiss = isMobile || (hydrated && kissMode);
+  const onHeroClick = useSingularityColorClick(heroRef, paramsRef, 0, !useKiss);
 
   useLayoutEffect(() => {
     const hero = heroRef.current;
@@ -64,8 +75,13 @@ export function LandingExperienceSingularity({ cards }: { cards: ProjectCardData
 
   return (
     <>
-      <section ref={heroRef} className="bh-hero is-intro border-b border-white/10">
-        {clientReady ? <BlackHoleLazy heroRef={heroRef} /> : null}
+      <section
+        ref={heroRef}
+        className="bh-hero is-intro border-b border-white/10"
+        aria-label="Drag the singularity to move it, drag around it to orbit, or click it to change its color."
+        onClick={onHeroClick}
+      >
+        {clientReady ? <BlackHoleLazy heroRef={heroRef} paramsRef={paramsRef} /> : null}
 
         <div className="relative z-10 mx-auto flex max-w-[1600px] flex-col px-4 md:min-h-[calc(100svh-57px)] md:px-8 md:py-8">
           <div className="archive-hero relative flex min-h-[calc(100svh-57px)] flex-1 flex-col justify-center py-10 md:min-h-0 md:py-6">

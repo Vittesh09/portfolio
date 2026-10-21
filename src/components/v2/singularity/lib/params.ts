@@ -54,6 +54,6 @@ export type SingularityMode = 'hero' | 'lab' | 'center';
 
 export type BlackHoleOptions = {
   mode?: SingularityMode;
-  /** Live lab controls — read each frame when mode is `lab`. */
+  /** Live lab sliders, plus click-to-cycle palettes on the hero and 404. */
   paramsRef?: { current: SingularityParams };
 };

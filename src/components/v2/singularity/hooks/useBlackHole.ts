@@ -464,9 +464,10 @@ export function useBlackHole(
         uTime: { value: 0 },
         uCameraPosition: { value: camera.position.clone() },
         uGlowColor: {
-          value: spinScene
-            ? new THREE.Color(labDefaults.colorMid)
-            : new THREE.Color().setRGB(1.0, 0.4, 0.1, THREE.LinearSRGBColorSpace)
+          value:
+            spinScene || paramsRef
+              ? new THREE.Color(labDefaults.colorMid)
+              : new THREE.Color().setRGB(1.0, 0.4, 0.1, THREE.LinearSRGBColorSpace)
         }
       },
       vertexShader: horizonVertexShader,
@@ -482,19 +483,19 @@ export function useBlackHole(
       uniforms: {
         uTime: { value: 0 },
         uColorHot: {
-          value: new THREE.Color(isLab ? labDefaults.colorHot : COLORS.hot)
+          value: new THREE.Color(isLab || paramsRef ? labDefaults.colorHot : COLORS.hot)
         },
         uColorMid: {
-          value: new THREE.Color(isLab ? labDefaults.colorMid : COLORS.mid)
+          value: new THREE.Color(isLab || paramsRef ? labDefaults.colorMid : COLORS.mid)
         },
         uColorAccent: {
-          value: new THREE.Color(isLab ? labDefaults.colorAccent : COLORS.accent)
+          value: new THREE.Color(isLab || paramsRef ? labDefaults.colorAccent : COLORS.accent)
         },
         uColorEmber: {
-          value: new THREE.Color(isLab ? labDefaults.colorEmber : COLORS.ember)
+          value: new THREE.Color(isLab || paramsRef ? labDefaults.colorEmber : COLORS.ember)
         },
         uColorOuter: {
-          value: new THREE.Color(isLab ? labDefaults.colorOuter : COLORS.outer)
+          value: new THREE.Color(isLab || paramsRef ? labDefaults.colorOuter : COLORS.outer)
         },
         uNoiseScale: { value: isLab ? labDefaults.noiseScale : 2.5 },
         uFlowSpeed: { value: isLab ? labDefaults.flowSpeed : 0.1 },
@@ -1241,6 +1242,7 @@ export function useBlackHole(
         const elapsed = clock.getElapsedTime();
         const delta = Math.min(0.033, clock.getDelta());
         const live = isLab ? (paramsRef?.current ?? labDefaults) : null;
+        const palette = paramsRef?.current;
         const timeScale = live?.timeScale ?? 0.45;
 
         if (live) {
@@ -1250,22 +1252,6 @@ export function useBlackHole(
           diskMaterial.uniforms.uDensity.value = live.diskDensity;
           diskMaterial.uniforms.uFlowSpeed.value = live.flowSpeed;
           diskMaterial.uniforms.uNoiseScale.value = live.noiseScale;
-          // The 404 eases between palettes; the lab applies slider values directly.
-          // `delta` reads ~0 here (getElapsedTime consumes the clock delta), so time it locally.
-          const colorNow = performance.now();
-          const colorDt = colorFrameAt ? Math.min(0.05, (colorNow - colorFrameAt) / 1000) : 0;
-          colorFrameAt = colorNow;
-          const colorEase = spinScene && !reduceMotion ? 1 - Math.exp(-colorDt * 2.6) : 1;
-          const easeColor = (target: THREE.Color, hex: string) => {
-            if (colorEase >= 1) target.set(hex);
-            else target.lerp(colorScratch.set(hex), colorEase);
-          };
-          easeColor(diskMaterial.uniforms.uColorHot.value, live.colorHot);
-          easeColor(diskMaterial.uniforms.uColorMid.value, live.colorMid);
-          easeColor(diskMaterial.uniforms.uColorAccent.value, live.colorAccent);
-          easeColor(diskMaterial.uniforms.uColorEmber.value, live.colorEmber);
-          easeColor(diskMaterial.uniforms.uColorOuter.value, live.colorOuter);
-          if (spinScene) easeColor(horizonMat.uniforms.uGlowColor.value, live.colorMid);
           const tiltXLive = (live.diskTiltDeg * Math.PI) / 180;
           const tiltZLive = (live.diskBankDeg * Math.PI) / 180;
           holeA.diskTilt.rotation.x = tiltXLive;
@@ -1297,6 +1283,27 @@ export function useBlackHole(
             } else if (!(holding && activeHole === holeB) && !returning) {
               activeHole = holeA;
             }
+          }
+        }
+
+        if (palette) {
+          // The 404 and homepage ease between palettes; the lab applies slider values directly.
+          // `delta` reads ~0 here (getElapsedTime consumes the clock delta), so time it locally.
+          const colorNow = performance.now();
+          const colorDt = colorFrameAt ? Math.min(0.05, (colorNow - colorFrameAt) / 1000) : 0;
+          colorFrameAt = colorNow;
+          const colorEase = mode !== 'lab' && !reduceMotion ? 1 - Math.exp(-colorDt * 2.6) : 1;
+          const easeColor = (target: THREE.Color, hex: string) => {
+            if (colorEase >= 1) target.set(hex);
+            else target.lerp(colorScratch.set(hex), colorEase);
+          };
+          easeColor(diskMaterial.uniforms.uColorHot.value, palette.colorHot);
+          easeColor(diskMaterial.uniforms.uColorMid.value, palette.colorMid);
+          easeColor(diskMaterial.uniforms.uColorAccent.value, palette.colorAccent);
+          easeColor(diskMaterial.uniforms.uColorEmber.value, palette.colorEmber);
+          easeColor(diskMaterial.uniforms.uColorOuter.value, palette.colorOuter);
+          if (spinScene || mode === 'hero') {
+            easeColor(horizonMat.uniforms.uGlowColor.value, palette.colorMid);
           }
         }
 
