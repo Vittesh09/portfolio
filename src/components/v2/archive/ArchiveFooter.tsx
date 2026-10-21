@@ -12,7 +12,7 @@ function FooterLandscape() {
         alt=""
         fill
         priority
-        sizes="100vw"
+        sizes="1024px"
         className="v2-footer-landscape-img v2-footer-landscape-img--light"
       />
       <Image
@@ -20,7 +20,7 @@ function FooterLandscape() {
         alt=""
         fill
         priority
-        sizes="100vw"
+        sizes="1024px"
         className="v2-footer-landscape-img v2-footer-landscape-img--dark"
       />
     </div>

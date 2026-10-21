@@ -371,11 +371,15 @@ body:has(.v2-root.dark) {
 }
 
 .v2-root .v2-footer-landscape {
-  height: 100%;
-  inset: 0;
+  bottom: 0;
+  height: min(431px, 100%);
   isolation: isolate;
+  left: 0;
   overflow: hidden;
+  pointer-events: none;
   position: absolute;
+  right: 0;
+  top: auto;
   width: 100%;
   z-index: 0;
 }
@@ -385,9 +389,12 @@ body:has(.v2-root.dark) {
 }
 
 .v2-root .v2-footer-landscape-img {
-  object-fit: cover;
-  object-position: center;
+  height: 100%;
+  max-width: none;
+  object-fit: none;
+  object-position: center bottom;
   transition: opacity 280ms cubic-bezier(0.42, 0, 0.58, 1);
+  width: 100%;
 }
 
 .v2-root .v2-footer-landscape-img--dark {
