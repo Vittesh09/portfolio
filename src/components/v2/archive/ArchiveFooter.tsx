@@ -3,12 +3,13 @@ import Link from 'next/link';
 import { siteConfig } from '@/src/config/v2/site';
 import { profile, v2Path } from '@/src/config/v2/profile';
 import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
+import { FOOTER_LANDSCAPE_DARK, FOOTER_LANDSCAPE_LIGHT } from '@/src/config/v2/footerMedia';
 
 function FooterLandscape() {
   return (
     <div className="v2-footer-landscape" aria-hidden="true">
       <Image
-        src="/assets/images/footer-landscape-light.jpg"
+        src={FOOTER_LANDSCAPE_LIGHT}
         alt=""
         fill
         priority
@@ -16,7 +17,7 @@ function FooterLandscape() {
         className="v2-footer-landscape-img v2-footer-landscape-img--light"
       />
       <Image
-        src="/assets/images/footer-landscape.jpg"
+        src={FOOTER_LANDSCAPE_DARK}
         alt=""
         fill
         priority

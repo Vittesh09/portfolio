@@ -7,9 +7,7 @@ import { KissModeProvider } from '@/src/components/v2/layout/KissModeProvider';
 import { ThemeProvider } from '@/src/components/v2/layout/ThemeProvider';
 import { HorizonTransition } from '@/src/components/v2/motion/HorizonTransition';
 import { useScrollToHashOnMount } from '@/src/components/v2/ui/HashNavLink';
-
-const FOOTER_LANDSCAPE_DARK = '/assets/images/footer-landscape.jpg';
-const FOOTER_LANDSCAPE_LIGHT = '/assets/images/footer-landscape-light.jpg';
+import { FOOTER_LANDSCAPE_DARK, FOOTER_LANDSCAPE_LIGHT } from '@/src/config/v2/footerMedia';
 
 function revealV2Root() {
   document.querySelector('.v2-root')?.classList.remove('v2-media-pending');
