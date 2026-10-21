@@ -7,7 +7,7 @@ import type { SingularityParams } from '../lib/params';
 /** Click (not drag) cycles the disk palette. Same gesture on 404 and the landing hero. */
 export function useSingularityColorClick(
   rootRef: RefObject<HTMLElement | null>,
-  paramsRef: RefObject<SingularityParams>,
+  paramsRef: { current: SingularityParams },
   startIndex = 0,
   enabled = true
 ) {
@@ -56,6 +56,8 @@ export function useSingularityColorClick(
       return;
     }
     colorIndex.current = (colorIndex.current + 1) % SINGULARITY_COLOR_SETS.length;
-    Object.assign(paramsRef.current, SINGULARITY_COLOR_SETS[colorIndex.current]);
+    const next = SINGULARITY_COLOR_SETS[colorIndex.current];
+    if (!next) return;
+    Object.assign(paramsRef.current, next);
   };
 }
