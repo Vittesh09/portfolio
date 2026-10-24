@@ -228,12 +228,7 @@ export function ArchiveHeader() {
               }
               const isHash = item.href.includes('#');
               const NavTag = isHash ? HashNavLink : Link;
-              const isCurrent =
-                item.label === 'About'
-                  ? Boolean(pathname?.includes('/about'))
-                  : item.label === 'TL;DR'
-                    ? Boolean(pathname?.includes('/tldr'))
-                    : false;
+              const isCurrent = item.label === 'About' ? Boolean(pathname?.includes('/about')) : false;
               return (
                 <NavTag
                   key={item.href}
