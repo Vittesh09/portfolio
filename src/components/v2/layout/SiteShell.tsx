@@ -7,6 +7,7 @@ import { KissModeProvider } from '@/src/components/v2/layout/KissModeProvider';
 import { ThemeProvider } from '@/src/components/v2/layout/ThemeProvider';
 import { HorizonTransition } from '@/src/components/v2/motion/HorizonTransition';
 import { useScrollToHashOnMount } from '@/src/components/v2/ui/HashNavLink';
+import { ToastProvider } from '@/src/components/v2/ui/Toast';
 import { FOOTER_LANDSCAPE_DARK, FOOTER_LANDSCAPE_LIGHT } from '@/src/config/v2/footerMedia';
 
 function revealV2Root() {
@@ -80,10 +81,11 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isMachine = pathname?.includes('/machine') ?? false;
   const isSingularityLab = pathname?.includes('/singularity') ?? false;
+  const isTldr = pathname === '/tldr' || pathname === '/tldr/' || pathname === '/v2/tldr' || pathname === '/v2/tldr/';
   useScrollToHashOnMount();
 
   useLayoutEffect(() => {
-    if (isMachine || isSingularityLab) {
+    if (isMachine || isSingularityLab || isTldr) {
       revealV2Root();
       return;
     }
@@ -98,49 +100,60 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
       cancelled = true;
       window.clearTimeout(failSafe);
     };
-  }, [isMachine, isSingularityLab]);
+  }, [isMachine, isSingularityLab, isTldr]);
 
   return (
     <ThemeProvider>
-      {isMachine ? null : (
-        <>
-          <MenuClickSound />
-          <ButtonHoverSound />
-          <BackgroundMusic />
-        </>
-      )}
-      <HorizonTransition>
-        {isMachine ? (
+      <ToastProvider>
+        {isMachine ? null : (
           <>
-            <SkipLink />
-            <main id="v2-main" tabIndex={-1}>
-              {children}
-            </main>
+            <MenuClickSound />
+            <ButtonHoverSound />
+            <BackgroundMusic />
           </>
-        ) : isSingularityLab ? (
-          <KissModeProvider>
-            <div className="min-h-svh bg-black text-[#f2efe6]">
-              <SkipLink />
-              <ArchiveHeader />
-              <main id="v2-main" tabIndex={-1}>
-                {children}
-              </main>
-            </div>
-          </KissModeProvider>
-        ) : (
-          <KissModeProvider>
-            <div className="min-h-svh">
-              <SkipLink />
-              <ExperienceMotion />
-              <ArchiveHeader />
-              <main id="v2-main" tabIndex={-1}>
-                {children}
-              </main>
-              <ArchiveFooter />
-            </div>
-          </KissModeProvider>
         )}
-      </HorizonTransition>
+        <HorizonTransition>
+          {isMachine ? (
+            <>
+              <SkipLink />
+              <main id="v2-main" tabIndex={-1}>
+                {children}
+              </main>
+            </>
+          ) : isSingularityLab ? (
+            <KissModeProvider>
+              <div className="min-h-svh bg-black text-[#f2efe6]">
+                <SkipLink />
+                <ArchiveHeader />
+                <main id="v2-main" tabIndex={-1}>
+                  {children}
+                </main>
+              </div>
+            </KissModeProvider>
+          ) : isTldr ? (
+            <KissModeProvider>
+              <div className="flex h-svh flex-col overflow-hidden">
+                <SkipLink />
+                <main id="v2-main" tabIndex={-1} className="flex min-h-0 flex-1 flex-col">
+                  {children}
+                </main>
+              </div>
+            </KissModeProvider>
+          ) : (
+            <KissModeProvider>
+              <div className="min-h-svh">
+                <SkipLink />
+                <ExperienceMotion />
+                <ArchiveHeader />
+                <main id="v2-main" tabIndex={-1}>
+                  {children}
+                </main>
+                <ArchiveFooter />
+              </div>
+            </KissModeProvider>
+          )}
+        </HorizonTransition>
+      </ToastProvider>
     </ThemeProvider>
   );
 }

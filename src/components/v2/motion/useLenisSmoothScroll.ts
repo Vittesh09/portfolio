@@ -15,7 +15,9 @@ export function useLenisSmoothScroll(enabled: boolean) {
     let lenis: Lenis | null = null;
     const onLenisScroll = (instance: Lenis) => {
       window.dispatchEvent(
-        new CustomEvent('v2-lenis-scroll', { detail: { velocity: instance.velocity } })
+        new CustomEvent('v2-lenis-scroll', {
+          detail: { velocity: instance.velocity, scroll: instance.scroll }
+        })
       );
     };
 

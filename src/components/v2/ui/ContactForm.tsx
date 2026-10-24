@@ -25,13 +25,77 @@ const NAME_ERROR_ID = `${FORM_ID}-name-error`;
 const EMAIL_ERROR_ID = `${FORM_ID}-email-error`;
 const MESSAGE_ERROR_ID = `${FORM_ID}-message-error`;
 
+type ContactPayload = { name: string; email: string; message: string };
+type ProviderResult = { success?: boolean | string; message?: string };
+
+function isAccepted(response: Response, result: ProviderResult) {
+  if (!response.ok) return false;
+  if (result.success === false || result.success === 'false') return false;
+  return true;
+}
+
+async function postJson(url: string, body: Record<string, unknown>) {
+  const response = await fetch(url, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Accept: 'application/json'
+    },
+    body: JSON.stringify(body)
+  });
+  let result: ProviderResult = {};
+  try {
+    result = (await response.json()) as ProviderResult;
+  } catch {
+    result = {};
+  }
+  return { response, result };
+}
+
+async function sendContactMessage({ name, email, message }: ContactPayload) {
+  if (ACCESS_KEY) {
+    const { response, result } = await postJson('https://api.web3forms.com/submit', {
+      access_key: ACCESS_KEY,
+      subject: `Portfolio message from ${name}`,
+      name,
+      from_name: name,
+      email,
+      message,
+      to: siteConfig.email
+    });
+    if (isAccepted(response, result)) return;
+    throw new Error(result.message || 'Something went wrong. Please try again.');
+  }
+
+  const { response, result } = await postJson(
+    `https://formsubmit.co/ajax/${encodeURIComponent(siteConfig.email)}`,
+    {
+      name,
+      email,
+      message,
+      _subject: `Portfolio message from ${name}`,
+      _template: 'table',
+      _captcha: false,
+      _replyto: email
+    }
+  );
+  if (isAccepted(response, result)) return;
+  if (typeof result.message === 'string' && /activat/i.test(result.message)) {
+    const activate = new Error('ACTIVATE_FORM');
+    activate.cause = result.message;
+    throw activate;
+  }
+  throw new Error(result.message || 'Something went wrong. Please try again.');
+}
+
 type ContactFormProps = {
   className?: string;
   /** Heading id that names this form (WCAG 1.3.1 / 4.1.2) */
   labelledBy?: string;
+  compact?: boolean;
 };
 
-export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
+export function ContactForm({ className = '', labelledBy, compact = false }: ContactFormProps) {
   const nameRef = useRef<HTMLInputElement>(null);
   const emailRef = useRef<HTMLInputElement>(null);
   const messageRef = useRef<HTMLTextAreaElement>(null);
@@ -40,6 +104,9 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
 
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState('');
+  const [sentNote, setSentNote] = useState(
+    `Thanks — your message was sent. If this doesn’t go through, email ${siteConfig.email}.`
+  );
   const [invalid, setInvalid] = useState<Partial<Record<FieldName, string>>>({});
 
   useEffect(() => {
@@ -61,12 +128,6 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
     setError('');
     setInvalid({});
     setStatus('idle');
-
-    if (!ACCESS_KEY) {
-      setStatus('error');
-      setError(`Form isn’t connected yet. Or email me at ${siteConfig.email}.`);
-      return;
-    }
 
     const form = event.currentTarget;
     const data = new FormData(form);
@@ -104,33 +165,28 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
     setStatus('sending');
 
     try {
-      const response = await fetch('https://api.web3forms.com/submit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Accept: 'application/json'
-        },
-        body: JSON.stringify({
-          access_key: ACCESS_KEY,
-          subject: `Portfolio message from ${name}`,
-          from_name: name,
-          email,
-          message,
-          to: siteConfig.email
-        })
-      });
-
-      const result = (await response.json()) as { success?: boolean; message?: string };
-      if (!response.ok || !result.success) {
-        throw new Error(result.message || 'Something went wrong. Please try again.');
-      }
+      await sendContactMessage({ name, email, message });
 
       form.reset();
       setInvalid({});
       setError('');
+      setSentNote(
+        `Thanks — your message was sent. If this doesn’t go through, email ${siteConfig.email}.`
+      );
       setStatus('sent');
       triggerHaptic('success');
     } catch (err) {
+      if (err instanceof Error && err.message === 'ACTIVATE_FORM') {
+        form.reset();
+        setInvalid({});
+        setError('');
+        setSentNote(
+          `Check ${siteConfig.email} and click the one-time activation link. After that, messages will arrive there.`
+        );
+        setStatus('sent');
+        triggerHaptic('success');
+        return;
+      }
       setStatus('error');
       setError(
         err instanceof Error
@@ -283,7 +339,7 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
             id={MESSAGE_ID}
             name="message"
             required
-            rows={3}
+            rows={compact ? 2 : 3}
             aria-required="true"
             aria-invalid={invalid.message ? true : undefined}
             aria-describedby={fieldDescribedBy('message', MESSAGE_ERROR_ID)}
@@ -327,7 +383,7 @@ export function ContactForm({ className = '', labelledBy }: ContactFormProps) {
             role="status"
             className="v2-contact-alert outline-none focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent-pop"
           >
-            Thanks — your message was sent. If this doesn’t go through, email {siteConfig.email}.
+            {sentNote}
           </p>
         ) : null}
       </div>

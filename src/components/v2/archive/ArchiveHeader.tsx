@@ -17,22 +17,39 @@ const navOptionClass =
 
 /** Stay on screen at the top of the page. Hide only while scrolling down. */
 const TOP_STAY_PX = 12;
+const SOLID_PX = 24;
 const PEEK_PX = 80;
+
+function readScrollY(event?: Event) {
+  if (event instanceof CustomEvent) {
+    const fromLenis = Number(event.detail?.scroll);
+    if (Number.isFinite(fromLenis)) return fromLenis;
+  }
+  const hero = document.querySelector('.bh-hero, .v2-kiss-hero');
+  if (hero instanceof HTMLElement) {
+    return Math.max(0, -hero.getBoundingClientRect().top);
+  }
+  return window.scrollY || document.documentElement.scrollTop || 0;
+}
 
 export function ArchiveHeader() {
   const [open, setOpen] = useState(false);
   const [visible, setVisible] = useState(true);
+  const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const isHome = pathname === v2Path('/') || pathname === '/' || pathname === '/v2' || pathname === '/v2/';
   const isMobile = useMobileLanding();
   const lastY = useRef(0);
   const openRef = useRef(open);
   const visibleRef = useRef(visible);
+  const scrolledRef = useRef(scrolled);
   const spacerRef = useRef<HTMLDivElement>(null);
   const headerRef = useRef<HTMLElement>(null);
 
   openRef.current = open;
   visibleRef.current = visible;
+  scrolledRef.current = scrolled;
+  const solid = !isHome || scrolled || open;
 
   const headerInertProps = !(visible || open) ? ({ inert: true } as const) : {};
 
@@ -49,7 +66,8 @@ export function ArchiveHeader() {
   useEffect(() => {
     setOpen(false);
     setVisible(true);
-  }, [pathname]);
+    setScrolled(!isHome || readScrollY() > SOLID_PX);
+  }, [pathname, isHome]);
 
   useEffect(() => {
     if (!open) return;
@@ -71,6 +89,10 @@ export function ArchiveHeader() {
     if (!header || !spacer) return;
 
     const sync = () => {
+      if (isHome) {
+        spacer.style.height = '0px';
+        return;
+      }
       const bar = header.querySelector('.v2-archive-header-bar');
       spacer.style.height = `${(bar as HTMLElement | null)?.offsetHeight ?? header.offsetHeight}px`;
     };
@@ -79,29 +101,36 @@ export function ArchiveHeader() {
     const ro = new ResizeObserver(sync);
     ro.observe(header);
     return () => ro.disconnect();
-  }, [open, pathname]);
+  }, [open, pathname, isHome]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reduce) {
-      setVisible(true);
-      return;
-    }
-
-    lastY.current = window.scrollY;
+    lastY.current = readScrollY();
 
     const showHeader = (next: boolean) => {
       if (visibleRef.current === next) return;
       setVisible(next);
     };
 
+    const showScrolled = (next: boolean) => {
+      if (scrolledRef.current === next) return;
+      setScrolled(next);
+    };
+
     const onScrollActivity = (event?: Event) => {
-      const y = window.scrollY;
+      const y = readScrollY(event);
       const goingDown = y > lastY.current + 2;
       const goingUp = y < lastY.current - 2;
       lastY.current = y;
+
+      showScrolled(!isHome || y > SOLID_PX);
+
+      if (reduce) {
+        showHeader(true);
+        return;
+      }
 
       if (openRef.current || y <= TOP_STAY_PX) {
         showHeader(true);
@@ -149,7 +178,8 @@ export function ArchiveHeader() {
     window.addEventListener('touchmove', onTouchMove, { passive: true });
     window.addEventListener('pointermove', onPointerMove, { passive: true });
 
-    setVisible(window.scrollY <= TOP_STAY_PX || visibleRef.current);
+    setVisible(reduce || readScrollY() <= TOP_STAY_PX || visibleRef.current);
+    showScrolled(!isHome || readScrollY() > SOLID_PX);
 
     return () => {
       window.removeEventListener('scroll', onScroll);
@@ -158,7 +188,7 @@ export function ArchiveHeader() {
       window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('pointermove', onPointerMove);
     };
-  }, [pathname]);
+  }, [pathname, isHome]);
 
   return (
     <>
@@ -166,6 +196,7 @@ export function ArchiveHeader() {
       <header
         ref={headerRef}
         data-hidden={visible || open ? 'false' : 'true'}
+        data-solid={solid ? 'true' : 'false'}
         className="v2-archive-header fixed inset-x-0 top-0 z-[110] border-b"
         {...headerInertProps}
       >
@@ -198,7 +229,11 @@ export function ArchiveHeader() {
               const isHash = item.href.includes('#');
               const NavTag = isHash ? HashNavLink : Link;
               const isCurrent =
-                item.label === 'About' ? Boolean(pathname?.includes('/about')) : false;
+                item.label === 'About'
+                  ? Boolean(pathname?.includes('/about'))
+                  : item.label === 'TL;DR'
+                    ? Boolean(pathname?.includes('/tldr'))
+                    : false;
               return (
                 <NavTag
                   key={item.href}

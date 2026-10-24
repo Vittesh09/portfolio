@@ -36,6 +36,7 @@ Hero → Trust → Why → Work → About → CTA
 |------|---------|
 | `/` | **Primary homepage** (singularity landing) |
 | `/about` | About |
+| `/tldr` | One-screen summary (identity, work, contact) |
 | `/work/[slug]` | Case-study templates (published slugs in `caseStudies.ts`) |
 | `/classic` | Archived orbit / particle landing (lab) |
 | `/classic/workbench` | Archived workbench (lab) |

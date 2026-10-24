@@ -4,7 +4,7 @@
   background: #000002;
   color: #f2efe6;
   isolation: isolate;
-  min-height: calc(100svh - 57px);
+  min-height: 100svh;
   overflow: visible;
   position: relative;
 }

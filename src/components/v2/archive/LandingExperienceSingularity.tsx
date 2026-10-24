@@ -83,8 +83,8 @@ export function LandingExperienceSingularity({ cards }: { cards: ProjectCardData
       >
         {clientReady ? <BlackHoleLazy heroRef={heroRef} paramsRef={paramsRef} /> : null}
 
-        <div className="relative z-10 mx-auto flex max-w-[1600px] flex-col px-4 md:min-h-[calc(100svh-57px)] md:px-8 md:py-8">
-          <div className="archive-hero relative flex min-h-[calc(100svh-57px)] flex-1 flex-col justify-center py-10 md:min-h-0 md:py-6">
+        <div className="relative z-10 mx-auto flex max-w-[1600px] flex-col px-4 md:min-h-[100svh] md:px-8 md:py-8">
+          <div className="archive-hero relative flex min-h-[100svh] flex-1 flex-col justify-center py-10 md:min-h-0 md:py-6">
             <div className="bh-copy-col relative z-10">
               <h1 className="bh-sr-only">{heroHeadline}</h1>
               <p className="bh-sr-only">{heroCloser}</p>

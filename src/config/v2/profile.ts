@@ -202,6 +202,7 @@ export const profile = {
   nav: [
     { label: 'Work', href: v2Path('/#work'), external: false },
     { label: 'About', href: v2Path('/about/'), external: false },
+    { label: 'TL;DR', href: v2Path('/tldr/'), external: false },
     { label: 'Resume', href: '/assets/resume/Vittesh_Sinha_Resume.pdf', external: true },
     { label: 'Contact', href: v2Path('/#contact'), external: false }
   ],

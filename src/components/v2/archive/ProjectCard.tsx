@@ -8,6 +8,7 @@ import { type ProjectCardData } from '@/src/config/v2/caseStudies';
 import { noOrphan, v2Path } from '@/src/config/v2/profile';
 import { triggerHaptic } from '@/src/components/v2/ui/haptics';
 import { IosHapticSwitch } from '@/src/components/v2/ui/IosHapticSwitch';
+import { useToast } from '@/src/components/v2/ui/Toast';
 
 function ProjectCardBody({
   project,
@@ -55,9 +56,15 @@ function ProjectCardBody({
       </div>
       <div className="archive-project-caption">
         <div className="archive-project-caption-main">
-          <h3 id={headingId} className="archive-display text-text-primary group-hover:text-accent-pop">
-            {noOrphan(project.title)}
-          </h3>
+          {locked ? (
+            <span id={headingId} className="archive-display text-text-primary group-hover:text-accent-pop">
+              {noOrphan(project.title)}
+            </span>
+          ) : (
+            <h3 id={headingId} className="archive-display text-text-primary group-hover:text-accent-pop">
+              {noOrphan(project.title)}
+            </h3>
+          )}
           <p className="archive-project-meta">
             {locked ? `Coming soon · ${project.year}` : `${project.cardRole} · ${project.year}`}
           </p>
@@ -77,6 +84,7 @@ function ProjectCardBody({
 
 export function ProjectCard({ project, index }: { project: ProjectCardData; index: number }) {
   const linkRef = useRef<HTMLAnchorElement>(null);
+  const { showToast } = useToast();
   const locked = Boolean(project.comingSoon);
   const headingId = `project-${project.slug}`;
   const body: ReactNode = (
@@ -86,9 +94,23 @@ export function ProjectCard({ project, index }: { project: ProjectCardData; inde
   if (locked) {
     return (
       <div className="archive-project-card is-locked group relative flex flex-col md:col-span-8 md:col-start-3 md:-mx-24">
-        <div className="flex flex-col" aria-labelledby={headingId}>
+        <button
+          type="button"
+          className="flex flex-col text-left"
+          aria-label={`${project.title}, coming soon`}
+          onClick={() => {
+            triggerHaptic('medium');
+            showToast('Coming soon');
+          }}
+        >
           {body}
-        </div>
+        </button>
+        <IosHapticSwitch
+          onActivate={() => {
+            triggerHaptic('medium');
+            showToast('Coming soon');
+          }}
+        />
       </div>
     );
   }

@@ -20,6 +20,7 @@ function routeLabel(path: string) {
   const p = normalizePath(path).replace(/^\/v2(?=\/)/, '') || '/';
   if (p === '/' || p === '/v2/') return 'Home';
   if (p.startsWith('/about') || p.startsWith('/v2/about')) return 'About';
+  if (p.startsWith('/tldr') || p.startsWith('/v2/tldr')) return 'TL;DR';
   if (p.startsWith('/work/') || p.startsWith('/v2/work/')) return 'Work';
   if (p.startsWith('/machine')) return 'Machine';
   if (p.startsWith('/classic/workbench')) return 'Workbench';

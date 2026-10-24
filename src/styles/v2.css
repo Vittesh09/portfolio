@@ -939,7 +939,17 @@ body:has(.v2-root.dark) {
 }
 
 .v2-root .archive-project-card.is-locked {
-  cursor: default;
+  cursor: pointer;
+}
+
+.v2-root .archive-project-card.is-locked > button {
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  padding: 0;
+  width: 100%;
 }
 
 .v2-root .archive-project-card.is-locked .archive-project-thumb::after {
@@ -1614,7 +1624,21 @@ html.v2-smooth-scroll body {
   color: var(--v2-text-primary);
   overflow: visible;
   pointer-events: auto;
-  transition: transform 280ms cubic-bezier(0.42, 0, 0.58, 1);
+  transition:
+    transform 280ms cubic-bezier(0.42, 0, 0.58, 1),
+    background-color 220ms ease,
+    border-color 220ms ease,
+    color 220ms ease;
+}
+
+.v2-root .v2-archive-header[data-solid='false'] {
+  background-color: transparent;
+  border-bottom-color: transparent;
+  color: #f2efe6;
+}
+
+.v2-root .v2-archive-header[data-solid='false'] .border-border-subtle {
+  border-color: rgba(242, 239, 230, 0.28);
 }
 
 .v2-root .v2-archive-header-bar {
@@ -3108,4 +3132,250 @@ html.v2-disc-lock .v2-root .v2-page-enter {
 .v2-root .notfound-home:hover {
   background: #f2efe6;
   color: #000;
+}
+
+.v2-root .v2-toast-region {
+  bottom: calc(1rem + env(safe-area-inset-bottom, 0px));
+  pointer-events: none;
+  position: fixed;
+  right: 1rem;
+  z-index: 200;
+}
+
+.v2-root .v2-toast {
+  background: var(--v2-text-primary);
+  color: var(--v2-bg-primary);
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.1em;
+  margin: 0;
+  min-width: 10rem;
+  padding: 0.85rem 1.15rem;
+  pointer-events: auto;
+  text-transform: uppercase;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .v2-root .v2-toast {
+    animation: v2-toast-in 220ms ease-out;
+  }
+}
+
+@keyframes v2-toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(0.5rem);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.v2-root .v2-tldr {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.v2-root .v2-tldr-bar {
+  align-items: center;
+  display: flex;
+  flex-shrink: 0;
+  justify-content: space-between;
+  padding: calc(0.85rem + env(safe-area-inset-top, 0px)) 1.25rem 0.85rem;
+  position: relative;
+  z-index: 21;
+}
+
+.v2-root .v2-tldr-wordmark,
+.v2-root .v2-tldr-menu-btn {
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.12em;
+  min-height: 2.75rem;
+  padding: 0;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.v2-root .v2-tldr-wordmark:focus-visible,
+.v2-root .v2-tldr-menu-btn:focus-visible,
+.v2-root .v2-tldr-email:focus-visible,
+.v2-root .v2-tldr-line:focus-visible,
+.v2-root .v2-tldr-menu-link:focus-visible {
+  outline: 2px solid var(--v2-accent-pop);
+  outline-offset: 4px;
+}
+
+.v2-root .v2-tldr-menu {
+  background: var(--v2-bg-primary);
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  inset: 0;
+  overflow: auto;
+  padding: 5.5rem 1.5rem 2rem;
+  position: absolute;
+  z-index: 20;
+}
+
+.v2-root .v2-tldr-menu-link {
+  color: inherit;
+  font-family: var(--font-space), system-ui, sans-serif;
+  font-size: clamp(1.75rem, 6vw, 2.25rem);
+  line-height: 1.2;
+  min-height: 2.75rem;
+  padding: 0.35rem 0;
+  text-decoration: none;
+}
+
+.v2-root .v2-tldr-sheet {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  justify-content: space-between;
+  margin: 0 auto;
+  max-width: 26rem;
+  min-height: 0;
+  padding: 0.25rem 1.5rem calc(1.25rem + env(safe-area-inset-bottom, 0px));
+  width: 100%;
+}
+
+.v2-root .v2-tldr-email {
+  align-self: flex-start;
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font-family: var(--font-space), system-ui, sans-serif;
+  font-size: clamp(0.72rem, 2.6vw, 0.875rem);
+  letter-spacing: 0.06em;
+  line-height: 1.2;
+  margin: 0.35rem 0 1.75rem;
+  min-height: 1.75rem;
+  padding: 0;
+  text-align: left;
+  text-transform: uppercase;
+}
+
+.v2-root .v2-tldr-portrait {
+  margin: 0 auto 2rem;
+  max-width: 9rem;
+  transform: translateY(1.5rem);
+  width: min(38vw, 9rem);
+}
+
+.v2-root .v2-tldr-portrait-img {
+  aspect-ratio: 1;
+  display: block;
+  height: auto;
+  object-fit: cover;
+  object-position: center 18%;
+  width: 100%;
+}
+
+.v2-root .v2-tldr-foot {
+  margin-top: 2.25rem;
+  padding-top: 0.25rem;
+}
+
+.v2-root .v2-tldr-name {
+  font-family: var(--font-space), system-ui, sans-serif;
+  font-size: clamp(1.35rem, 5.4vw, 1.75rem);
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+  margin: 0 0 0.4rem;
+  text-transform: uppercase;
+}
+
+.v2-root .v2-tldr-bio {
+  color: var(--v2-text-secondary);
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  line-height: 1.5;
+  margin: 0 0 1.5rem;
+  max-width: 42ch;
+  text-transform: uppercase;
+}
+
+.v2-root .v2-tldr-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 0.95rem;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.v2-root .v2-tldr-line {
+  align-items: baseline;
+  background: none;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  display: grid;
+  font: inherit;
+  gap: 1rem;
+  grid-template-columns: 3.25rem minmax(0, 1fr);
+  min-height: 1.75rem;
+  padding: 0;
+  text-align: left;
+  text-decoration: none;
+  width: 100%;
+}
+
+.v2-root .v2-tldr-year {
+  color: var(--v2-text-muted);
+  font-family: var(--font-jetbrains), ui-monospace, monospace;
+  font-size: 0.6875rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.v2-root .v2-tldr-line-title {
+  font-size: 0.8rem;
+  letter-spacing: 0.02em;
+  line-height: 1.35;
+}
+
+.v2-root .v2-tldr-line:hover .v2-tldr-line-title {
+  color: var(--v2-accent-pop);
+}
+
+@media (min-width: 768px) {
+  .v2-root .v2-tldr-bar {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+
+  .v2-root .v2-tldr-sheet {
+    max-width: 28rem;
+    padding-bottom: 1.75rem;
+  }
+
+  .v2-root .v2-tldr-email {
+    margin-bottom: 2.25rem;
+  }
+
+  .v2-root .v2-tldr-portrait {
+    margin-bottom: 2.5rem;
+    max-width: 9.5rem;
+    width: 9.5rem;
+  }
+
+  .v2-root .v2-tldr-foot {
+    margin-top: 2.75rem;
+  }
 }

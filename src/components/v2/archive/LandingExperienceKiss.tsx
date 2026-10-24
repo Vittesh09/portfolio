@@ -26,7 +26,7 @@ export function LandingExperienceKiss({ cards }: { cards: ProjectCardData[] }) {
     <article>
       <section className="v2-kiss-hero relative border-b border-border-subtle">
         <KissStarfield />
-        <div className="relative z-[1] mx-auto flex min-h-[calc(100svh-57px)] max-w-[1600px] flex-col px-4 pb-6 pt-2 md:block md:min-h-0 md:px-8 md:py-24">
+        <div className="relative z-[1] mx-auto flex min-h-[100svh] max-w-[1600px] flex-col px-4 pb-6 pt-[4.75rem] md:block md:min-h-0 md:px-8 md:py-24">
           {/* Mobile */}
           <div className="v2-kiss-copy flex flex-1 flex-col md:hidden">
             <h1 className="v2-kiss-wordmark m-0 archive-display text-[clamp(3rem,14vw,4.25rem)] leading-[0.86]">
