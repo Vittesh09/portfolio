@@ -29,6 +29,7 @@ jobs:
           npm run build
           mkdir -p out
           if [ -f public/.htaccess ]; then cp public/.htaccess out/.htaccess; fi
+          if [ -f public/contact.php ]; then cp public/contact.php out/contact.php; fi
 
       - name: Deploy via SSH (rsync)
         uses: appleboy/ssh-action@v1.0.3

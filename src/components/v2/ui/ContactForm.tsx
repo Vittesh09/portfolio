@@ -34,6 +34,10 @@ function isAccepted(response: Response, result: ProviderResult) {
   return true;
 }
 
+function isJsonResponse(response: Response) {
+  return (response.headers.get('content-type') || '').toLowerCase().includes('application/json');
+}
+
 async function postJson(url: string, body: Record<string, unknown>) {
   const response = await fetch(url, {
     method: 'POST',
@@ -52,9 +56,20 @@ async function postJson(url: string, body: Record<string, unknown>) {
   return { response, result };
 }
 
+async function tryPostJson(url: string, body: Record<string, unknown>) {
+  try {
+    return await postJson(url, body);
+  } catch {
+    return null;
+  }
+}
+
 async function sendContactMessage({ name, email, message }: ContactPayload) {
+  const php = await tryPostJson('/contact.php', { name, email, message });
+  if (php && isJsonResponse(php.response) && isAccepted(php.response, php.result)) return;
+
   if (ACCESS_KEY) {
-    const { response, result } = await postJson('https://api.web3forms.com/submit', {
+    const web3 = await tryPostJson('https://api.web3forms.com/submit', {
       access_key: ACCESS_KEY,
       subject: `Portfolio message from ${name}`,
       name,
@@ -63,11 +78,10 @@ async function sendContactMessage({ name, email, message }: ContactPayload) {
       message,
       to: siteConfig.email
     });
-    if (isAccepted(response, result)) return;
-    throw new Error(result.message || 'Something went wrong. Please try again.');
+    if (web3 && isAccepted(web3.response, web3.result)) return;
   }
 
-  const { response, result } = await postJson(
+  const formsubmit = await tryPostJson(
     `https://formsubmit.co/ajax/${encodeURIComponent(siteConfig.email)}`,
     {
       name,
@@ -79,13 +93,15 @@ async function sendContactMessage({ name, email, message }: ContactPayload) {
       _replyto: email
     }
   );
-  if (isAccepted(response, result)) return;
-  if (typeof result.message === 'string' && /activat/i.test(result.message)) {
+  if (formsubmit && isAccepted(formsubmit.response, formsubmit.result)) return;
+  if (formsubmit && typeof formsubmit.result.message === 'string' && /activat/i.test(formsubmit.result.message)) {
     const activate = new Error('ACTIVATE_FORM');
-    activate.cause = result.message;
+    activate.cause = formsubmit.result.message;
     throw activate;
   }
-  throw new Error(result.message || 'Something went wrong. Please try again.');
+  throw new Error(
+    formsubmit?.result.message || php?.result.message || 'Something went wrong. Please try again.'
+  );
 }
 
 type ContactFormProps = {
