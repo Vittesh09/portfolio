@@ -5,7 +5,7 @@ import { v2PageMetadata } from '@/src/config/v2/seo';
 
 export const metadata = {
   ...v2PageMetadata({
-    title: 'Vittesh Sinha — Senior Product Designer, automotive and VR',
+    title: 'Vittesh Sinha, Senior Product Designer, automotive and VR',
     description: metaDescription,
     path: '/'
   })

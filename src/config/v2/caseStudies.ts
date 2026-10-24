@@ -105,7 +105,7 @@ export const projects: Project[] = [
     index: '02',
     comingSoon: true,
     title: 'Fleet Track management',
-    seoTitle: 'Fleet Track management — one workspace for fleet events | Vittesh Sinha',
+    seoTitle: 'Fleet Track management: one workspace for fleet events | Vittesh Sinha',
     cardTitle: 'Fleet Track management',
     domain: 'Logistics',
     summary:
@@ -305,7 +305,7 @@ export const projects: Project[] = [
     slug: 'vr-eeg-analytics',
     index: '01',
     title: 'Future City VR + EEG',
-    seoTitle: 'Future City VR + EEG — analytics | Vittesh Sinha',
+    seoTitle: 'Future City VR + EEG: analytics | Vittesh Sinha',
     cardTitle: "Future City VR + EEG: walk the city before it's built",
     domain: 'VR',
     summary:

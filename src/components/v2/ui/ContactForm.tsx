@@ -14,6 +14,8 @@ function headerSafe(value: string, max: number) {
   return value.replace(/[\r\n\0]+/g, ' ').trim().slice(0, max);
 }
 
+const THANKS_NOTE = 'Thanks for getting in touch. I’ll reply soon.';
+
 const FORM_ID = 'v2-contact-form';
 const NAME_ID = `${FORM_ID}-name`;
 const EMAIL_ID = `${FORM_ID}-email`;
@@ -120,9 +122,7 @@ export function ContactForm({ className = '', labelledBy, compact = false }: Con
 
   const [status, setStatus] = useState<Status>('idle');
   const [error, setError] = useState('');
-  const [sentNote, setSentNote] = useState(
-    `Thanks — your message was sent. If this doesn’t go through, email ${siteConfig.email}.`
-  );
+  const [sentNote, setSentNote] = useState(THANKS_NOTE);
   const [invalid, setInvalid] = useState<Partial<Record<FieldName, string>>>({});
 
   useEffect(() => {
@@ -151,6 +151,7 @@ export function ContactForm({ className = '', labelledBy, compact = false }: Con
       form.reset();
       setInvalid({});
       setError('');
+      setSentNote(THANKS_NOTE);
       setStatus('sent');
       return;
     }
@@ -186,9 +187,7 @@ export function ContactForm({ className = '', labelledBy, compact = false }: Con
       form.reset();
       setInvalid({});
       setError('');
-      setSentNote(
-        `Thanks — your message was sent. If this doesn’t go through, email ${siteConfig.email}.`
-      );
+      setSentNote(THANKS_NOTE);
       setStatus('sent');
       triggerHaptic('success');
     } catch (err) {
@@ -196,9 +195,7 @@ export function ContactForm({ className = '', labelledBy, compact = false }: Con
         form.reset();
         setInvalid({});
         setError('');
-        setSentNote(
-          `Check ${siteConfig.email} and click the one-time activation link. After that, messages will arrive there.`
-        );
+        setSentNote(THANKS_NOTE);
         setStatus('sent');
         triggerHaptic('success');
         return;
@@ -244,7 +241,7 @@ export function ContactForm({ className = '', labelledBy, compact = false }: Con
                       nameRef.current?.focus();
                     }}
                   >
-                    Name — {invalid.name}
+                    Name: {invalid.name}
                   </a>
                 </li>
               ) : null}
@@ -258,7 +255,7 @@ export function ContactForm({ className = '', labelledBy, compact = false }: Con
                       emailRef.current?.focus();
                     }}
                   >
-                    Email — {invalid.email}
+                    Email: {invalid.email}
                   </a>
                 </li>
               ) : null}
@@ -272,7 +269,7 @@ export function ContactForm({ className = '', labelledBy, compact = false }: Con
                       messageRef.current?.focus();
                     }}
                   >
-                    Message — {invalid.message}
+                    Message: {invalid.message}
                   </a>
                 </li>
               ) : null}

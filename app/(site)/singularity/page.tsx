@@ -3,7 +3,7 @@ import { SingularityLabExperience } from '@/src/components/v2/singularity/Singul
 export const metadata = {
   title: 'Singularity lab · Vittesh Sinha',
   description:
-    'Interactive singularity playground — tune bloom, accretion disk shaders, lensing, and color live.',
+    'Interactive singularity playground: tune bloom, accretion disk shaders, lensing, and color live.',
   robots: { index: false, follow: false }
 };
 

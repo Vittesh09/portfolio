@@ -50,7 +50,7 @@ export const agentVoiceRule =
 export const resumePublicDetailsNote =
   'TODO: [FILL: confirm what contact details I want public on the resume PDF]';
 export const taskFlowComplexityDefinition =
-  'TODO: [FILL: define task-flow complexity — steps, taps, or time?]';
+  'TODO: [FILL: define task-flow complexity: steps, taps, or time?]';
 
 export const heroName = 'Vittesh';
 /**
@@ -184,7 +184,7 @@ export const profile = {
   valueProposition: metaDescription,
   tagline: metaDescription,
   statement:
-    'Complex systems fail at the handoffs — between screens, roles and moments. I design the connections.',
+    'Complex systems fail at the handoffs, between screens, roles and moments. I design the connections.',
   aboutShort: noOrphan(
     'I take data-heavy products and make the next action obvious.'
   ),
@@ -305,5 +305,5 @@ export const unresolvedPlaceholders = [
   '[FILL: education, optional]',
   '[FILL: confirm third-person agent voice rule]',
   '[FILL: confirm resume public contact details]',
-  'Domains list (Automotive, Enterprise / Logistics, Cloud / FinOps, VR / Neuro-tech) — confirm before finalising'
+  'Domains list (Automotive, Enterprise / Logistics, Cloud / FinOps, VR / Neuro-tech): confirm before finalising'
 ] as const;

@@ -25,7 +25,7 @@ const jetbrains = JetBrains_Mono({
 });
 
 export const metadata = {
-  title: '404 — Page not found'
+  title: '404: Page not found'
 };
 
 export default function NotFound() {
