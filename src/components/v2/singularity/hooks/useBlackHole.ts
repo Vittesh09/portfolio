@@ -159,7 +159,7 @@ export function useBlackHole(
       } else if (isLab) {
         camera.position.set(HOME.x - 0.4, HOME.y + 2.8, HOME.z + 12.5);
       } else {
-        camera.position.set(HOME.x - 2.6, HOME.y + 3.85, HOME.z + 12.4);
+        camera.position.set(HOME.x - 2.6, HOME.y + 3.85, HOME.z + 11.6);
       }
       camera.lookAt(HOME);
     };
@@ -417,6 +417,7 @@ export function useBlackHole(
     let streakViewW = 0;
     let streakViewH = 0;
     let nextStreakAt = 0;
+    let streakCount = 0;
 
     const sizeStreakCanvas = (width: number, height: number) => {
       streakViewW = width;
@@ -502,7 +503,7 @@ export function useBlackHole(
     // --- Singularity (primary + optional lab twin) ---
     const horizonMul = spinScene ? 1.4 : isLab ? 1 : 1.18;
     const diskInner = BLACK_HOLE_RADIUS * horizonMul + 0.16;
-    const diskOuter = isLab || spinScene ? DISK_OUTER : 10.8;
+    const diskOuter = isLab || spinScene ? DISK_OUTER : 9.6;
     const horizonGeo = new THREE.SphereGeometry(BLACK_HOLE_RADIUS * 1.05 * horizonMul, 128, 64);
     const voidGeo = new THREE.SphereGeometry(BLACK_HOLE_RADIUS * horizonMul, 128, 64);
     const diskGeo = new THREE.RingGeometry(diskInner, diskOuter, 256, 128);
@@ -618,8 +619,8 @@ export function useBlackHole(
     const raycaster = new THREE.Raycaster();
     const clock = new THREE.Clock();
     const pullScratch = new THREE.Vector3();
-    const holeScreen = { x: 0, y: 0, radius: 120 };
-    const holeScreenB = { x: 0, y: 0, radius: 120 };
+    const holeScreen = { x: 0, y: 0, radius: 120, innerR: 120 };
+    const holeScreenB = { x: 0, y: 0, radius: 120, innerR: 120 };
 
     let lastDragMoveAt = 0;
 
@@ -724,7 +725,7 @@ export function useBlackHole(
 
     const projectHoleScreen = (
       hole: Hole,
-      out: { x: number; y: number; radius: number }
+      out: { x: number; y: number; radius: number; innerR: number }
     ) => {
       const mountRect = mount.getBoundingClientRect();
       if (mountRect.width < 1 || mountRect.height < 1) return;
@@ -743,6 +744,20 @@ export function useBlackHole(
       const rimClientX = (rimPos.x * 0.5 + 0.5) * mountRect.width + mountRect.left;
       const voidRadiusPx = Math.max(36, Math.abs(rimClientX - cx));
       out.radius = voidRadiusPx * 1.2 + (mobile ? 18 : 24);
+
+      hole.disk.updateWorldMatrix(true, false);
+      let innerR = 0;
+      for (let i = 0; i < 20; i += 1) {
+        const a = (i / 20) * Math.PI * 2;
+        rimPos.set(Math.cos(a) * diskInner, Math.sin(a) * diskInner, 0);
+        hole.disk.localToWorld(rimPos);
+        rimPos.project(camera);
+        if (!Number.isFinite(rimPos.x) || !Number.isFinite(rimPos.y)) continue;
+        const rx = (rimPos.x * 0.5 + 0.5) * mountRect.width + mountRect.left;
+        const ry = (-rimPos.y * 0.5 + 0.5) * mountRect.height + mountRect.top;
+        innerR = Math.max(innerR, Math.hypot(rx - cx, ry - cy));
+      }
+      out.innerR = Math.max(out.radius, innerR);
     };
 
     const updateHoleScreen = () => {
@@ -1583,13 +1598,21 @@ export function useBlackHole(
               ? {
                   x: (holeScreen.x - rect.left) / rect.width,
                   y: (holeScreen.y - rect.top) / rect.height,
-                  r: Math.max(36, (holeScreen.radius - (mobile ? 18 : 24)) / 1.2)
+                  // Post-lens overlay: keep out of the lensed dark disk, not the raw 3D void.
+                  r: Math.max(
+                    56,
+                    holeScreen.innerR * 1.04,
+                    heroLensRadius * streakViewH * 0.84
+                  )
                 }
               : undefined;
           if (around) retargetShootingStars(streaks, around, streakViewW, streakViewH);
-          if (introDone && (nextStreakAt === 0 || now >= nextStreakAt)) {
+          if (nextStreakAt === 0) {
+            nextStreakAt = now + nextShootingStarDelay(0);
+          } else if (now >= nextStreakAt) {
             streaks.push(spawnShootingStar(streakViewW, streakViewH, now, around));
-            nextStreakAt = now + nextShootingStarDelay();
+            streakCount += 1;
+            nextStreakAt = now + nextShootingStarDelay(streakCount);
           }
           drawShootingStars(streakInk, streakViewW, streakViewH, streaks, now);
           streakTexture.needsUpdate = true;

@@ -2,7 +2,7 @@ export const BLACK_HOLE_RADIUS = 1.3;
 export const DISK_INNER = BLACK_HOLE_RADIUS + 0.2;
 export const DISK_OUTER = 8.0;
 /** Homepage rest scale so the disk does not swallow the copy lane. */
-export const HERO_HOLE_SCALE = 0.56;
+export const HERO_HOLE_SCALE = 0.7;
 /** Thin edge-on rest pose — a sliver of disk, not a face-on ring. */
 export const DISK_TILT = (-82 * Math.PI) / 180;
 /** Mild bank so the thin disk still reads diagonal. */

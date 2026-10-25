@@ -11,107 +11,88 @@ export type ShootingStar = {
   hy?: number;
   hr?: number;
   hrMul?: number;
-  a0?: number;
-  a1?: number;
+  spin?: number;
+  /** First t where the raw path enters the hole; unset if it misses. */
+  absorbT?: number;
+  clock: number;
+  lastNow: number;
 };
-
-const ARC_IN = 0.22;
-const ARC_OUT = 0.78;
 
 function rand(min: number, max: number) {
   return min + Math.random() * (max - min);
 }
 
-function smooth01(u: number) {
-  return u * u * (3 - 2 * u);
-}
-
-function hermite(
-  p0: { x: number; y: number },
-  m0: { x: number; y: number },
-  p1: { x: number; y: number },
-  m1: { x: number; y: number },
-  u: number
-) {
-  const u2 = u * u;
-  const u3 = u2 * u;
-  const h00 = 2 * u3 - 3 * u2 + 1;
-  const h10 = u3 - 2 * u2 + u;
-  const h01 = -2 * u3 + 3 * u2;
-  const h11 = u3 - u2;
+function quadratic(star: ShootingStar, t: number) {
+  const u = 1 - t;
   return {
-    x: h00 * p0.x + h10 * m0.x + h01 * p1.x + h11 * m1.x,
-    y: h00 * p0.y + h10 * m0.y + h01 * p1.y + h11 * m1.y
+    x: u * u * star.x + 2 * u * t * star.cx + t * t * star.ex,
+    y: u * u * star.y + 2 * u * t * star.cy + t * t * star.ey
   };
 }
 
-function wrapsHorizon(star: ShootingStar): star is ShootingStar & {
-  hx: number;
-  hy: number;
-  hr: number;
-  a0: number;
-  a1: number;
-} {
-  return star.hr != null && star.hx != null && star.hy != null && star.a0 != null && star.a1 != null;
+function distToHole(star: ShootingStar, t: number) {
+  if (star.hx == null || star.hy == null) return Infinity;
+  const p = quadratic(star, t);
+  return Math.hypot(p.x - star.hx, p.y - star.hy);
 }
 
-function onHorizon(hole: { hx: number; hy: number; hr: number }, a: number) {
-  return {
-    x: hole.hx + hole.hr * Math.cos(a),
-    y: hole.hy + hole.hr * Math.sin(a)
-  };
+function findAbsorbT(star: ShootingStar) {
+  if (star.hx == null || star.hy == null || star.hr == null) return undefined;
+  const rim = star.hr;
+  if (distToHole(star, 0) < rim) return 0;
+  const steps = 80;
+  for (let i = 1; i <= steps; i += 1) {
+    const t = i / steps;
+    if (distToHole(star, t) >= rim) continue;
+    let lo = (i - 1) / steps;
+    let hi = t;
+    for (let k = 0; k < 8; k += 1) {
+      const mid = (lo + hi) * 0.5;
+      if (distToHole(star, mid) < rim) hi = mid;
+      else lo = mid;
+    }
+    return hi;
+  }
+  return undefined;
 }
 
-function circleTangent(
-  star: ShootingStar & { hr: number; a0: number; a1: number },
-  a: number
-) {
-  const da = star.a1 - star.a0;
-  return {
-    x: -star.hr * Math.sin(a) * da,
-    y: star.hr * Math.cos(a) * da
-  };
+function pathSpeed(star: ShootingStar, t: number) {
+  if (star.hx == null || star.hy == null || star.hr == null) return 1;
+  const dist = distToHole(star, t);
+  const reach = star.hr * 2.6;
+  if (dist >= reach) return 1;
+  const near = Math.max(0, 1 - dist / reach);
+  const k = near * near * (3 - 2 * near);
+  return 1 - 0.42 * k;
 }
 
-function scaledTangent(vec: { x: number; y: number }, length: number) {
-  const mag = Math.hypot(vec.x, vec.y) || 1;
-  return { x: (vec.x / mag) * length, y: (vec.y / mag) * length };
+function advanceClock(star: ShootingStar, now: number) {
+  const dt = Math.min(48, Math.max(0, now - star.lastNow));
+  star.lastNow = now;
+  star.clock += (dt / star.duration) * pathSpeed(star, star.clock);
 }
 
 function alongPath(star: ShootingStar, t: number) {
-  if (!wrapsHorizon(star)) {
-    const u = 1 - t;
-    return {
-      x: u * u * star.x + 2 * u * t * star.cx + t * t * star.ex,
-      y: u * u * star.y + 2 * u * t * star.cy + t * t * star.ey
-    };
-  }
+  const p = quadratic(star, t);
+  if (star.hx == null || star.hy == null || star.hr == null) return p;
+  if (star.absorbT != null) return p;
 
-  const entry = onHorizon(star, star.a0);
-  const exit = onHorizon(star, star.a1);
-  const join = star.hr * 1.1;
-  if (t <= ARC_IN) {
-    const u = smooth01(t / ARC_IN);
-    return hermite(
-      { x: star.x, y: star.y },
-      scaledTangent({ x: entry.x - star.x, y: entry.y - star.y }, join * 1.4),
-      entry,
-      scaledTangent(circleTangent(star, star.a0), join),
-      u
-    );
-  }
-  if (t <= ARC_OUT) {
-    const u = (t - ARC_IN) / (ARC_OUT - ARC_IN);
-    return onHorizon(star, star.a0 + (star.a1 - star.a0) * u);
-  }
-  const u = smooth01((t - ARC_OUT) / (1 - ARC_OUT));
-  return hermite(
-    exit,
-    scaledTangent(circleTangent(star, star.a1), join),
-    { x: star.ex, y: star.ey },
-    scaledTangent({ x: star.ex - exit.x, y: star.ey - exit.y }, join * 1.4),
-    u
-  );
+  const rim = star.hr;
+  const dx = p.x - star.hx;
+  const dy = p.y - star.hy;
+  const dist = Math.hypot(dx, dy);
+  const reach = rim * 2.2;
+  if (dist >= reach || dist <= rim) return p;
+
+  const nx = dx / dist;
+  const ny = dy / dist;
+  const near = Math.max(0, 1 - dist / reach);
+  const k = near * near * (3 - 2 * near);
+  const lift = rim * 0.42 * k;
+  const spin = star.spin ?? 1;
+  p.x += -ny * spin * lift;
+  p.y += nx * spin * lift;
+  return p;
 }
 
 function pathTangent(star: ShootingStar, t: number) {
@@ -121,9 +102,35 @@ function pathTangent(star: ShootingStar, t: number) {
   return { dx: b.x - a.x, dy: b.y - a.y };
 }
 
+function strokePath(
+  ink: CanvasRenderingContext2D,
+  star: ShootingStar,
+  t0: number,
+  t1: number
+) {
+  const end = star.absorbT != null ? Math.min(t1, star.absorbT) : t1;
+  const startT = Math.min(t0, end);
+  if (end - startT < 1e-4) return false;
+  const start = alongPath(star, startT);
+  ink.moveTo(start.x, start.y);
+  const steps = 56;
+  for (let i = 1; i <= steps; i += 1) {
+    const p = alongPath(star, startT + (end - startT) * (i / steps));
+    ink.lineTo(p.x, p.y);
+  }
+  return true;
+}
+
+function bindHole(star: ShootingStar, around: { x: number; y: number; r: number }, viewW: number, viewH: number) {
+  star.hx = around.x * viewW;
+  star.hy = around.y * viewH;
+  star.hr = Math.max(56, around.r * (star.hrMul ?? 1.04));
+  star.absorbT = findAbsorbT(star);
+}
+
 /**
- * Always left → right across the screen. Pass `around` so the mid-path
- * rides the event horizon instead of falling into the well and stalling.
+ * Left → right across the screen on a new random curve each time.
+ * If the curve heads into the hole, the remaining path fades at the rim.
  */
 export function spawnShootingStar(
   viewW: number,
@@ -131,43 +138,48 @@ export function spawnShootingStar(
   now: number,
   around?: { x: number; y: number; r: number }
 ): ShootingStar {
+  const x = viewW * rand(-0.1, 0.04);
+  const y = viewH * rand(0.06, 0.92);
+  const ex = viewW * rand(0.9, 1.14);
+  const ey = viewH * rand(0.04, 0.94);
+  const star: ShootingStar = {
+    start: now,
+    duration: rand(2400, 3800),
+    x,
+    y,
+    cx: viewW * rand(0.22, 0.78),
+    cy: viewH * rand(0.04, 0.94),
+    ex,
+    ey,
+    clock: 0,
+    lastNow: now
+  };
+
   if (around && around.r > 8) {
     const hx = around.x * viewW;
     const hy = around.y * viewH;
-    const hrMul = rand(0.78, 0.92);
-    const hr = Math.max(36, around.r * hrMul);
-    const above = Math.random() < 0.5;
-    const a0 = above ? Math.PI + rand(0.08, 0.28) : Math.PI - rand(0.08, 0.28);
-    const a1 = above ? Math.PI * 2 - rand(0.08, 0.28) : rand(0.08, 0.28);
-    const entry = onHorizon({ hx, hy, hr }, a0);
-    const exit = onHorizon({ hx, hy, hr }, a1);
-    return {
-      start: now,
-      duration: rand(3200, 4400),
-      x: viewW * rand(-0.08, 0.02),
-      y: entry.y + viewH * rand(-0.08, 0.08),
-      cx: hx,
-      cy: hy,
-      ex: viewW * rand(0.94, 1.12),
-      ey: exit.y + viewH * rand(-0.08, 0.08),
-      hx,
-      hy,
-      hr,
-      hrMul,
-      a0,
-      a1
-    };
+    const hrMul = rand(1.0, 1.08);
+    const hr = Math.max(56, around.r * hrMul);
+    star.hx = hx;
+    star.hy = hy;
+    star.hr = hr;
+    star.hrMul = hrMul;
+    star.spin = Math.random() < 0.5 ? 1 : -1;
+    const roll = Math.random();
+    if (roll < 0.42) {
+      star.cx = hx + rand(-hr * 0.4, hr * 0.4);
+      star.cy = hy + rand(-hr * 0.4, hr * 0.4);
+    } else if (roll < 0.82) {
+      const side = star.spin;
+      const ang = (side > 0 ? Math.PI / 2 : -Math.PI / 2) + rand(-0.85, 0.85);
+      const dist = hr * rand(1.15, 2.5);
+      star.cx = hx + Math.cos(ang) * dist + rand(-viewW * 0.08, viewW * 0.08);
+      star.cy = hy + Math.sin(ang) * dist + rand(-viewH * 0.1, viewH * 0.1);
+    }
+    star.absorbT = findAbsorbT(star);
   }
-  return {
-    start: now,
-    duration: rand(1900, 2600),
-    x: viewW * rand(-0.08, 0.02),
-    y: viewH * rand(0.14, 0.78),
-    cx: viewW * rand(0.32, 0.62),
-    cy: viewH * rand(0.12, 0.55),
-    ex: viewW * rand(0.94, 1.12),
-    ey: viewH * rand(0.08, 0.82)
-  };
+
+  return star;
 }
 
 export function drawShootingStars(
@@ -180,60 +192,66 @@ export function drawShootingStars(
   ink.clearRect(0, 0, viewW, viewH);
   for (let i = streaks.length - 1; i >= 0; i -= 1) {
     const star = streaks[i];
-    const t = Math.min((now - star.start) / star.duration, 1);
-    if (t >= 1) {
+    advanceClock(star, now);
+    const t = star.clock;
+    const absorbT = star.absorbT;
+    if (t >= 1 || (absorbT != null && t >= absorbT)) {
       streaks.splice(i, 1);
       continue;
     }
-    const head = alongPath(star, t);
-    const tailSpan = wrapsHorizon(star) ? 0.48 : 0.64;
-    const tailT = Math.max(0, t - tailSpan);
+    const headT = absorbT != null ? Math.min(t, absorbT) : t;
+    const tailT = Math.max(0, headT - 0.42);
+    const head = alongPath(star, headT);
     const tail = alongPath(star, tailT);
-    const fade = Math.sin(Math.PI * t) ** 0.65;
+    const eaten =
+      absorbT == null
+        ? 0
+        : Math.max(0, Math.min(1, 1 - (absorbT - t) / 0.16));
+    const fade = Math.sin(Math.PI * t) ** 0.65 * (1 - eaten) ** 1.7;
+    if (fade < 0.02) {
+      if (eaten > 0.92) streaks.splice(i, 1);
+      continue;
+    }
     const glow = ink.createLinearGradient(tail.x, tail.y, head.x, head.y);
     glow.addColorStop(0, 'rgba(255, 214, 176, 0)');
     glow.addColorStop(0.55, `rgba(255, 232, 210, ${0.4 * fade})`);
     glow.addColorStop(1, `rgba(255, 248, 238, ${0.95 * fade})`);
     ink.beginPath();
-    ink.moveTo(tail.x, tail.y);
-    const steps = wrapsHorizon(star) ? 72 : 48;
-    for (let step = 1; step <= steps; step += 1) {
-      const p = alongPath(star, tailT + (t - tailT) * (step / steps));
-      ink.lineTo(p.x, p.y);
-    }
+    if (!strokePath(ink, star, tailT, headT)) continue;
     ink.strokeStyle = glow;
-    ink.lineWidth = wrapsHorizon(star) ? 2.15 : 1.7;
+    ink.lineWidth = 1.8;
     ink.lineCap = 'round';
     ink.lineJoin = 'round';
     ink.stroke();
-    const tangent = pathTangent(star, t);
+    const tangent = pathTangent(star, headT);
     ink.beginPath();
     ink.ellipse(head.x, head.y, 3.4, 1.15, Math.atan2(tangent.dy, tangent.dx), 0, Math.PI * 2);
     ink.fillStyle = `rgba(255, 248, 238, ${fade})`;
-    ink.shadowBlur = 14;
+    ink.shadowBlur = 14 * fade;
     ink.shadowColor = '#fff5ee';
     ink.fill();
     ink.shadowBlur = 0;
   }
 }
 
-export function nextShootingStarDelay(immediate = false) {
-  return immediate ? 1800 : rand(4500, 8000);
+/** Delay before the next star. `count` is how many have already appeared. */
+export function nextShootingStarDelay(count = 0) {
+  if (count <= 0) return rand(350, 900);
+  if (count === 1) return rand(4000, 5000);
+  const ramp = 5000 + (count - 1) * 2200;
+  const delay = Math.min(18000, ramp);
+  return rand(delay * 0.9, delay * 1.12);
 }
 
-/** Keep an in-flight wrap locked to the live horizon so it cannot stall in a stale well. */
+/** Keep the warp field locked to the live hole. */
 export function retargetShootingStars(
   streaks: ShootingStar[],
   around: { x: number; y: number; r: number },
   viewW: number,
   viewH: number
 ) {
-  const hx = around.x * viewW;
-  const hy = around.y * viewH;
   for (const star of streaks) {
     if (star.hr == null) continue;
-    star.hx = hx;
-    star.hy = hy;
-    star.hr = Math.max(42, around.r * (star.hrMul ?? 1.12));
+    bindHole(star, around, viewW, viewH);
   }
 }

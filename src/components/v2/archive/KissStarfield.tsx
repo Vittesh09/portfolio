@@ -246,6 +246,7 @@ export function KissStarfield({ streaksOnly = false }: { streaksOnly?: boolean }
     let frame = 0;
     let streakFrame = 0;
     let spawnTimer = 0;
+    let streakCount = 0;
     let visible = true;
     let streaksLive = false;
     const started = performance.now();
@@ -300,16 +301,17 @@ export function KissStarfield({ streaksOnly = false }: { streaksOnly?: boolean }
       if (!streakFrame) streakFrame = window.requestAnimationFrame(tickStreaks);
     };
 
-    const planStreak = (immediate = false) => {
+    const planStreak = () => {
       window.clearTimeout(spawnTimer);
       if (!streaksLive) return;
       spawnTimer = window.setTimeout(
         () => {
           spawnStreak();
+          streakCount += 1;
           wakeStreaks();
           planStreak();
         },
-        nextShootingStarDelay(immediate)
+        nextShootingStarDelay(streakCount)
       );
     };
 
@@ -339,13 +341,14 @@ export function KissStarfield({ streaksOnly = false }: { streaksOnly?: boolean }
       frame = window.requestAnimationFrame(tick);
     };
 
-    const syncStreaks = (immediate = false) => {
+    const syncStreaks = () => {
       const live = !reduceMotion && !document.hidden;
       if (live === streaksLive) return;
       streaksLive = live;
-      if (live) planStreak(immediate);
+      if (live) planStreak();
       else {
         window.clearTimeout(spawnTimer);
+        streakCount = 0;
         streaks.length = 0;
         ink?.clearRect(0, 0, viewW, viewH);
       }
@@ -358,11 +361,11 @@ export function KissStarfield({ streaksOnly = false }: { streaksOnly?: boolean }
         return;
       }
       if (skyReady) frame = window.requestAnimationFrame(tick);
-      syncStreaks(true);
+      syncStreaks();
     };
 
     resize();
-    syncStreaks(true);
+    syncStreaks();
 
     const resizeObserver = new ResizeObserver(() => {
       resize();
