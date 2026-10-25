@@ -55,10 +55,10 @@ function wrapsHorizon(star: ShootingStar): star is ShootingStar & {
   return star.hr != null && star.hx != null && star.hy != null && star.a0 != null && star.a1 != null;
 }
 
-function onHorizon(star: ShootingStar & { hx: number; hy: number; hr: number }, a: number) {
+function onHorizon(hole: { hx: number; hy: number; hr: number }, a: number) {
   return {
-    x: star.hx + star.hr * Math.cos(a),
-    y: star.hy + star.hr * Math.sin(a)
+    x: hole.hx + hole.hr * Math.cos(a),
+    y: hole.hy + hole.hr * Math.sin(a)
   };
 }
 

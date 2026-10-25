@@ -39,7 +39,15 @@ facts.caseTitles.forEach((title) => {
   must(llms.includes(title), `llms.txt missing case ${title}`);
   must(json.caseStudies.includes(title), `machine.json missing case ${title}`);
 });
-must(home.includes(facts.heroHeadline) || home.includes('heroHeadline'), 'Home hero not driven by shared headline');
+const heroCopy = read('src/components/v2/archive/HeroIntroCopy.tsx');
+must(
+  home.includes('heroHeadline') ||
+    home.includes(facts.heroHeadline) ||
+    (home.includes('HeroIdentityMark') &&
+      heroCopy.includes('siteConfig.name') &&
+      heroCopy.includes('siteConfig.role')),
+  'Home hero not driven by shared headline'
+);
 must(agentDocs.includes('Person') && agentDocs.includes('CreativeWork'), 'JSON-LD types missing');
 must(!robots.includes('Disallow: /machine'), 'robots.txt blocks machine page');
 must(robots.includes('Sitemap:'), 'robots.txt missing sitemap');
