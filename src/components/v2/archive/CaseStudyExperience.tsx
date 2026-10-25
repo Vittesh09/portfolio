@@ -841,7 +841,7 @@ export function CaseStudyExperience({
         <div className={`${band} py-8 md:py-12`}>
           <div className="flex flex-wrap items-center justify-between gap-x-8 gap-y-4">
             <HashNavLink href={v2Path('/#work')} className="archive-label text-text-muted hover:text-accent-pop">
-              ← Back to work
+              go back
             </HashNavLink>
           </div>
           {project.story ? (

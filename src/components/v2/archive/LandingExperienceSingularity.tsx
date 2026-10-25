@@ -17,12 +17,12 @@ import { ContactPanel } from '@/src/components/v2/ui/ContactPanel';
 import { CopyEmail } from '@/src/components/v2/ui/CopyEmail';
 import { ResumeDownload } from '@/src/components/v2/ui/ResumeDownload';
 import { useMobileLanding } from '@/src/components/v2/ui/useMobileLanding';
-import { HeroCloser, HeroHeadlineLines, HeroKicker } from '@/src/components/v2/archive/HeroIntroCopy';
+import { HeroCloser, HeroIdentityMark, HeroKicker } from '@/src/components/v2/archive/HeroIntroCopy';
 import { HeroPortrait } from '@/src/components/v2/archive/HeroPortrait';
 import { HeroMeta } from '@/src/components/v2/archive/HeroMeta';
 import { ProjectCard } from '@/src/components/v2/archive/ProjectCard';
 import { type ProjectCardData } from '@/src/config/v2/caseStudies';
-import { heroCloser, heroHeadline, v2Path } from '@/src/config/v2/profile';
+import { heroCloser, v2Path } from '@/src/config/v2/profile';
 import { siteConfig } from '@/src/config/v2/site';
 
 const LandingExperienceKiss = dynamic(
@@ -86,13 +86,15 @@ export function LandingExperienceSingularity({ cards }: { cards: ProjectCardData
         <div className="relative z-10 mx-auto flex max-w-[1600px] flex-col px-4 md:min-h-[100svh] md:px-8 md:py-8">
           <div className="archive-hero relative flex min-h-[100svh] flex-1 flex-col justify-center py-10 md:min-h-0 md:py-6">
             <div className="bh-copy-col relative z-10">
-              <h1 className="bh-sr-only">{heroHeadline}</h1>
+              <h1 className="bh-sr-only">
+                {siteConfig.name}, {siteConfig.role}
+              </h1>
               <p className="bh-sr-only">{heroCloser}</p>
               <div className="bh-copy bh-copy-source" data-bh-warp aria-hidden="true">
                 <HeroPortrait className="mb-5" />
                 <HeroKicker />
-                <p className="archive-display archive-display--hero text-[clamp(2.15rem,2.2vw+1.1rem,3.25rem)]">
-                  <HeroHeadlineLines />
+                <p className="v2-kiss-wordmark archive-display">
+                  <HeroIdentityMark />
                 </p>
                 <HeroCloser />
               </div>
@@ -121,12 +123,16 @@ export function LandingExperienceSingularity({ cards }: { cards: ProjectCardData
         aria-labelledby="work-heading"
       >
         <div className="mx-auto max-w-[1600px] px-4 pb-16 pt-16 md:min-h-[100svh] md:px-8 md:pb-24">
-          <div className="grid gap-x-8 gap-y-20 md:grid-cols-12 md:items-center">
+          <div className="grid gap-x-8 gap-y-20 md:grid-cols-12 md:items-end">
             <div className="md:col-span-8">
-              <h2 id="work-heading" className="archive-display text-[clamp(2.75rem,9vw,6.5rem)]">
+              <p className="archive-section-kicker archive-label text-text-muted">Case studies</p>
+              <h2 id="work-heading" className="archive-display archive-section-title">
                 Selected work.
               </h2>
             </div>
+            <p className="text-sm leading-relaxed text-text-secondary md:col-span-4 md:text-right">
+              VR · Ops · Enterprise
+            </p>
             {cards.map((project, index) => (
               <motion.article
                 key={project.slug}

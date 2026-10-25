@@ -14,11 +14,18 @@ import {
   BLACK_HOLE_RADIUS,
   COLORS,
   DISK_BANK,
-  DISK_INNER,
   DISK_OUTER,
   DISK_TILT,
-  DISK_YAW
+  DISK_YAW,
+  HERO_HOLE_SCALE
 } from '../lib/constants';
+import {
+  drawShootingStars,
+  nextShootingStarDelay,
+  retargetShootingStars,
+  spawnShootingStar,
+  type ShootingStar
+} from '../lib/shootingStars';
 import {
   DEFAULT_SINGULARITY_PARAMS,
   type BlackHoleOptions
@@ -127,6 +134,8 @@ export function useBlackHole(
     // Screen placement on the RIGHT is done via setViewOffset — lookAt always
     // centers the target, so world X alone cannot push it right.
     const HOME = new THREE.Vector3(0, isLab ? 0 : mobile ? 0.55 : 0.48, 0);
+    const holeRest = isLab || spinScene ? 1 : HERO_HOLE_SCALE;
+    const heroLensRadius = 0.46 * holeRest;
 
     const scene = new THREE.Scene();
     scene.fog = new THREE.FogExp2(
@@ -150,7 +159,7 @@ export function useBlackHole(
       } else if (isLab) {
         camera.position.set(HOME.x - 0.4, HOME.y + 2.8, HOME.z + 12.5);
       } else {
-        camera.position.set(HOME.x - 2.6, HOME.y + 3.85, HOME.z + 10.6);
+        camera.position.set(HOME.x - 2.6, HOME.y + 3.85, HOME.z + 12.4);
       }
       camera.lookAt(HOME);
     };
@@ -383,6 +392,42 @@ export function useBlackHole(
     textMesh.visible = false;
     overlayScene.add(textMesh);
 
+    const streakCanvas = document.createElement('canvas');
+    const streakInk = streakCanvas.getContext('2d', { alpha: true });
+    const streakTexture = new THREE.CanvasTexture(streakCanvas);
+    streakTexture.colorSpace = THREE.SRGBColorSpace;
+    streakTexture.minFilter = THREE.LinearFilter;
+    streakTexture.magFilter = THREE.LinearFilter;
+    streakTexture.generateMipmaps = false;
+    const streakMaterial = new THREE.MeshBasicMaterial({
+      map: streakTexture,
+      transparent: true,
+      depthWrite: false,
+      depthTest: false,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      toneMapped: false
+    });
+    const streakMesh = new THREE.Mesh(new THREE.PlaneGeometry(2, 2), streakMaterial);
+    streakMesh.frustumCulled = false;
+    streakMesh.visible = !isLab && !spinScene && !reduceMotion;
+    const streakScene = new THREE.Scene();
+    streakScene.add(streakMesh);
+    const streaks: ShootingStar[] = [];
+    let streakViewW = 0;
+    let streakViewH = 0;
+    let nextStreakAt = 0;
+
+    const sizeStreakCanvas = (width: number, height: number) => {
+      streakViewW = width;
+      streakViewH = height;
+      const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+      streakCanvas.width = Math.round(width * dpr);
+      streakCanvas.height = Math.round(height * dpr);
+      streakInk?.setTransform(dpr, 0, 0, dpr, 0, 0);
+      streakTexture.needsUpdate = true;
+    };
+
     const composer = new EffectComposer(renderer);
     composer.addPass(new RenderPass(scene, camera));
     composer.addPass(new UnrealBloomPass(
@@ -404,7 +449,7 @@ export function useBlackHole(
         holePos1: { value: new THREE.Vector2(0.72, 0.48) },
         holeCount: { value: 1 },
         lensingStrength: { value: isLab ? labDefaults.lensingStrength : mobile ? 0.09 : 0.12 },
-        lensingRadius: { value: isLab ? labDefaults.lensingRadius : 0.46 },
+        lensingRadius: { value: isLab ? labDefaults.lensingRadius : heroLensRadius },
         aspectRatio: { value: 1 },
         chromaticAberration: { value: isLab ? labDefaults.chromaticAberration : 0.0006 }
       },
@@ -418,6 +463,8 @@ export function useBlackHole(
       fragmentShader: lensingFragmentShader
     });
     composer.addPass(lensingPass);
+    const streakPass = new OverlayScenePass(streakScene, overlayCamera);
+    composer.addPass(streakPass);
 
     const bloomPass = composer.passes[1] as InstanceType<typeof UnrealBloomPass>;
     const BLOOM_TARGET = isLab ? labDefaults.bloomStrength : 0.8;
@@ -453,11 +500,12 @@ export function useBlackHole(
     starScene.add(stars);
 
     // --- Singularity (primary + optional lab twin) ---
-    const horizonMul = spinScene ? 1.4 : 1;
-    const diskInner = spinScene ? BLACK_HOLE_RADIUS * horizonMul + 0.22 : DISK_INNER;
+    const horizonMul = spinScene ? 1.4 : isLab ? 1 : 1.18;
+    const diskInner = BLACK_HOLE_RADIUS * horizonMul + 0.16;
+    const diskOuter = isLab || spinScene ? DISK_OUTER : 10.8;
     const horizonGeo = new THREE.SphereGeometry(BLACK_HOLE_RADIUS * 1.05 * horizonMul, 128, 64);
     const voidGeo = new THREE.SphereGeometry(BLACK_HOLE_RADIUS * horizonMul, 128, 64);
-    const diskGeo = new THREE.RingGeometry(diskInner, DISK_OUTER, 256, 128);
+    const diskGeo = new THREE.RingGeometry(diskInner, diskOuter, 256, 128);
 
     const horizonMat = new THREE.ShaderMaterial({
       uniforms: {
@@ -500,7 +548,8 @@ export function useBlackHole(
         uNoiseScale: { value: isLab ? labDefaults.noiseScale : 2.5 },
         uFlowSpeed: { value: isLab ? labDefaults.flowSpeed : 0.1 },
         uDensity: { value: isLab || reduceMotion ? DISK_DENSITY_TARGET : 0 },
-        uDiskInner: { value: diskInner }
+        uDiskInner: { value: diskInner },
+        uDiskOuter: { value: diskOuter }
       },
       vertexShader: diskVertexShader,
       fragmentShader: diskFragmentShader,
@@ -523,7 +572,7 @@ export function useBlackHole(
     const buildHole = (home: THREE.Vector3): Hole => {
       const core = new THREE.Group();
       core.position.copy(home);
-      core.scale.setScalar(isLab || reduceMotion ? 1 : 0.001);
+      core.scale.setScalar(isLab || reduceMotion ? holeRest : 0.001);
 
       const horizon = new THREE.Mesh(horizonGeo, horizonMat);
       core.add(horizon);
@@ -689,7 +738,7 @@ export function useBlackHole(
       out.x = cx;
       out.y = cy;
 
-      const grabReach = spinScene ? BLACK_HOLE_RADIUS * 1.4 * 1.35 : BLACK_HOLE_RADIUS;
+      const grabReach = BLACK_HOLE_RADIUS * horizonMul * (spinScene ? 1.35 : 1);
       rimPos.set(grabReach, 0, 0).add(hole.core.position).project(camera);
       const rimClientX = (rimPos.x * 0.5 + 0.5) * mountRect.width + mountRect.left;
       const voidRadiusPx = Math.max(36, Math.abs(rimClientX - cx));
@@ -945,6 +994,7 @@ export function useBlackHole(
       bloomPass.resolution.set(width * dpr, height * dpr);
       lensingPass.uniforms.aspectRatio.value = width / height;
       starMaterial.uniforms.uPixelRatio.value = dpr;
+      sizeStreakCanvas(width, height);
       updateHoleScreen();
       placeTextPlane();
       // Debounce recapture on resize / browser zoom so text doesn't thrash mid-drag
@@ -1023,7 +1073,7 @@ export function useBlackHole(
 
     const completeIntroVisuals = () => {
       introDone = true;
-      holeA.core.scale.set(1, 1, 1);
+      holeA.core.scale.setScalar(holeRest);
       holeA.core.rotation.z = 0;
       bloomPass.strength = BLOOM_TARGET;
       diskMaterial.uniforms.uDensity.value = DISK_DENSITY_TARGET;
@@ -1043,8 +1093,8 @@ export function useBlackHole(
       hero?.classList.add('is-copy-in');
       if (!isLab) finishIntro();
       else {
-        holeA.core.scale.set(1, 1, 1);
-        if (holeB) holeB.core.scale.set(1, 1, 1);
+        holeA.core.scale.setScalar(holeRest);
+        if (holeB) holeB.core.scale.setScalar(holeRest);
         bloomPass.strength = BLOOM_TARGET;
         diskMaterial.uniforms.uDensity.value = DISK_DENSITY_TARGET;
         grabProxy.style.pointerEvents = '';
@@ -1402,7 +1452,7 @@ export function useBlackHole(
               if (!introTravelAt) introTravelAt = performance.now();
               const t = Math.min(1, (performance.now() - introTravelAt) / INTRO_TRAVEL_MS);
               const e = easeOutCubic(t);
-              holeA.core.scale.setScalar(Math.max(0.001, e));
+              holeA.core.scale.setScalar(Math.max(0.001, e * holeRest));
               bloomPass.strength = BLOOM_TARGET * e;
               diskMaterial.uniforms.uDensity.value = DISK_DENSITY_TARGET * e;
               lensingPass.uniforms.lensingStrength.value = lensIdle * e;
@@ -1522,7 +1572,27 @@ export function useBlackHole(
             cur + (lensTarget - cur) * Math.min(1, delta * 8);
         }
         if (!live) {
-          lensingPass.uniforms.lensingRadius.value = 0.46;
+          lensingPass.uniforms.lensingRadius.value = heroLensRadius;
+        }
+
+        if (streakMesh.visible && streakInk && streakViewW > 2) {
+          const now = performance.now();
+          const rect = mount.getBoundingClientRect();
+          const around =
+            rect.width > 1
+              ? {
+                  x: (holeScreen.x - rect.left) / rect.width,
+                  y: (holeScreen.y - rect.top) / rect.height,
+                  r: Math.max(36, (holeScreen.radius - (mobile ? 18 : 24)) / 1.2)
+                }
+              : undefined;
+          if (around) retargetShootingStars(streaks, around, streakViewW, streakViewH);
+          if (introDone && (nextStreakAt === 0 || now >= nextStreakAt)) {
+            streaks.push(spawnShootingStar(streakViewW, streakViewH, now, around));
+            nextStreakAt = now + nextShootingStarDelay();
+          }
+          drawShootingStars(streakInk, streakViewW, streakViewH, streaks, now);
+          streakTexture.needsUpdate = true;
         }
 
         composer.render();
@@ -1676,7 +1746,11 @@ export function useBlackHole(
       textMesh.geometry.dispose();
       textMaterial.dispose();
       textTexture.dispose();
+      streakMesh.geometry.dispose();
+      streakMaterial.dispose();
+      streakTexture.dispose();
       overlayPass.dispose();
+      streakPass.dispose();
       composer.dispose();
       renderer.dispose();
       renderer.forceContextLoss();

@@ -1,6 +1,12 @@
 'use client';
 
 import { useEffect, useRef } from 'react';
+import {
+  drawShootingStars,
+  nextShootingStarDelay,
+  spawnShootingStar,
+  type ShootingStar
+} from '@/src/components/v2/singularity/lib/shootingStars';
 
 /** Thinner than the desktop sky so the mobile hero stays quiet. */
 const STAR_COUNT = 3500;
@@ -141,74 +147,115 @@ function buildStars() {
 }
 
 /**
- * Mobile night sky. Same palette and slow turn as the desktop singularity,
- * drawn with one WebGL point pass so the page does not load three.js.
+ * Mobile night sky, or a streaks-only overlay for the desktop singularity.
  */
-export function KissStarfield() {
+export function KissStarfield({ streaksOnly = false }: { streaksOnly?: boolean } = {}) {
   const mountRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const mount = mountRef.current;
     if (!mount) return;
 
-    const canvas = document.createElement('canvas');
-    canvas.style.pointerEvents = 'none';
-    canvas.style.touchAction = 'none';
-    canvas.style.width = '100%';
-    canvas.style.height = '100%';
-    canvas.setAttribute('aria-hidden', 'true');
-    mount.appendChild(canvas);
+    const fillLayer = (layer: HTMLCanvasElement) => {
+      layer.style.pointerEvents = 'none';
+      layer.style.touchAction = 'none';
+      layer.style.position = 'absolute';
+      layer.style.inset = '0';
+      layer.style.width = '100%';
+      layer.style.height = '100%';
+      layer.setAttribute('aria-hidden', 'true');
+    };
 
-    const gl = canvas.getContext('webgl', {
-      alpha: false,
-      antialias: false,
-      powerPreference: 'low-power'
-    });
-    if (!gl) return;
+    const streak = document.createElement('canvas');
+    fillLayer(streak);
+    mount.appendChild(streak);
 
-    const vs = compile(gl, gl.VERTEX_SHADER, VERT);
-    const fs = compile(gl, gl.FRAGMENT_SHADER, FRAG);
-    if (!vs || !fs) return;
-    const program = gl.createProgram();
-    if (!program) return;
-    gl.attachShader(program, vs);
-    gl.attachShader(program, fs);
-    gl.linkProgram(program);
-    if (!gl.getProgramParameter(program, gl.LINK_STATUS)) return;
+    let canvas: HTMLCanvasElement | null = null;
+    let gl: WebGLRenderingContext | null = null;
+    let vs: WebGLShader | null = null;
+    let fs: WebGLShader | null = null;
+    let program: WebGLProgram | null = null;
 
-    const stars = buildStars();
-    const buffer = gl.createBuffer();
-    gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
-    const stride = 7 * 4;
-    const packed = new Float32Array(STAR_COUNT * 7);
-    for (let i = 0; i < STAR_COUNT; i += 1) {
-      const base = i * 7;
-      packed[base] = stars.positions[i * 3];
-      packed[base + 1] = stars.positions[i * 3 + 1];
-      packed[base + 2] = stars.positions[i * 3 + 2];
-      packed[base + 3] = stars.colors[i * 3];
-      packed[base + 4] = stars.colors[i * 3 + 1];
-      packed[base + 5] = stars.colors[i * 3 + 2];
-      packed[base + 6] = stars.sizes[i];
+    if (!streaksOnly) {
+      canvas = document.createElement('canvas');
+      fillLayer(canvas);
+      mount.appendChild(canvas);
+      gl = canvas.getContext('webgl', {
+        alpha: false,
+        antialias: false,
+        powerPreference: 'low-power'
+      });
+      if (gl) {
+        vs = compile(gl, gl.VERTEX_SHADER, VERT);
+        fs = compile(gl, gl.FRAGMENT_SHADER, FRAG);
+        if (vs && fs) {
+          program = gl.createProgram();
+          if (program) {
+            gl.attachShader(program, vs);
+            gl.attachShader(program, fs);
+            gl.linkProgram(program);
+            if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+              gl.deleteProgram(program);
+              program = null;
+            }
+          }
+        }
+      }
     }
-    gl.bufferData(gl.ARRAY_BUFFER, packed, gl.STATIC_DRAW);
 
-    const aPosition = gl.getAttribLocation(program, 'aPosition');
-    const aColor = gl.getAttribLocation(program, 'aColor');
-    const aSize = gl.getAttribLocation(program, 'aSize');
-    const uView = gl.getUniformLocation(program, 'uView');
-    const uProjection = gl.getUniformLocation(program, 'uProjection');
-    const uPixelRatio = gl.getUniformLocation(program, 'uPixelRatio');
-    const uTime = gl.getUniformLocation(program, 'uTime');
-    const uYaw = gl.getUniformLocation(program, 'uYaw');
+    const skyReady = Boolean(gl && program && canvas);
+    const stride = 7 * 4;
     const view = lookAt([-2.6, 4.4, 10.6], [0, 0.55, 0], [0, 1, 0]);
+    let buffer: WebGLBuffer | null = null;
+    let aPosition = -1;
+    let aColor = -1;
+    let aSize = -1;
+    let uView: WebGLUniformLocation | null = null;
+    let uProjection: WebGLUniformLocation | null = null;
+    let uPixelRatio: WebGLUniformLocation | null = null;
+    let uTime: WebGLUniformLocation | null = null;
+    let uYaw: WebGLUniformLocation | null = null;
+
+    if (skyReady && gl && program && canvas) {
+      const stars = buildStars();
+      buffer = gl.createBuffer();
+      gl.bindBuffer(gl.ARRAY_BUFFER, buffer);
+      const packed = new Float32Array(STAR_COUNT * 7);
+      for (let i = 0; i < STAR_COUNT; i += 1) {
+        const base = i * 7;
+        packed[base] = stars.positions[i * 3];
+        packed[base + 1] = stars.positions[i * 3 + 1];
+        packed[base + 2] = stars.positions[i * 3 + 2];
+        packed[base + 3] = stars.colors[i * 3];
+        packed[base + 4] = stars.colors[i * 3 + 1];
+        packed[base + 5] = stars.colors[i * 3 + 2];
+        packed[base + 6] = stars.sizes[i];
+      }
+      gl.bufferData(gl.ARRAY_BUFFER, packed, gl.STATIC_DRAW);
+      aPosition = gl.getAttribLocation(program, 'aPosition');
+      aColor = gl.getAttribLocation(program, 'aColor');
+      aSize = gl.getAttribLocation(program, 'aSize');
+      uView = gl.getUniformLocation(program, 'uView');
+      uProjection = gl.getUniformLocation(program, 'uProjection');
+      uPixelRatio = gl.getUniformLocation(program, 'uPixelRatio');
+      uTime = gl.getUniformLocation(program, 'uTime');
+      uYaw = gl.getUniformLocation(program, 'uYaw');
+    }
 
     const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     let frame = 0;
+    let streakFrame = 0;
+    let spawnTimer = 0;
     let visible = true;
+    let streaksLive = false;
     const started = performance.now();
+    const streaks: ShootingStar[] = [];
+    const ink = streak.getContext('2d', { alpha: true });
+    let viewW = 0;
+    let viewH = 0;
 
     const draw = (elapsed: number) => {
+      if (!skyReady || !gl || !program || !canvas || !buffer) return;
       gl.viewport(0, 0, canvas.width, canvas.height);
       gl.clearColor(0, 0, 2 / 255, 1);
       gl.clear(gl.COLOR_BUFFER_BIT);
@@ -230,13 +277,56 @@ export function KissStarfield() {
       gl.drawArrays(gl.POINTS, 0, STAR_COUNT);
     };
 
+    const spawnStreak = () => {
+      if (viewW < 2 || viewH < 2) resize();
+      if (viewW < 2 || viewH < 2) return;
+      streaks.push(spawnShootingStar(viewW, viewH, performance.now()));
+    };
+
+    const drawStreaks = (now: number) => {
+      if (!ink) return;
+      drawShootingStars(ink, viewW, viewH, streaks, now);
+    };
+
+    const tickStreaks = (now: number) => {
+      streakFrame = 0;
+      drawStreaks(now);
+      if (streaksLive && streaks.length) {
+        streakFrame = window.requestAnimationFrame(tickStreaks);
+      }
+    };
+
+    const wakeStreaks = () => {
+      if (!streakFrame) streakFrame = window.requestAnimationFrame(tickStreaks);
+    };
+
+    const planStreak = (immediate = false) => {
+      window.clearTimeout(spawnTimer);
+      if (!streaksLive) return;
+      spawnTimer = window.setTimeout(
+        () => {
+          spawnStreak();
+          wakeStreaks();
+          planStreak();
+        },
+        nextShootingStarDelay(immediate)
+      );
+    };
+
     const resize = () => {
       const width = mount.clientWidth;
       const height = mount.clientHeight;
       if (width < 2 || height < 2) return;
+      viewW = width;
+      viewH = height;
       const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
-      canvas.width = Math.round(width * dpr);
-      canvas.height = Math.round(height * dpr);
+      if (canvas) {
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
+      }
+      streak.width = Math.round(width * dpr);
+      streak.height = Math.round(height * dpr);
+      ink?.setTransform(dpr, 0, 0, dpr, 0, 0);
     };
 
     const tick = () => {
@@ -249,14 +339,30 @@ export function KissStarfield() {
       frame = window.requestAnimationFrame(tick);
     };
 
+    const syncStreaks = (immediate = false) => {
+      const live = !reduceMotion && !document.hidden;
+      if (live === streaksLive) return;
+      streaksLive = live;
+      if (live) planStreak(immediate);
+      else {
+        window.clearTimeout(spawnTimer);
+        streaks.length = 0;
+        ink?.clearRect(0, 0, viewW, viewH);
+      }
+    };
+
     const start = () => {
       resize();
       if (reduceMotion) {
         draw(0);
         return;
       }
-      frame = window.requestAnimationFrame(tick);
+      if (skyReady) frame = window.requestAnimationFrame(tick);
+      syncStreaks(true);
     };
+
+    resize();
+    syncStreaks(true);
 
     const resizeObserver = new ResizeObserver(() => {
       resize();
@@ -268,29 +374,44 @@ export function KissStarfield() {
     });
     visibility.observe(mount);
 
+    const onVisibility = () => {
+      syncStreaks();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+
     const idle = window.requestIdleCallback?.(() => start(), { timeout: 1200 });
     const fallback = idle === undefined ? window.setTimeout(start, 300) : 0;
 
     return () => {
       if (idle !== undefined) window.cancelIdleCallback(idle);
       window.clearTimeout(fallback);
+      window.clearTimeout(spawnTimer);
       window.cancelAnimationFrame(frame);
+      window.cancelAnimationFrame(streakFrame);
+      document.removeEventListener('visibilitychange', onVisibility);
       resizeObserver.disconnect();
       visibility.disconnect();
-      gl.deleteBuffer(buffer);
-      gl.deleteProgram(program);
-      gl.deleteShader(vs);
-      gl.deleteShader(fs);
-      const lose = gl.getExtension('WEBGL_lose_context');
-      lose?.loseContext();
-      canvas.remove();
+      if (gl) {
+        if (buffer) gl.deleteBuffer(buffer);
+        if (program) gl.deleteProgram(program);
+        if (vs) gl.deleteShader(vs);
+        if (fs) gl.deleteShader(fs);
+        const lose = gl.getExtension('WEBGL_lose_context');
+        lose?.loseContext();
+      }
+      canvas?.remove();
+      streak.remove();
     };
-  }, []);
+  }, [streaksOnly]);
 
   return (
     <div
       ref={mountRef}
-      className="v2-kiss-stars pointer-events-none absolute inset-0 overflow-hidden md:hidden"
+      className={
+        streaksOnly
+          ? 'v2-kiss-stars v2-kiss-streaks pointer-events-none absolute inset-0 overflow-hidden'
+          : 'v2-kiss-stars pointer-events-none absolute inset-0 overflow-hidden md:hidden'
+      }
       aria-hidden="true"
     />
   );

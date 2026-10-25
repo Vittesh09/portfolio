@@ -7,7 +7,7 @@ import { ContactPanel } from '@/src/components/v2/ui/ContactPanel';
 import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
 import { ResumeDownload } from '@/src/components/v2/ui/ResumeDownload';
 import { RevealOnScroll } from '@/src/components/v2/motion/landingMotion';
-import { HeroCloser, HeroHeadlineLines, HeroKicker } from '@/src/components/v2/archive/HeroIntroCopy';
+import { HeroCloser, HeroIdentityMark, HeroKicker, TypewriterCloser } from '@/src/components/v2/archive/HeroIntroCopy';
 import { KissStarfield } from '@/src/components/v2/archive/KissStarfield';
 import { HeroPortrait } from '@/src/components/v2/archive/HeroPortrait';
 import { HeroMeta } from '@/src/components/v2/archive/HeroMeta';
@@ -29,13 +29,13 @@ export function LandingExperienceKiss({ cards }: { cards: ProjectCardData[] }) {
         <div className="relative z-[1] mx-auto flex min-h-[100svh] max-w-[1600px] flex-col px-4 pb-6 pt-[4.75rem] md:block md:min-h-0 md:px-8 md:py-24">
           {/* Mobile */}
           <div className="v2-kiss-copy flex flex-1 flex-col md:hidden">
-            <h1 className="v2-kiss-wordmark m-0 archive-display text-[clamp(3rem,14vw,4.25rem)] leading-[0.86]">
-              {siteConfig.name}
+            <h1 className="v2-kiss-wordmark m-0 archive-display">
+              <HeroIdentityMark />
             </h1>
             <div className="min-h-2 flex-1" />
             <div className="grid grid-cols-12 items-center gap-x-4">
               <div className="col-span-7">
-                <HeroCloser />
+                <TypewriterCloser />
               </div>
               <div className="col-span-5">
                 <div className="relative aspect-[4/5] w-full overflow-hidden bg-bg-muted">
@@ -72,8 +72,8 @@ export function LandingExperienceKiss({ cards }: { cards: ProjectCardData[] }) {
           <div className="hidden md:block">
             <HeroPortrait className="mb-2" />
             <HeroKicker />
-            <h1 className="archive-display archive-display--hero text-[clamp(2.5rem,5.2vw,4.5rem)]">
-              <HeroHeadlineLines />
+            <h1 className="v2-kiss-wordmark m-0 archive-display">
+              <HeroIdentityMark />
             </h1>
             <HeroCloser />
             <div className="mt-8 flex flex-col gap-3 border-t border-border-subtle pt-6 sm:flex-row sm:flex-wrap">
@@ -92,11 +92,12 @@ export function LandingExperienceKiss({ cards }: { cards: ProjectCardData[] }) {
         <div className="mx-auto max-w-[1600px] px-4 pb-10 pt-16 md:min-h-[100svh] md:px-8 md:pb-14">
           <RevealOnScroll className="grid items-end gap-4 md:grid-cols-12">
             <div className="md:col-span-8">
-              <h2 id="kiss-work-heading" className="archive-display text-[clamp(2rem,5vw,3.5rem)]">
+              <p className="archive-section-kicker archive-label text-text-muted">Case studies</p>
+              <h2 id="kiss-work-heading" className="archive-display archive-section-title">
                 Selected work.
               </h2>
             </div>
-            <p className="text-sm leading-relaxed text-text-secondary md:col-span-4">
+            <p className="text-sm leading-relaxed text-text-secondary md:col-span-4 md:text-right">
               VR · Ops · Enterprise
             </p>
           </RevealOnScroll>

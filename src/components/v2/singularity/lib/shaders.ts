@@ -1,5 +1,3 @@
-import { DISK_INNER, DISK_OUTER } from './constants';
-
 export const starVertexShader = /* glsl */ `
   uniform float uPixelRatio;
   uniform float uTime;
@@ -99,6 +97,7 @@ export const diskFragmentShader = /* glsl */ `
   uniform float uFlowSpeed;
   uniform float uDensity;
   uniform float uDiskInner;
+  uniform float uDiskOuter;
 
   varying vec2 vUv;
   varying float vRadius;
@@ -153,7 +152,7 @@ export const diskFragmentShader = /* glsl */ `
   }
 
   void main() {
-    float normalizedRadius = smoothstep(uDiskInner, ${DISK_OUTER.toFixed(2)}, vRadius);
+    float normalizedRadius = smoothstep(uDiskInner, uDiskOuter, vRadius);
     vec2 dir = normalize(vPolar + 1e-6);
     float vAngle = atan(dir.y, dir.x);
 

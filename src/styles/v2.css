@@ -191,6 +191,42 @@ body:has(.v2-root.dark) {
   text-wrap: balance;
 }
 
+.v2-root .v2-kiss-wordmark {
+  display: flex;
+  flex-direction: column;
+  font-weight: 600;
+  letter-spacing: -0.05em;
+  line-height: 1.08;
+  margin: 0;
+  text-align: left;
+  text-transform: uppercase;
+  text-wrap: unset;
+  width: 100%;
+}
+
+.v2-root .v2-kiss-heading-row {
+  display: block;
+}
+
+.v2-root .v2-kiss-heading-row--name {
+  margin-bottom: 0.16em;
+  white-space: nowrap;
+}
+
+.v2-root .v2-kiss-heading-row--role {
+  color: color-mix(in srgb, currentColor 70%, transparent);
+  font-size: 0.52em;
+  font-weight: 500;
+  letter-spacing: 0.012em;
+  line-height: 1.14;
+}
+
+@media (min-width: 768px) {
+  .v2-root .v2-kiss-wordmark {
+    font-size: clamp(2.65rem, 4vw, 4rem);
+  }
+}
+
 .v2-root .archive-display--hero {
   letter-spacing: -0.05em;
   line-height: 1.12;
@@ -202,12 +238,12 @@ body:has(.v2-root.dark) {
 
 .v2-root .v2-hero-kicker,
 .v2-root .v2-hero-closer {
-  font-size: clamp(0.95rem, 1.35vw, 1.125rem);
+  font-size: clamp(0.95rem, 1.2vw, 1.0625rem);
   font-weight: 400;
   letter-spacing: 0;
-  line-height: 1.45;
+  line-height: 1.5;
   margin: 0;
-  max-width: 36rem;
+  max-width: 28rem;
 }
 
 .v2-root .v2-hero-kicker,
@@ -218,7 +254,15 @@ body:has(.v2-root.dark) {
 .v2-root .v2-hero-closer,
 .v2-root .bh-copy .v2-hero-closer {
   font-style: italic;
-  margin-top: 0.35rem;
+  margin-top: 1.35rem;
+}
+
+.v2-root .archive-section-kicker {
+  margin-bottom: 0.85rem;
+}
+
+.v2-root .archive-section-title {
+  font-size: clamp(2rem, 3.6vw, 3.15rem);
 }
 
 .v2-root .v2-hero-line {
@@ -1554,7 +1598,9 @@ body:has(.v2-root.dark) {
   .v2-root .v2-title-reveal,
   .v2-root .v2-title-reveal.is-in,
   .v2-root .v2-kiss-copy .v2-kiss-wordmark,
+  .v2-root .v2-kiss-copy .v2-kiss-heading-row,
   .v2-root .v2-kiss-copy .v2-kiss-headline,
+  .v2-root .v2-kiss-caret,
   .v2-root .v2-kiss-copy .v2-hero-closer {
     opacity: 1;
     filter: none;
@@ -1901,6 +1947,8 @@ html.v2-smooth-scroll body {
   .v2-root .v2-kiss-stars canvas {
     display: block;
     height: 100%;
+    inset: 0;
+    position: absolute;
     width: 100%;
   }
 
@@ -1910,21 +1958,29 @@ html.v2-smooth-scroll body {
   }
 
   .v2-root .v2-kiss-copy .v2-kiss-wordmark {
-    margin-top: 1.75rem;
+    font-size: clamp(2.6rem, 12vw, 4.35rem);
+    margin-top: 1.25rem;
   }
 
-  .v2-root .v2-kiss-copy .v2-kiss-wordmark,
-  .v2-root .v2-kiss-copy .v2-kiss-headline,
-  .v2-root .v2-kiss-copy .v2-hero-closer {
+  .v2-root .v2-kiss-copy .v2-kiss-heading-row {
     animation: v2-mobile-text-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
   }
 
-  .v2-root .v2-kiss-copy .v2-kiss-headline {
-    animation-delay: 0.16s;
+  .v2-root .v2-kiss-heading-row:nth-child(2) {
+    animation-delay: 0.04s;
   }
 
-  .v2-root .v2-kiss-copy .v2-hero-closer {
-    animation-delay: 0.32s;
+  .v2-root .v2-kiss-heading-row:nth-child(3) {
+    animation-delay: 0.12s;
+  }
+
+  .v2-root .v2-kiss-heading-row:nth-child(4) {
+    animation-delay: 0.2s;
+  }
+
+  .v2-root .v2-kiss-copy .v2-kiss-headline {
+    animation: v2-mobile-text-in 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
+    animation-delay: 0.16s;
   }
 
   @keyframes v2-kiss-arrow {
@@ -1943,11 +1999,54 @@ html.v2-smooth-scroll body {
   }
 
   .v2-root .v2-kiss-copy .v2-hero-closer {
-    font-size: 0.8125rem;
-    line-height: 1.4;
-    margin-top: 0;
+    font-size: 1.0625rem;
+    line-height: 1.45;
+    margin-top: 1.15rem;
     max-width: none;
     text-wrap: pretty;
+  }
+
+  .v2-root .v2-kiss-typed {
+    position: relative;
+  }
+
+  .v2-root .v2-kiss-typed-sizer {
+    visibility: hidden;
+  }
+
+  .v2-root .v2-kiss-typed-live {
+    position: absolute;
+    inset: 0;
+  }
+
+  .v2-root .v2-kiss-caret {
+    display: inline-block;
+    width: 1.5px;
+    height: 0.9em;
+    margin-left: 0.12em;
+    background: currentColor;
+    transform: translateY(0.12em);
+    animation: v2-kiss-caret-blink 0.72s steps(1) infinite;
+  }
+
+  @keyframes v2-kiss-caret-blink {
+    50% {
+      opacity: 0;
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .v2-root .v2-kiss-typed-sizer {
+      visibility: visible;
+    }
+
+    .v2-root .v2-kiss-typed-live {
+      display: none;
+    }
+
+    .v2-root .v2-kiss-caret {
+      animation: none;
+    }
   }
 
   .v2-root .v2-kiss-email .uppercase {
