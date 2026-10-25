@@ -88,7 +88,7 @@ function alongPath(star: ShootingStar, t: number) {
   const ny = dy / dist;
   const near = Math.max(0, 1 - dist / reach);
   const k = near * near * (3 - 2 * near);
-  const lift = rim * 0.42 * k;
+  const lift = rim * 0.18 * k;
   const spin = star.spin ?? 1;
   p.x += -ny * spin * lift;
   p.y += nx * spin * lift;
@@ -138,17 +138,18 @@ export function spawnShootingStar(
   now: number,
   around?: { x: number; y: number; r: number }
 ): ShootingStar {
-  const x = viewW * rand(-0.1, 0.04);
-  const y = viewH * rand(0.06, 0.92);
-  const ex = viewW * rand(0.9, 1.14);
-  const ey = viewH * rand(0.04, 0.94);
+  const x = viewW * rand(-0.12, 0.02);
+  const y = viewH * rand(0.1, 0.78);
+  const ex = viewW * rand(0.96, 1.14);
+  const ey = Math.min(viewH * 0.9, Math.max(viewH * 0.06, y + viewH * rand(-0.07, 0.07)));
+  const bow = viewH * rand(-0.04, 0.04);
   const star: ShootingStar = {
     start: now,
     duration: rand(2400, 3800),
     x,
     y,
-    cx: viewW * rand(0.22, 0.78),
-    cy: viewH * rand(0.04, 0.94),
+    cx: (x + ex) * 0.5,
+    cy: (y + ey) * 0.5 + bow,
     ex,
     ey,
     clock: 0,
@@ -165,16 +166,8 @@ export function spawnShootingStar(
     star.hr = hr;
     star.hrMul = hrMul;
     star.spin = Math.random() < 0.5 ? 1 : -1;
-    const roll = Math.random();
-    if (roll < 0.42) {
-      star.cx = hx + rand(-hr * 0.4, hr * 0.4);
-      star.cy = hy + rand(-hr * 0.4, hr * 0.4);
-    } else if (roll < 0.82) {
-      const side = star.spin;
-      const ang = (side > 0 ? Math.PI / 2 : -Math.PI / 2) + rand(-0.85, 0.85);
-      const dist = hr * rand(1.15, 2.5);
-      star.cx = hx + Math.cos(ang) * dist + rand(-viewW * 0.08, viewW * 0.08);
-      star.cy = hy + Math.sin(ang) * dist + rand(-viewH * 0.1, viewH * 0.1);
+    if (Math.random() < 0.45) {
+      star.cy += (hy - star.cy) * 0.2;
     }
     star.absorbT = findAbsorbT(star);
   }

@@ -10,7 +10,7 @@ export const metadata = {
 
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning data-build="20261025d">
+    <html lang="en" suppressHydrationWarning data-build="20261025e">
       <body>{children}</body>
     </html>
   );

@@ -2003,29 +2003,29 @@ html.v2-smooth-scroll body {
     line-height: 1.45;
     margin-top: 1.15rem;
     max-width: none;
-    text-wrap: pretty;
+    text-wrap: wrap;
   }
 
   .v2-root .v2-kiss-typed {
+    --v2-kiss-ink: currentColor;
+  }
+
+  .v2-root .v2-kiss-typed-ch.is-wait {
+    color: transparent;
+  }
+
+  .v2-root .v2-kiss-typed-ch.is-caret {
     position: relative;
   }
 
-  .v2-root .v2-kiss-typed-sizer {
-    visibility: hidden;
-  }
-
-  .v2-root .v2-kiss-typed-live {
+  .v2-root .v2-kiss-typed-ch.is-caret::before {
+    content: '';
     position: absolute;
-    inset: 0;
-  }
-
-  .v2-root .v2-kiss-caret {
-    display: inline-block;
+    left: 0;
+    top: 0.12em;
     width: 1.5px;
-    height: 0.9em;
-    margin-left: 0.12em;
-    background: currentColor;
-    transform: translateY(0.12em);
+    height: 0.85em;
+    background: var(--v2-kiss-ink);
     animation: v2-kiss-caret-blink 0.72s steps(1) infinite;
   }
 
@@ -2036,15 +2036,12 @@ html.v2-smooth-scroll body {
   }
 
   @media (prefers-reduced-motion: reduce) {
-    .v2-root .v2-kiss-typed-sizer {
-      visibility: visible;
+    .v2-root .v2-kiss-typed-ch.is-wait {
+      color: inherit;
     }
 
-    .v2-root .v2-kiss-typed-live {
-      display: none;
-    }
-
-    .v2-root .v2-kiss-caret {
+    .v2-root .v2-kiss-typed-ch.is-caret::before {
+      content: none;
       animation: none;
     }
   }

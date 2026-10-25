@@ -168,7 +168,7 @@ export function KissStarfield({ streaksOnly = false }: { streaksOnly?: boolean }
 
     const streak = document.createElement('canvas');
     fillLayer(streak);
-    mount.appendChild(streak);
+    streak.style.zIndex = '1';
 
     let canvas: HTMLCanvasElement | null = null;
     let gl: WebGLRenderingContext | null = null;
@@ -202,6 +202,8 @@ export function KissStarfield({ streaksOnly = false }: { streaksOnly?: boolean }
         }
       }
     }
+
+    mount.appendChild(streak);
 
     const skyReady = Boolean(gl && program && canvas);
     const stride = 7 * 4;
@@ -280,8 +282,9 @@ export function KissStarfield({ streaksOnly = false }: { streaksOnly?: boolean }
 
     const spawnStreak = () => {
       if (viewW < 2 || viewH < 2) resize();
-      if (viewW < 2 || viewH < 2) return;
+      if (viewW < 2 || viewH < 2) return false;
       streaks.push(spawnShootingStar(viewW, viewH, performance.now()));
+      return true;
     };
 
     const drawStreaks = (now: number) => {
@@ -290,10 +293,11 @@ export function KissStarfield({ streaksOnly = false }: { streaksOnly?: boolean }
     };
 
     const tickStreaks = (now: number) => {
-      streakFrame = 0;
       drawStreaks(now);
-      if (streaksLive && streaks.length) {
+      if (streaksLive) {
         streakFrame = window.requestAnimationFrame(tickStreaks);
+      } else {
+        streakFrame = 0;
       }
     };
 
@@ -301,17 +305,20 @@ export function KissStarfield({ streaksOnly = false }: { streaksOnly?: boolean }
       if (!streakFrame) streakFrame = window.requestAnimationFrame(tickStreaks);
     };
 
-    const planStreak = () => {
+    const planStreak = (retry = false) => {
       window.clearTimeout(spawnTimer);
       if (!streaksLive) return;
       spawnTimer = window.setTimeout(
         () => {
-          spawnStreak();
-          streakCount += 1;
-          wakeStreaks();
-          planStreak();
+          if (spawnStreak()) {
+            streakCount += 1;
+            wakeStreaks();
+            planStreak();
+          } else {
+            planStreak(true);
+          }
         },
-        nextShootingStarDelay(streakCount)
+        retry ? 280 : nextShootingStarDelay(streakCount)
       );
     };
 
@@ -345,9 +352,13 @@ export function KissStarfield({ streaksOnly = false }: { streaksOnly?: boolean }
       const live = !reduceMotion && !document.hidden;
       if (live === streaksLive) return;
       streaksLive = live;
-      if (live) planStreak();
-      else {
+      if (live) {
+        planStreak();
+        wakeStreaks();
+      } else {
         window.clearTimeout(spawnTimer);
+        window.cancelAnimationFrame(streakFrame);
+        streakFrame = 0;
         streakCount = 0;
         streaks.length = 0;
         ink?.clearRect(0, 0, viewW, viewH);

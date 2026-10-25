@@ -90,18 +90,25 @@ export function TypewriterCloser({ className }: { className?: string }) {
     return () => window.cancelAnimationFrame(frame);
   }, [reduced]);
 
-  const done = reduced || count >= heroCloser.length;
-  const shown = reduced ? heroCloser : heroCloser.slice(0, count);
+  const chars = Array.from(heroCloser);
+  const done = reduced || count >= chars.length;
 
   return (
     <p className={`v2-hero-closer v2-kiss-typed text-text-secondary ${className ?? ''}`}>
       <span className="v2-visually-hidden">{heroCloser}</span>
-      <span className="v2-kiss-typed-sizer" aria-hidden="true">
-        {heroCloser}
-      </span>
-      <span className="v2-kiss-typed-live" aria-hidden="true">
-        {shown}
-        {done ? null : <span className="v2-kiss-caret" />}
+      <span className="v2-kiss-typed-track" aria-hidden="true">
+        {chars.map((ch, i) => {
+          const typed = reduced || i < count;
+          const caret = !done && i === count;
+          return (
+            <span
+              key={i}
+              className={`v2-kiss-typed-ch${typed ? ' is-in' : ' is-wait'}${caret ? ' is-caret' : ''}`}
+            >
+              {ch}
+            </span>
+          );
+        })}
       </span>
     </p>
   );
