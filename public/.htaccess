@@ -28,7 +28,9 @@ RedirectMatch 404 \.(bak|swp)$
 
 <IfModule mod_headers.c>
   <FilesMatch "\.(html)$">
-    Header set Cache-Control "no-cache"
+    Header set Cache-Control "no-cache, must-revalidate"
+    Header set Pragma "no-cache"
+    Header set Expires "0"
   </FilesMatch>
   Header set X-Content-Type-Options "nosniff"
   Header set X-Frame-Options "DENY"

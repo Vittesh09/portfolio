@@ -23,7 +23,7 @@ export function v2Path(path = '/') {
   return hash ? `${url}#${hash}` : url;
 }
 
-export const lastUpdated = '2026-10-13';
+export const lastUpdated = '2026-10-25';
 
 /** Canonical domain vocabulary and order. Cloud stays until a published case study confirms or drops it. */
 export const domains = ['Automotive', 'Logistics', 'Cloud', 'VR'] as const;
