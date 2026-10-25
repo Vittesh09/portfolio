@@ -3,7 +3,7 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "npm run sync:v2-agent && npm run check:v2 && next build && npm run check:placeholders",
+    "build": "npm run sync:v2-agent && npm run check:v2 && next build && node scripts/copy-og-image.mjs && npm run check:placeholders",
     "check:placeholders": "node scripts/check-placeholders.mjs",
     "start": "next start",
     "lint": "eslint .",

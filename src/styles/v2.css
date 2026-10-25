@@ -1689,7 +1689,8 @@ html.v2-smooth-scroll body {
 
 .v2-root .v2-archive-header-bar {
   min-width: 0;
-  padding-top: calc(0.75rem + env(safe-area-inset-top, 0px));
+  flex-wrap: nowrap;
+  padding-top: 0.75rem;
 }
 
 .v2-root .v2-archive-header[data-hidden='true'] {
@@ -2201,9 +2202,28 @@ html.v2-smooth-scroll body {
 }
 
 .v2-root .v2-archive-header {
-  padding-top: env(safe-area-inset-top);
+  padding-top: env(safe-area-inset-top, 0px);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
+}
+
+.v2-root .v2-archive-header[data-embedded='true'] {
+  top: var(--v2-vv-top, 0px);
+  transform: none !important;
+  pointer-events: auto;
+}
+
+.v2-root .v2-archive-header[data-open='true'] {
+  max-height: 100vh;
+  max-height: 100dvh;
+  max-height: 100svh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.v2-root .v2-archive-header[data-embedded='true'][data-open='true'] {
+  max-height: var(--v2-vv-height, 100svh);
 }
 
 .v2-root .v2-footer {

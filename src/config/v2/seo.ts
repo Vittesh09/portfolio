@@ -19,6 +19,14 @@ export function v2Canonical(path = '/') {
 
 export const v2DefaultTitle = `${profile.name} | ${profile.title}`;
 
+const shareImage = {
+  url: `${SITE_URL}/opengraph-image.png`,
+  width: 1200,
+  height: 630,
+  alt: `${profile.name}, ${profile.title}`,
+  type: 'image/png'
+};
+
 export function v2PageMetadata({
   title,
   description = metaDescription,
@@ -45,12 +53,14 @@ export function v2PageMetadata({
       url: canonical,
       siteName: profile.name,
       type: 'website' as const,
-      locale: 'en_US'
+      locale: 'en_US',
+      images: [shareImage]
     },
     twitter: {
       card: 'summary_large_image' as const,
       title,
-      description
+      description,
+      images: [shareImage.url]
     }
   };
 }

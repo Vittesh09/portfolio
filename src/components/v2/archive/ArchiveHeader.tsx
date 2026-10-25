@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { useEffect, useRef, useState, type MouseEvent } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from 'react';
 import { siteConfig } from '@/src/config/v2/site';
 import { v2Path } from '@/src/config/v2/profile';
 import { triggerHaptic } from '@/src/components/v2/ui/haptics';
@@ -11,6 +11,7 @@ import { ThemeToggle } from '@/src/components/v2/ui/ThemeToggle';
 import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
 import { RollText } from '@/src/components/v2/ui/RollText';
 import { useMobileLanding } from '@/src/components/v2/ui/useMobileLanding';
+import { isEmbeddedBrowser } from '@/src/components/v2/ui/embeddedBrowser';
 
 const navOptionClass =
   'archive-label v2-nav-option group transition-colors hover:text-accent-pop focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-accent-pop';
@@ -40,6 +41,8 @@ export function ArchiveHeader() {
   const isHome = pathname === v2Path('/') || pathname === '/' || pathname === '/v2' || pathname === '/v2/';
   const isMobile = useMobileLanding();
   const lastY = useRef(0);
+  const embeddedRef = useRef(false);
+  const [embedded, setEmbedded] = useState(false);
   const openRef = useRef(open);
   const visibleRef = useRef(visible);
   const scrolledRef = useRef(scrolled);
@@ -63,6 +66,16 @@ export function ArchiveHeader() {
     }
   };
 
+  useLayoutEffect(() => {
+    const next = isEmbeddedBrowser();
+    embeddedRef.current = next;
+    setEmbedded(next);
+    document.documentElement.dataset.embedded = next ? 'true' : 'false';
+    return () => {
+      delete document.documentElement.dataset.embedded;
+    };
+  }, []);
+
   useEffect(() => {
     setOpen(false);
     setVisible(true);
@@ -71,14 +84,15 @@ export function ArchiveHeader() {
 
   useEffect(() => {
     if (!open) return;
+    const lockScroll = !embeddedRef.current;
     const previous = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    if (lockScroll) document.body.style.overflow = 'hidden';
     const onKey = (event: KeyboardEvent) => {
       if (event.key === 'Escape') setOpen(false);
     };
     window.addEventListener('keydown', onKey);
     return () => {
-      document.body.style.overflow = previous;
+      if (lockScroll) document.body.style.overflow = previous;
       window.removeEventListener('keydown', onKey);
     };
   }, [open]);
@@ -89,7 +103,7 @@ export function ArchiveHeader() {
     if (!header || !spacer) return;
 
     const sync = () => {
-      if (isHome) {
+      if (isHome || embeddedRef.current) {
         spacer.style.height = '0px';
         return;
       }
@@ -101,13 +115,28 @@ export function ArchiveHeader() {
     const ro = new ResizeObserver(sync);
     ro.observe(header);
     return () => ro.disconnect();
-  }, [open, pathname, isHome]);
+  }, [open, pathname, isHome, embedded]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
 
+    embeddedRef.current = isEmbeddedBrowser();
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const readyAt = performance.now() + 900;
     lastY.current = readScrollY();
+
+    const syncViewportOffset = () => {
+      const vv = window.visualViewport;
+      const top = Math.max(0, vv?.offsetTop ?? 0);
+      document.documentElement.style.setProperty('--v2-vv-top', `${top}px`);
+      document.documentElement.style.setProperty(
+        '--v2-vv-height',
+        `${Math.round(vv?.height ?? window.innerHeight)}px`
+      );
+    };
+    syncViewportOffset();
+    window.visualViewport?.addEventListener('resize', syncViewportOffset);
+    window.visualViewport?.addEventListener('scroll', syncViewportOffset);
 
     const showHeader = (next: boolean) => {
       if (visibleRef.current === next) return;
@@ -127,7 +156,7 @@ export function ArchiveHeader() {
 
       showScrolled(!isHome || y > SOLID_PX);
 
-      if (reduce) {
+      if (reduce || embeddedRef.current || performance.now() < readyAt) {
         showHeader(true);
         return;
       }
@@ -187,6 +216,8 @@ export function ArchiveHeader() {
       window.removeEventListener('wheel', onWheel);
       window.removeEventListener('touchmove', onTouchMove);
       window.removeEventListener('pointermove', onPointerMove);
+      window.visualViewport?.removeEventListener('resize', syncViewportOffset);
+      window.visualViewport?.removeEventListener('scroll', syncViewportOffset);
     };
   }, [pathname, isHome]);
 
@@ -195,8 +226,10 @@ export function ArchiveHeader() {
       <div ref={spacerRef} aria-hidden className="v2-archive-header-spacer shrink-0" />
       <header
         ref={headerRef}
-        data-hidden={visible || open ? 'false' : 'true'}
+        data-hidden={embedded || visible || open ? 'false' : 'true'}
         data-solid={solid ? 'true' : 'false'}
+        data-open={open ? 'true' : 'false'}
+        data-embedded={embedded ? 'true' : 'false'}
         className="v2-archive-header fixed inset-x-0 top-0 z-[110] border-b"
         {...headerInertProps}
       >
@@ -257,7 +290,9 @@ export function ArchiveHeader() {
               >
                 {open ? 'Close' : 'Menu'}
               </button>
-              <IosHapticSwitch onActivate={() => setOpen((value) => !value)} />
+              {embedded ? null : (
+                <IosHapticSwitch onActivate={() => setOpen((value) => !value)} />
+              )}
             </span>
           </div>
         </div>
