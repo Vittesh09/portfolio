@@ -3,7 +3,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { BlackHoleLazy } from '@/src/components/v2/black-hole/BlackHoleLazy';
 import { useKissMode } from '@/src/components/v2/layout/KissModeProvider';
 import { CopyEmail } from '@/src/components/v2/ui/CopyEmail';

@@ -108,7 +108,7 @@ function isInteractiveTarget(target: EventTarget | null) {
 }
 
 /**
- * Bloom on the singularity only → overlay warped copy (no glow) → lensing warps both.
+ * Bloom singularity → stars → sharp copy (tinted by void glow) → lensing.
  * Drag moves the hole; it eases back home when released.
  * `lab` mode skips hero copy/intro and reads live params from `paramsRef`.
  */
@@ -117,9 +117,11 @@ export function useBlackHole(
   heroRef: RefObject<HTMLElement | null>,
   options: BlackHoleOptions = {}
 ) {
-  const { mode = 'hero', paramsRef } = options;
+  const { mode = 'hero', paramsRef, transparent = false, playIntro = false } = options;
   const isLab = mode === 'lab' || mode === 'center';
   const spinScene = mode === 'center';
+  /** Desk (and opt-in lab): oversized → rest settle, same family as the homepage intro. */
+  const deskIntro = playIntro && !spinScene;
 
   useEffect(() => {
     const mount = mountRef.current;
@@ -134,15 +136,21 @@ export function useBlackHole(
     // Screen placement on the RIGHT is done via setViewOffset — lookAt always
     // centers the target, so world X alone cannot push it right.
     const HOME = new THREE.Vector3(0, isLab ? 0 : mobile ? 0.55 : 0.48, 0);
-    const holeRest = isLab || spinScene ? 1 : HERO_HOLE_SCALE;
+    // Transparent desk: keep the void small so paper shows around it (no black plate).
+    const holeRest = transparent ? 0.58 : isLab || spinScene ? 1 : HERO_HOLE_SCALE;
     const heroLensRadius = 0.46 * holeRest;
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(
-      isLab ? labDefaults.background : 0x020104,
-      isLab ? labDefaults.fogDensity : 0.025
-    );
-    scene.background = new THREE.Color(isLab ? labDefaults.background : 0x000002);
+    if (transparent) {
+      scene.background = null;
+      scene.fog = null;
+    } else {
+      scene.fog = new THREE.FogExp2(
+        isLab ? labDefaults.background : 0x020104,
+        isLab ? labDefaults.fogDensity : 0.025
+      );
+      scene.background = new THREE.Color(isLab ? labDefaults.background : 0x000002);
+    }
 
     const camera = new THREE.PerspectiveCamera(48, 1, 0.1, 4000);
     // 404 rest stays close enough that the horizon reads as a disk, from a
@@ -151,13 +159,20 @@ export function useBlackHole(
     const CENTER_REVEAL_MS = 10000;
     /** How far the 404 camera backs off on narrow screens; lensing shrinks to match. */
     let centerFit = 1;
+    const DESK_ROLL = (12 * Math.PI) / 180;
     const placeCamera = () => {
       if (spinScene) {
         // Narrow screens back the camera off so the whole disk fits the width.
         centerFit = THREE.MathUtils.clamp(1.35 / Math.max(0.1, camera.aspect), 1, 2.6);
         camera.position.copy(HOME).addScaledVector(CENTER_REST, centerFit);
       } else if (isLab) {
-        camera.position.set(HOME.x - 0.4, HOME.y + 2.8, HOME.z + 12.5);
+        // Desk intro: slightly above the disk plane for the Interstellar edge-on still.
+        if (deskIntro) {
+          camera.position.set(HOME.x - 0.26, HOME.y + 2.0, HOME.z + 16.5);
+          camera.up.set(Math.sin(DESK_ROLL), Math.cos(DESK_ROLL), 0);
+        } else {
+          camera.position.set(HOME.x - 0.4, HOME.y + 2.8, HOME.z + 12.5);
+        }
       } else {
         camera.position.set(HOME.x - 2.6, HOME.y + 3.85, HOME.z + 11.6);
       }
@@ -167,13 +182,20 @@ export function useBlackHole(
 
     const renderer = new THREE.WebGLRenderer({
       antialias: !mobile,
-      alpha: false,
+      alpha: transparent,
+      // Premultiplied + paper-lit shaders keep glow from darkening the page.
+      premultipliedAlpha: transparent,
       stencil: false,
       powerPreference: 'high-performance'
     });
     renderer.outputColorSpace = THREE.SRGBColorSpace;
-    renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = isLab ? labDefaults.exposure : 1.2;
+    renderer.toneMapping = transparent ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = isLab ? labDefaults.exposure : 1.05;
+    if (transparent) {
+      renderer.setClearColor(0x000000, 0);
+      renderer.setClearAlpha(0);
+      renderer.autoClear = true;
+    }
     renderer.domElement.className = 'bh-canvas';
     renderer.domElement.setAttribute('aria-hidden', 'true');
     mount.appendChild(renderer.domElement);
@@ -195,7 +217,13 @@ export function useBlackHole(
     controls.minAzimuthAngle = -Infinity;
     controls.maxAzimuthAngle = Infinity;
     controls.autoRotate = false;
-    controls.enabled = !mobile && !reduceMotion;
+    // Desk camera is rolled. OrbitControls was built for an upright camera, so a
+    // drag on the canvas clamps immediately and holds the pointer. Drag still moves the hole.
+    controls.enabled = !deskIntro && !mobile && !reduceMotion;
+    if (deskIntro) {
+      controls.disconnect();
+      renderer.domElement.style.touchAction = 'pan-y';
+    }
     controls.update();
     const homeCamPos = camera.position.clone();
     controls.saveState();
@@ -207,6 +235,13 @@ export function useBlackHole(
     let centerTiltZ = (-34 * Math.PI) / 180;
     let centerYaw = (36 * Math.PI) / 180;
     const colorScratch = new THREE.Color();
+    const textGlowScratch = new THREE.Color();
+    /** Soften mid → hot; keep enough chroma that duo clicks still read on type. */
+    const muteTextGlow = (out: THREE.Color, midHex: string, hotHex: string) => {
+      out.set(midHex).lerp(colorScratch.set(hotHex), 0.38);
+      const peak = Math.max(out.r, out.g, out.b, 1e-5);
+      if (peak > 0.62) out.multiplyScalar(0.62 / peak);
+    };
     let colorFrameAt = 0;
     if (spinScene && !reduceMotion) {
       camera.position.copy(centerStartPos);
@@ -304,7 +339,7 @@ export function useBlackHole(
       if (Math.abs(orbitCoastDTheta) < 0.002 && Math.abs(orbitCoastDPhi) < 0.002) {
         orbitCoasting = false;
         if (!holding && !returning && introDone) {
-          if (!mobile && !reduceMotion) controls.enabled = true;
+          if (!deskIntro && !mobile && !reduceMotion) controls.enabled = true;
         }
         return;
       }
@@ -329,7 +364,7 @@ export function useBlackHole(
         orbitCoasting = false;
         orbitAngVel.theta = 0;
         orbitAngVel.phi = 0;
-        if (!holding && !returning && introDone && !mobile && !reduceMotion) {
+        if (!holding && !returning && introDone && !deskIntro && !mobile && !reduceMotion) {
           controls.enabled = true;
         }
       }
@@ -373,10 +408,19 @@ export function useBlackHole(
     textTexture.magFilter = THREE.LinearFilter;
     textTexture.generateMipmaps = false;
 
+    const textGlowColor = new THREE.Color();
+    muteTextGlow(
+      textGlowColor,
+      isLab || paramsRef ? labDefaults.colorMid : `#${COLORS.mid.toString(16).padStart(6, '0')}`,
+      isLab || paramsRef ? labDefaults.colorHot : `#${COLORS.hot.toString(16).padStart(6, '0')}`
+    );
     const textMaterial = new THREE.ShaderMaterial({
       uniforms: {
         uMap: { value: textTexture },
-        uOpacity: { value: 0 }
+        uOpacity: { value: 0 },
+        uHoleGlowColor: { value: textGlowColor.clone() },
+        uHoleNdc: { value: new THREE.Vector2(0.45, 0) },
+        uAspect: { value: 1 }
       },
       vertexShader: textPlaneVertexShader,
       fragmentShader: textPlaneFragmentShader,
@@ -429,30 +473,45 @@ export function useBlackHole(
       streakTexture.needsUpdate = true;
     };
 
-    const composer = new EffectComposer(renderer);
-    composer.addPass(new RenderPass(scene, camera));
-    composer.addPass(new UnrealBloomPass(
-      new THREE.Vector2(1, 1),
-      isLab ? labDefaults.bloomStrength : 0.8,
-      isLab ? labDefaults.bloomRadius : 0.7,
-      isLab ? labDefaults.bloomThreshold : 0.8
-    ));
+    const composerTarget = transparent
+      ? new THREE.WebGLRenderTarget(1, 1, {
+          type: THREE.HalfFloatType,
+          format: THREE.RGBAFormat,
+          colorSpace: THREE.SRGBColorSpace
+        })
+      : undefined;
+    const composer = new EffectComposer(renderer, composerTarget);
+    const scenePass = new RenderPass(scene, camera);
+    if (transparent) {
+      scenePass.clearAlpha = 0;
+    }
+    composer.addPass(scenePass);
+    composer.addPass(
+      new UnrealBloomPass(
+        new THREE.Vector2(1, 1),
+        transparent ? 0.45 : isLab ? labDefaults.bloomStrength : 0.28,
+        transparent ? 0.5 : isLab ? labDefaults.bloomRadius : 0.4,
+        transparent ? 0.82 : isLab ? labDefaults.bloomThreshold : 0.86
+      )
+    );
     const starScene = new THREE.Scene();
     starScene.fog = scene.fog;
     composer.addPass(new StarFieldPass(starScene, camera));
+    // Copy after bloom — stays sharp, then tinted by the void's glow in the text shader.
     const overlayPass = new OverlayScenePass(overlayScene, overlayCamera);
     composer.addPass(overlayPass);
 
+    const HERO_LENS = mobile ? 0.06 : 0.08;
     const lensingPass = new ShaderPass({
       uniforms: {
         tDiffuse: { value: null },
         holePos0: { value: new THREE.Vector2(isLab ? 0.5 : 0.72, 0.5) },
         holePos1: { value: new THREE.Vector2(0.72, 0.48) },
         holeCount: { value: 1 },
-        lensingStrength: { value: isLab ? labDefaults.lensingStrength : mobile ? 0.09 : 0.12 },
+        lensingStrength: { value: isLab ? labDefaults.lensingStrength : HERO_LENS },
         lensingRadius: { value: isLab ? labDefaults.lensingRadius : heroLensRadius },
         aspectRatio: { value: 1 },
-        chromaticAberration: { value: isLab ? labDefaults.chromaticAberration : 0.0006 }
+        chromaticAberration: { value: isLab ? labDefaults.chromaticAberration : 0.0004 }
       },
       vertexShader: `
         varying vec2 vUv;
@@ -468,9 +527,13 @@ export function useBlackHole(
     composer.addPass(streakPass);
 
     const bloomPass = composer.passes[1] as InstanceType<typeof UnrealBloomPass>;
-    const BLOOM_TARGET = isLab ? labDefaults.bloomStrength : 0.8;
+    const BLOOM_TARGET = transparent ? 0 : isLab ? labDefaults.bloomStrength : 0.28;
     const DISK_DENSITY_TARGET = isLab ? labDefaults.diskDensity : 1.3;
-    if (!isLab) {
+    if (transparent) {
+      // UnrealBloom paints an opaque plate — disk shader carries its own glow.
+      bloomPass.enabled = false;
+      bloomPass.strength = 0;
+    } else if (!isLab) {
       bloomPass.strength = 0;
       lensingPass.uniforms.lensingStrength.value = 0;
     } else {
@@ -478,7 +541,7 @@ export function useBlackHole(
     }
 
     // --- Stars ---
-    const starCount = mobile ? 4000 : 12000;
+    const starCount = transparent ? 0 : mobile ? 1800 : isLab ? 9000 : 4200;
     const starGeometry = new THREE.BufferGeometry();
     const starField = buildStarField(starCount);
     starGeometry.setAttribute('position', new THREE.BufferAttribute(starField.positions, 3));
@@ -504,10 +567,19 @@ export function useBlackHole(
     const horizonMul = spinScene ? 1.4 : isLab ? 1 : 1.18;
     const diskInner = BLACK_HOLE_RADIUS * horizonMul + 0.16;
     const diskOuter = isLab || spinScene ? DISK_OUTER : 9.6;
-    const horizonGeo = new THREE.SphereGeometry(BLACK_HOLE_RADIUS * 1.05 * horizonMul, 128, 64);
-    const voidGeo = new THREE.SphereGeometry(BLACK_HOLE_RADIUS * horizonMul, 128, 64);
-    const diskGeo = new THREE.RingGeometry(diskInner, diskOuter, 256, 128);
+    const sphereSeg = isLab ? 96 : 48;
+    const sphereRings = isLab ? 48 : 24;
+    const diskSeg = isLab ? 160 : 72;
+    const diskRings = isLab ? 64 : 24;
+    const horizonGeo = new THREE.SphereGeometry(
+      BLACK_HOLE_RADIUS * 1.05 * horizonMul,
+      sphereSeg,
+      sphereRings
+    );
+    const voidGeo = new THREE.SphereGeometry(BLACK_HOLE_RADIUS * horizonMul, sphereSeg, sphereRings);
+    const diskGeo = new THREE.RingGeometry(diskInner, diskOuter, diskSeg, diskRings);
 
+    const paperLit = transparent ? 1 : 0;
     const horizonMat = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
@@ -516,17 +588,24 @@ export function useBlackHole(
           value:
             spinScene || paramsRef
               ? new THREE.Color(labDefaults.colorMid)
-              : new THREE.Color().setRGB(1.0, 0.4, 0.1, THREE.LinearSRGBColorSpace)
-        }
+              : new THREE.Color(COLORS.horizonGlow)
+        },
+        uPaperLit: { value: paperLit }
       },
       vertexShader: horizonVertexShader,
       fragmentShader: horizonFragmentShader,
       transparent: true,
       blending: THREE.AdditiveBlending,
       side: THREE.BackSide,
-      depthWrite: false
+      depthWrite: false,
+      premultipliedAlpha: transparent
     });
-    const voidMat = new THREE.MeshBasicMaterial({ color: 0x000000 });
+    const voidMat = new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      // Opaque hole only — must not spill a translucent black plate.
+      transparent: false,
+      depthWrite: true
+    });
 
     const diskMaterial = new THREE.ShaderMaterial({
       uniforms: {
@@ -544,20 +623,29 @@ export function useBlackHole(
           value: new THREE.Color(isLab || paramsRef ? labDefaults.colorEmber : COLORS.ember)
         },
         uColorOuter: {
-          value: new THREE.Color(isLab || paramsRef ? labDefaults.colorOuter : COLORS.outer)
+          // On paper, skip near-black outer — it becomes a soft black plate.
+          value: new THREE.Color(
+            transparent
+              ? labDefaults.colorEmber
+              : isLab || paramsRef
+                ? labDefaults.colorOuter
+                : COLORS.outer
+          )
         },
         uNoiseScale: { value: isLab ? labDefaults.noiseScale : 2.5 },
         uFlowSpeed: { value: isLab ? labDefaults.flowSpeed : 0.1 },
         uDensity: { value: isLab || reduceMotion ? DISK_DENSITY_TARGET : 0 },
         uDiskInner: { value: diskInner },
-        uDiskOuter: { value: diskOuter }
+        uDiskOuter: { value: diskOuter },
+        uPaperLit: { value: paperLit }
       },
       vertexShader: diskVertexShader,
       fragmentShader: diskFragmentShader,
       transparent: true,
       side: THREE.DoubleSide,
       depthWrite: false,
-      blending: THREE.AdditiveBlending
+      blending: THREE.AdditiveBlending,
+      premultipliedAlpha: transparent
     });
 
     const tiltX = isLab ? (labDefaults.diskTiltDeg * Math.PI) / 180 : DISK_TILT;
@@ -573,7 +661,13 @@ export function useBlackHole(
     const buildHole = (home: THREE.Vector3): Hole => {
       const core = new THREE.Group();
       core.position.copy(home);
-      core.scale.setScalar(isLab || reduceMotion ? holeRest : 0.001);
+      core.scale.setScalar(
+        deskIntro && !reduceMotion
+          ? holeRest * 2.35
+          : isLab || reduceMotion
+            ? holeRest
+            : 0.001
+      );
 
       const horizon = new THREE.Mesh(horizonGeo, horizonMat);
       core.add(horizon);
@@ -856,6 +950,25 @@ export function useBlackHole(
       textMesh.rotation.set(0, 0, 0);
     };
 
+    /** Feed hole NDC into the text shader so void light falls across the glyphs. */
+    const syncTextGlow = () => {
+      if (!warpNode || isLab || !textReady) return;
+      const mountRect = mount.getBoundingClientRect();
+      if (mountRect.width < 1 || mountRect.height < 1) return;
+      const ndcX = ((holeScreen.x - mountRect.left) / mountRect.width) * 2 - 1;
+      const ndcY = -(((holeScreen.y - mountRect.top) / mountRect.height) * 2 - 1);
+      textMaterial.uniforms.uHoleNdc.value.set(ndcX, ndcY);
+      textMaterial.uniforms.uAspect.value = mountRect.width / Math.max(1, mountRect.height);
+
+      const box = measureWarpBox(warpNode);
+      const cx = box.left + box.width * 0.5;
+      const cy = box.top + box.height * 0.4;
+      const dist = Math.hypot(holeScreen.x - cx, holeScreen.y - cy);
+      const reach = Math.max(box.width, box.height) * 0.7 + holeScreen.radius * 1.2;
+      const near = 1 - THREE.MathUtils.clamp(dist / Math.max(1, reach), 0, 1);
+      hero?.style.setProperty('--bh-text-glow', (0.2 + near * 0.8).toFixed(3));
+    };
+
     /** WebGL headline — fades in with the singularity intro. */
     const syncTextWarpVisibility = () => {
       if (!warpNode || reduceMotion) {
@@ -874,18 +987,23 @@ export function useBlackHole(
       if (!introDone) {
         textMaterial.uniforms.uOpacity.value = 1;
         textRevealStartedAt = performance.now();
+        hero?.classList.add('bh-copy-warped');
         return;
       }
       if (!textRevealStartedAt) textRevealStartedAt = performance.now();
       const t = Math.min(1, (performance.now() - textRevealStartedAt) / TEXT_REVEAL_MS);
-      textMaterial.uniforms.uOpacity.value = Math.max(
+      const opacity = Math.max(
         textMaterial.uniforms.uOpacity.value as number,
         easeOutCubic(t)
       );
+      textMaterial.uniforms.uOpacity.value = opacity;
+      // Hide DOM only after the warped plane is opaque enough to read.
+      if (opacity > 0.55) hero?.classList.add('bh-copy-warped');
     };
 
     const enableCopyFallback = () => {
       hero?.classList.add('bh-copy-fallback');
+      hero?.classList.remove('bh-copy-warped');
       textMesh.visible = false;
       textMaterial.uniforms.uOpacity.value = 0;
     };
@@ -981,7 +1099,8 @@ export function useBlackHole(
     let layoutWidth = 0;
     let layoutHeight = 0;
     let layoutDpr = 0;
-    let qualityCap = mobile ? 1.5 : 2;
+    // Retina × bloom/lensing is the main hitch — start capped, adapt further if needed.
+    let qualityCap = mobile ? 1.25 : isLab ? 1.75 : 1.5;
     let qualitySamples = 0;
     let qualityAccum = 0;
 
@@ -1006,7 +1125,9 @@ export function useBlackHole(
       renderer.setSize(width, height, false);
       composer.setPixelRatio(dpr);
       composer.setSize(width, height);
-      bloomPass.resolution.set(width * dpr, height * dpr);
+      // Half-res bloom is nearly free visually and much cheaper on fill-rate.
+      const bloomScale = isLab ? 0.75 : 0.5;
+      bloomPass.resolution.set(width * dpr * bloomScale, height * dpr * bloomScale);
       lensingPass.uniforms.aspectRatio.value = width / height;
       starMaterial.uniforms.uPixelRatio.value = dpr;
       sizeStreakCanvas(width, height);
@@ -1025,12 +1146,13 @@ export function useBlackHole(
     // ---------------------------------------------------------------------------
     // First-load / refresh intro + singularity grab → return home
     // ---------------------------------------------------------------------------
-    let introDone = isLab || reduceMotion;
+    let introDone = (isLab && !deskIntro) || reduceMotion;
     let introStartedAt = 0;
     let introBootAt = 0;
     let introTravelAt = 0;
     /** Text gets a tiny head start; singularity begins right after. */
-    const INTRO_BH_DELAY_MS = 140;
+    const INTRO_BH_DELAY_MS = deskIntro ? 80 : 140;
+    const INTRO_SCALE_FROM = holeRest * 2.35;
     const prevPos = new THREE.Vector3();
     const sampleVel = new THREE.Vector3();
     const DRAG_THRESHOLD_PX = 3;
@@ -1058,7 +1180,7 @@ export function useBlackHole(
 
     const enableOrbitIfAllowed = () => {
       if ((spinScene && !centerRevealDone) || !introDone || holding || returning || orbitCoasting) return;
-      if (!mobile && !reduceMotion) controls.enabled = true;
+      if (!deskIntro && !mobile && !reduceMotion) controls.enabled = true;
       controls.target.copy(HOME);
       controls.update();
     };
@@ -1104,21 +1226,30 @@ export function useBlackHole(
       armHint();
     };
 
-    if (isLab || reduceMotion) {
+    if (reduceMotion) {
       hero?.classList.add('is-copy-in');
-      if (!isLab) finishIntro();
-      else {
-        holeA.core.scale.setScalar(holeRest);
-        if (holeB) holeB.core.scale.setScalar(holeRest);
-        bloomPass.strength = BLOOM_TARGET;
-        diskMaterial.uniforms.uDensity.value = DISK_DENSITY_TARGET;
-        grabProxy.style.pointerEvents = '';
-        mount.classList.add('is-intro-done');
-        if (!spinScene) enableOrbitIfAllowed();
-      }
+      finishIntro();
+    } else if (isLab && !deskIntro) {
+      hero?.classList.add('is-copy-in');
+      holeA.core.scale.setScalar(holeRest);
+      if (holeB) holeB.core.scale.setScalar(holeRest);
+      bloomPass.strength = BLOOM_TARGET;
+      diskMaterial.uniforms.uDensity.value = DISK_DENSITY_TARGET;
+      grabProxy.style.pointerEvents = '';
+      mount.classList.add('is-intro-done');
+      if (!spinScene) enableOrbitIfAllowed();
     } else {
+      // Homepage intro, or desk oversized → rest settle.
       controls.enabled = false;
       grabProxy.style.pointerEvents = 'none';
+      if (deskIntro) {
+        hero?.classList.add('is-copy-in');
+        holeA.core.position.copy(holeA.home);
+        holeA.core.scale.setScalar(INTRO_SCALE_FROM);
+        holeA.core.rotation.z = 0;
+        bloomPass.strength = BLOOM_TARGET;
+        diskMaterial.uniforms.uDensity.value = DISK_DENSITY_TARGET;
+      }
     }
 
     const clearHoldUi = () => {
@@ -1311,9 +1442,11 @@ export function useBlackHole(
         const timeScale = live?.timeScale ?? 0.45;
 
         if (live) {
-          bloomPass.strength = live.bloomStrength;
-          bloomPass.radius = live.bloomRadius;
-          bloomPass.threshold = live.bloomThreshold;
+          if (!transparent) {
+            bloomPass.strength = live.bloomStrength;
+            bloomPass.radius = live.bloomRadius;
+            bloomPass.threshold = live.bloomThreshold;
+          }
           diskMaterial.uniforms.uDensity.value = live.diskDensity;
           diskMaterial.uniforms.uFlowSpeed.value = live.flowSpeed;
           diskMaterial.uniforms.uNoiseScale.value = live.noiseScale;
@@ -1332,10 +1465,12 @@ export function useBlackHole(
           lensingPass.uniforms.lensingRadius.value = (spinScene ? 0.28 : live.lensingRadius) * lensFit;
           lensingPass.uniforms.chromaticAberration.value = live.chromaticAberration;
           renderer.toneMappingExposure = live.exposure;
-          scene.background = new THREE.Color(live.background);
-          if (scene.fog instanceof THREE.FogExp2) {
-            scene.fog.color.set(live.background);
-            scene.fog.density = live.fogDensity;
+          if (!transparent) {
+            scene.background = new THREE.Color(live.background);
+            if (scene.fog instanceof THREE.FogExp2) {
+              scene.fog.color.set(live.background);
+              scene.fog.density = live.fogDensity;
+            }
           }
 
           const nextCount = live.holeCount > 1 ? 2 : 1;
@@ -1366,19 +1501,27 @@ export function useBlackHole(
           easeColor(diskMaterial.uniforms.uColorMid.value, palette.colorMid);
           easeColor(diskMaterial.uniforms.uColorAccent.value, palette.colorAccent);
           easeColor(diskMaterial.uniforms.uColorEmber.value, palette.colorEmber);
-          easeColor(diskMaterial.uniforms.uColorOuter.value, palette.colorOuter);
+          easeColor(
+            diskMaterial.uniforms.uColorOuter.value,
+            transparent ? palette.colorEmber : palette.colorOuter
+          );
           if (spinScene || mode === 'hero') {
             easeColor(horizonMat.uniforms.uGlowColor.value, palette.colorMid);
           }
+          muteTextGlow(textGlowScratch, palette.colorMid, palette.colorHot);
+          if (colorEase >= 1) {
+            textMaterial.uniforms.uHoleGlowColor.value.copy(textGlowScratch);
+          } else {
+            textMaterial.uniforms.uHoleGlowColor.value.lerp(textGlowScratch, colorEase);
+          }
         }
 
-        // Slow sky drift on the homepage. One revolution is about 8 minutes.
-        // The 404 turns the star field a little faster. The hole stays put;
-        // only the horizon shader and disk flow move.
-        if (!reduceMotion && !isLab) {
-          const skyTurn = elapsed * ((Math.PI * 2) / (8 * 60));
+        // Starfield drifts; the hole stays put. Desk/lab use a slow sky crawl.
+        if (!reduceMotion && !spinScene) {
+          const periodSec = isLab ? 3.5 * 60 : 8 * 60;
+          const skyTurn = elapsed * ((Math.PI * 2) / periodSec);
           stars.rotation.y = skyTurn;
-          stars.rotation.x = skyTurn * 0.12;
+          stars.rotation.x = skyTurn * (isLab ? 0.1 : 0.12);
         }
         if (spinScene && !reduceMotion) {
           const skyTurn = elapsed * ((Math.PI * 2) / (4 * 60));
@@ -1418,23 +1561,55 @@ export function useBlackHole(
           holeA.diskTilt.rotation.x = centerTiltX;
           holeA.diskTilt.rotation.z = centerTiltZ;
           holeA.disk.rotation.z = centerYaw;
+        } else {
+          // Keep the disk parked — motion lives in the stars + quiet shader flow.
+          holeA.disk.rotation.z = DISK_YAW;
+          if (holeB) holeB.disk.rotation.z = DISK_YAW;
         }
         diskMaterial.uniforms.uTime.value = elapsed * timeScale;
         if (!reduceMotion) starMaterial.uniforms.uTime.value = elapsed;
         horizonMat.uniforms.uTime.value = elapsed * timeScale;
         horizonMat.uniforms.uCameraPosition.value.copy(camera.position);
 
-        const lensIdle = live?.lensingStrength ?? (mobile ? 0.09 : 0.12);
-        const lensDrag = Math.min(0.4, lensIdle + 0.04);
+        const lensIdle = live?.lensingStrength ?? HERO_LENS;
+        const lensDrag = Math.min(0.22, lensIdle + 0.03);
+        lensingPass.enabled = (lensingPass.uniforms.lensingStrength.value as number) > 0.001;
+        bloomPass.enabled = !transparent && (isLab || bloomPass.strength > 0.001);
 
         if (!introDone) {
           if (!introBootAt) {
             introBootAt = performance.now();
           }
           const sinceBoot = introBootAt ? performance.now() - introBootAt : 0;
+          controls.enabled = false;
 
-          // Hold the void collapsed until copy has started (~140ms)
-          if (sinceBoot < INTRO_BH_DELAY_MS) {
+          if (deskIntro) {
+            // Desk: oversized → rest zoom. Hole stays upright; stars carry drift.
+            if (sinceBoot < INTRO_BH_DELAY_MS) {
+              holeA.core.position.copy(holeA.home);
+              holeA.core.scale.setScalar(INTRO_SCALE_FROM);
+              holeA.core.rotation.z = 0;
+              lensingPass.uniforms.lensingStrength.value = lensIdle * 0.35;
+            } else {
+              if (!introTravelAt) {
+                introTravelAt = performance.now();
+                introStartedAt = introTravelAt;
+                grabProxy.style.pointerEvents = '';
+              }
+              const t = Math.min(1, (performance.now() - introTravelAt) / INTRO_TRAVEL_MS);
+              const e = easeOutCubic(t);
+              holeA.core.scale.setScalar(
+                THREE.MathUtils.lerp(INTRO_SCALE_FROM, holeRest, e)
+              );
+              holeA.core.position.copy(holeA.home);
+              holeA.core.rotation.z = 0;
+              bloomPass.strength = BLOOM_TARGET;
+              diskMaterial.uniforms.uDensity.value = DISK_DENSITY_TARGET;
+              lensingPass.uniforms.lensingStrength.value = lensIdle * (0.35 + 0.65 * e);
+              if (t >= 1) finishIntro();
+            }
+          } else if (sinceBoot < INTRO_BH_DELAY_MS) {
+            // Homepage: hold the void collapsed until copy has started (~140ms)
             if (!introStartedAt) {
               prepareIntroSpawn();
               holeA.core.position.copy(spawnFrom);
@@ -1443,7 +1618,6 @@ export function useBlackHole(
             bloomPass.strength = 0;
             diskMaterial.uniforms.uDensity.value = 0;
             lensingPass.uniforms.lensingStrength.value = 0;
-            controls.enabled = false;
           } else {
             if (!introStartedAt) {
               introStartedAt = performance.now();
@@ -1452,9 +1626,11 @@ export function useBlackHole(
               grabProxy.style.pointerEvents = '';
             }
 
+            // DOM type is visible with is-copy-in — don't hold the void on warp capture.
             const typeIsUp =
-              textReady || Boolean(hero?.classList.contains('bh-copy-fallback'));
-            controls.enabled = false;
+              textReady ||
+              Boolean(hero?.classList.contains('bh-copy-fallback')) ||
+              Boolean(hero?.classList.contains('is-copy-in'));
 
             if (!typeIsUp) {
               holeA.core.position.copy(spawnFrom);
@@ -1492,7 +1668,7 @@ export function useBlackHole(
             sinceNudge < 0 ? 0 : Math.sin(Math.PI * nudgeT)
           );
           controls.target.copy(HOME);
-          if (!mobile && !reduceMotion) {
+          if (!deskIntro && !mobile && !reduceMotion) {
             controls.enabled = true;
             controls.update();
           }
@@ -1507,7 +1683,7 @@ export function useBlackHole(
           throwVel.set(0, 0, 0);
           if (!spinScene || centerRevealDone) {
             controls.target.copy(HOME);
-            if (!mobile && !reduceMotion) {
+            if (!deskIntro && !mobile && !reduceMotion) {
               controls.enabled = true;
               controls.update();
             }
@@ -1516,7 +1692,7 @@ export function useBlackHole(
           // Dual mode: leave positions free so mutual gravity can warp them
           throwVel.set(0, 0, 0);
           controls.target.copy(HOME);
-          if (!mobile && !reduceMotion) {
+          if (!deskIntro && !mobile && !reduceMotion) {
             controls.enabled = true;
             controls.update();
           }
@@ -1561,7 +1737,10 @@ export function useBlackHole(
 
         placeTextPlane();
         updateHoleScreen();
-        if (mode !== 'lab') syncTextWarpVisibility();
+        if (mode !== 'lab') {
+          syncTextWarpVisibility();
+          syncTextGlow();
+        }
 
         // Dual-hole lensing: each singularity warps the field around the other
         screenPos.copy(holeA.core.position).project(camera);
@@ -1618,7 +1797,13 @@ export function useBlackHole(
           streakTexture.needsUpdate = true;
         }
 
-        composer.render();
+        if (transparent) {
+          renderer.setClearColor(0x000000, 0);
+          renderer.clear();
+          renderer.render(scene, camera);
+        } else {
+          composer.render();
+        }
         mount.classList.add('is-ready');
         if (introDone && qualitySamples < 90) {
           qualitySamples += 1;
@@ -1682,9 +1867,19 @@ export function useBlackHole(
       textReady,
       uOpacity: textMaterial.uniforms.uOpacity.value,
       meshVisible: textMesh.visible,
+      holeNdc: {
+        x: textMaterial.uniforms.uHoleNdc.value.x,
+        y: textMaterial.uniforms.uHoleNdc.value.y
+      },
+      holeGlowColor: textMaterial.uniforms.uHoleGlowColor.value.getHexString(),
       holding,
       returning,
       introDone,
+      deskIntro,
+      coreScale: holeA.core.scale.x,
+      coreRotZ: holeA.core.rotation.z,
+      diskRotZ: holeA.disk.rotation.z,
+      diskSpin: paramsRef?.current?.diskSpin ?? labDefaults.diskSpin,
       hole: { ...holeScreen }
     });
 
@@ -1721,7 +1916,13 @@ export function useBlackHole(
     }
 
     if (reduceMotion && !isLab) {
-      composer.render();
+      if (transparent) {
+        renderer.setClearColor(0x000000, 0);
+        renderer.clear();
+        renderer.render(scene, camera);
+      } else {
+        composer.render();
+      }
       stop();
     } else {
       raf = requestAnimationFrame(frame);
@@ -1752,6 +1953,8 @@ export function useBlackHole(
       hero?.classList.remove('is-bh-dragging');
       hero?.classList.remove('is-intro-done');
       hero?.classList.remove('bh-copy-fallback');
+      hero?.classList.remove('bh-copy-warped');
+      hero?.style.removeProperty('--bh-text-glow');
       mount.classList.remove('is-intro-done');
       if (grabProxy.parentNode) grabProxy.parentNode.removeChild(grabProxy);
       if (hintEl?.parentNode) hintEl.parentNode.removeChild(hintEl);
@@ -1775,11 +1978,12 @@ export function useBlackHole(
       overlayPass.dispose();
       streakPass.dispose();
       composer.dispose();
+      composerTarget?.dispose();
       renderer.dispose();
       renderer.forceContextLoss();
       if (renderer.domElement.parentNode === mount) {
         mount.removeChild(renderer.domElement);
       }
     };
-  }, [mountRef, heroRef, isLab, spinScene, paramsRef]);
+  }, [mountRef, heroRef, isLab, spinScene, paramsRef, transparent, deskIntro]);
 }

@@ -81,26 +81,18 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isMachine = pathname?.includes('/machine') ?? false;
   const isSingularityLab = pathname?.includes('/singularity') ?? false;
+  const isDeskLab = pathname === '/desk' || pathname?.startsWith('/desk/') || false;
   const isTldr = pathname === '/tldr' || pathname === '/tldr/' || pathname === '/v2/tldr' || pathname === '/v2/tldr/';
   useScrollToHashOnMount();
 
   useLayoutEffect(() => {
-    if (isMachine || isSingularityLab || isTldr) {
-      revealV2Root();
-      return;
-    }
-    let cancelled = false;
-    const failSafe = window.setTimeout(() => {
-      if (!cancelled) revealV2Root();
-    }, 4000);
-    void preloadFooterLandscape().then(() => {
-      if (!cancelled) revealV2Root();
+    // Never leave the site at opacity:0 — reveal immediately, warm footer media after.
+    revealV2Root();
+    if (isMachine || isSingularityLab || isDeskLab || isTldr) return;
+    void preloadFooterLandscape().catch(() => {
+      /* ignore — reveal already happened */
     });
-    return () => {
-      cancelled = true;
-      window.clearTimeout(failSafe);
-    };
-  }, [isMachine, isSingularityLab, isTldr]);
+  }, [isMachine, isSingularityLab, isDeskLab, isTldr]);
 
   return (
     <ThemeProvider>
@@ -109,7 +101,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
           <>
             <MenuClickSound />
             <ButtonHoverSound />
-            <BackgroundMusic />
+            {isDeskLab ? null : <BackgroundMusic />}
           </>
         )}
         <HorizonTransition>
@@ -126,6 +118,16 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
                 <SkipLink />
                 <ArchiveHeader />
                 <main id="v2-main" tabIndex={-1}>
+                  {children}
+                </main>
+              </div>
+            </KissModeProvider>
+          ) : isDeskLab ? (
+            <KissModeProvider>
+              <div className="desk-shell-host h-svh overflow-hidden">
+                <SkipLink />
+                <ExperienceMotion />
+                <main id="v2-main" tabIndex={-1} className="h-full">
                   {children}
                 </main>
               </div>

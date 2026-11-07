@@ -4,7 +4,7 @@
 
 - **Production** is the archive site at `/` (`app/(site)/`). Homepage is the singularity landing.
 - **Previous portfolio** lives under `/legacy/` (`app/legacy/`). Do not replace it.
-- Lab tools: `/classic`, `/singularity`, `/classic/workbench`. `/v2/*` redirects to the same paths without the prefix.
+- Lab tools: `/classic`, `/singularity`, `/classic/workbench`, `/desk`. `/v2/*` redirects to the same paths without the prefix.
 - Case studies to edit are the pages under `app/(site)/work/` and copy in `src/config/v2/caseStudies.ts`.
 - Classic orbit / particle landing: `/classic`.
 
@@ -41,6 +41,10 @@ Hero → Trust → Why → Work → About → CTA
 | `/classic` | Archived orbit / particle landing (lab) |
 | `/classic/workbench` | Archived workbench (lab) |
 | `/singularity` | Interactive singularity playground (lab) |
+| `/desk` | Desk lab — singularity stage + horizontal work rail (not live) |
+| `/desk/about` | Desk lab about |
+| `/desk/work` | Redirects to `/desk` |
+| `/desk/work/[slug]` | Desk lab case study (separate from live `/work/[slug]`) |
 | `/machine` | Plain-text agent bio |
 | `/legacy/` | Previous portfolio |
 | `/legacy/about/` | Previous about |
@@ -59,3 +63,4 @@ npm run dev
 - Case study: `http://localhost:3000/work/vr-eeg-analytics/`
 - Previous site: `http://localhost:3000/legacy/`
 - Classic: `http://localhost:3000/classic/`
+- Desk case study: `http://localhost:3000/desk/work/vr-eeg-analytics/`

@@ -10,10 +10,16 @@ import {
 } from 'react';
 
 type Phase = 'idle' | 'cover' | 'swap' | 'reveal';
+type Wipe = 'disc' | 'blur';
 
 function normalizePath(path: string) {
   if (!path) return '/';
   return path.endsWith('/') ? path : `${path}/`;
+}
+
+function isDeskPath(path: string) {
+  const p = normalizePath(path).replace(/^\/v2(?=\/)/, '');
+  return p === '/desk/' || p.startsWith('/desk/');
 }
 
 function routeLabel(path: string) {
@@ -21,6 +27,8 @@ function routeLabel(path: string) {
   if (p === '/' || p === '/v2/') return 'Home';
   if (p.startsWith('/about') || p.startsWith('/v2/about')) return 'About';
   if (p.startsWith('/tldr') || p.startsWith('/v2/tldr')) return 'TL;DR';
+  if (p.startsWith('/desk/work')) return 'Work';
+  if (p.startsWith('/desk')) return 'Desk';
   if (p.startsWith('/work/') || p.startsWith('/v2/work/')) return 'Work';
   if (p.startsWith('/machine')) return 'Machine';
   if (p.startsWith('/classic/workbench')) return 'Workbench';
@@ -49,19 +57,19 @@ function isSitePath(pathname: string) {
 }
 
 /**
- * Disc rise — Nod-style staggered circles that climb to cover the page,
- * then clear. Adapted: red + paper/ink discs, singularity core instead of eye.
- * Ref: https://nodcoding.com/summer-bootcamps/
+ * Disc rise on the archive; soft blur wipe on desk lab routes.
  */
 export function HorizonTransition({ children }: { children: ReactNode }) {
   const router = useRouter();
   const pathname = usePathname();
   const [phase, setPhase] = useState<Phase>('idle');
+  const [wipe, setWipe] = useState<Wipe>('disc');
   const [label, setLabel] = useState('Archive');
   const [live, setLive] = useState('');
   const [radius, setRadius] = useState(1200);
   const pendingPath = useRef<string | null>(null);
   const pendingHref = useRef<string | null>(null);
+  const wipeRef = useRef<Wipe>('disc');
   const pushed = useRef(false);
   const phaseRef = useRef<Phase>('idle');
 
@@ -87,12 +95,14 @@ export function HorizonTransition({ children }: { children: ReactNode }) {
   }, [router, setPhaseSafe]);
 
   const beginCover = useCallback(
-    (href: string) => {
+    (href: string, nextWipe: Wipe) => {
       const url = new URL(href, window.location.href);
       setRadius(coverRadius());
       pendingPath.current = normalizePath(url.pathname);
       pendingHref.current = `${url.pathname}${url.search}${url.hash}`;
       pushed.current = false;
+      wipeRef.current = nextWipe;
+      setWipe(nextWipe);
       phaseRef.current = 'cover';
       router.prefetch(pendingHref.current);
       setLabel(routeLabel(url.pathname));
@@ -134,10 +144,14 @@ export function HorizonTransition({ children }: { children: ReactNode }) {
       if (!isSitePath(next.pathname)) return;
       if (normalizePath(next.pathname) === normalizePath(window.location.pathname)) return;
       if (prefersReducedMotion()) return;
+      const fromDesk = isDeskPath(window.location.pathname);
+      const toDesk = isDeskPath(next.pathname);
+      // Desk layout owns desk → desk transitions (content-only, chrome stays).
+      if (fromDesk && toDesk) return;
 
       mouse.preventDefault();
       mouse.stopPropagation();
-      beginCover(next.href);
+      beginCover(next.href, fromDesk || toDesk ? 'blur' : 'disc');
     };
 
     root.addEventListener('click', onClick, true);
@@ -146,23 +160,38 @@ export function HorizonTransition({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (phase !== 'cover') return;
-    /* First disc ~0s, second ~0.22s, settle ~0.9s */
-    const failSafe = window.setTimeout(pushPending, 920);
+    // Blur wipe needs a beat to settle before swap; disc keeps the longer beat.
+    const delay = wipeRef.current === 'blur' ? 340 : 920;
+    const failSafe = window.setTimeout(pushPending, delay);
     return () => window.clearTimeout(failSafe);
   }, [phase, pushPending]);
 
   useEffect(() => {
     if (phase !== 'swap' || !pendingPath.current) return;
-    if (normalizePath(pathname ?? '') !== pendingPath.current) return;
-    window.scrollTo(0, 0);
-    const id = window.requestAnimationFrame(() => setPhaseSafe('reveal'));
-    return () => window.cancelAnimationFrame(id);
+    const target = pendingPath.current;
+    const matched = normalizePath(pathname ?? '') === target;
+
+    const reveal = () => {
+      if (phaseRef.current !== 'swap') return;
+      window.scrollTo(0, 0);
+      setPhaseSafe('reveal');
+    };
+
+    // Wait for the route to land, then one paint before reveal.
+    // Failsafe keeps desk blur from sticking in swap.
+    if (matched) {
+      const id = window.setTimeout(reveal, 48);
+      return () => window.clearTimeout(id);
+    }
+    const failSafe = window.setTimeout(reveal, 280);
+    return () => window.clearTimeout(failSafe);
   }, [phase, pathname, setPhaseSafe]);
 
   useEffect(() => {
     if (phase !== 'reveal') return;
     document.getElementById('v2-main')?.focus({ preventScroll: true });
-    const failSafe = window.setTimeout(finish, 700);
+    const delay = wipeRef.current === 'blur' ? 480 : 700;
+    const failSafe = window.setTimeout(finish, delay);
     return () => window.clearTimeout(failSafe);
   }, [phase, finish]);
 
@@ -175,7 +204,7 @@ export function HorizonTransition({ children }: { children: ReactNode }) {
       <div className="v2-visually-hidden" aria-live="polite" aria-atomic="true">
         {live}
       </div>
-      {phase !== 'idle' ? (
+      {phase !== 'idle' && wipe === 'disc' ? (
         <div
           className="v2-disc"
           data-phase={phase}
@@ -193,7 +222,13 @@ export function HorizonTransition({ children }: { children: ReactNode }) {
           <p className="v2-disc-label">{label}</p>
         </div>
       ) : null}
-      <div className="v2-disc-stage" data-phase={phase}>
+      {phase !== 'idle' && wipe === 'blur' ? (
+        <div className="v2-blur-wipe" data-phase={phase} aria-hidden="true" />
+      ) : null}
+      <div
+        className="v2-disc-stage"
+        data-phase={wipe === 'blur' && phase !== 'idle' ? `blur-${phase}` : phase}
+      >
         {children}
       </div>
     </>

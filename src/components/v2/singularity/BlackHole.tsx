@@ -9,12 +9,21 @@ type Props = {
   heroRef: RefObject<HTMLElement | null>;
   mode?: BlackHoleOptions['mode'];
   paramsRef?: BlackHoleOptions['paramsRef'];
+  transparent?: boolean;
+  playIntro?: boolean;
   className?: string;
 };
 
-export function BlackHole({ heroRef, mode = 'hero', paramsRef, className = '' }: Props) {
+export function BlackHole({
+  heroRef,
+  mode = 'hero',
+  paramsRef,
+  transparent = false,
+  playIntro = false,
+  className = ''
+}: Props) {
   const mountRef = useRef<HTMLDivElement>(null);
-  useBlackHole(mountRef, heroRef, { mode, paramsRef });
+  useBlackHole(mountRef, heroRef, { mode, paramsRef, transparent, playIntro });
 
   return (
     <div

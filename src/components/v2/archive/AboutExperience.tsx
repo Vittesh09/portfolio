@@ -1,7 +1,7 @@
 'use client';
 
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { ContactPanel } from '@/src/components/v2/ui/ContactPanel';
 import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
 import { yearsExperience, v2Path } from '@/src/config/v2/profile';

@@ -4,7 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import dynamic from 'next/dynamic';
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import { motion } from 'framer-motion';
+import { motion } from 'motion/react';
 import { BlackHoleLazy } from '@/src/components/v2/singularity/BlackHoleLazy';
 import { useSingularityColorClick } from '@/src/components/v2/singularity/hooks/useSingularityColorClick';
 import { SINGULARITY_COLOR_SETS } from '@/src/components/v2/singularity/lib/palettes';
@@ -77,7 +77,7 @@ export function LandingExperienceSingularity({ cards }: { cards: ProjectCardData
     <>
       <section
         ref={heroRef}
-        className="bh-hero is-intro border-b border-white/10"
+        className="bh-hero is-intro is-copy-in border-b border-white/10"
         aria-label="Drag the singularity to move it, drag around it to orbit, or click it to change its color."
         onClick={onHeroClick}
       >
@@ -90,8 +90,9 @@ export function LandingExperienceSingularity({ cards }: { cards: ProjectCardData
                 {siteConfig.name}, {siteConfig.role}
               </h1>
               <p className="bh-sr-only">{heroCloser}</p>
+              {/* Portrait stays in DOM — singularity glow is for type only. */}
+              <HeroPortrait className="bh-intro-fade mb-5" />
               <div className="bh-copy bh-copy-source" data-bh-warp aria-hidden="true">
-                <HeroPortrait className="mb-5" />
                 <HeroKicker />
                 <p className="v2-kiss-wordmark archive-display">
                   <HeroIdentityMark />

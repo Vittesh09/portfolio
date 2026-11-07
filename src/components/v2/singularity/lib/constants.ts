@@ -10,15 +10,15 @@ export const DISK_BANK = (-16 * Math.PI) / 180;
 /** In-plane yaw — park the ring join on the far edge, off the bright face. */
 export const DISK_YAW = (108 * Math.PI) / 180;
 
-/** Tight archival palette — cream + red only, no rainbow. */
+/** Interstellar ice — cool silver-blue core, muted mid band, warm ember inner. */
 export const COLORS = {
-  hot: 0xfff6ee,
-  mid: 0xff5a3a,
-  accent: 0xf23828,
-  ember: 0x7a2218,
-  outer: 0x1a0a08,
-  horizonGlow: 0xf23828,
-  starWarm: 0xffe8d8,
-  starCool: 0xfff5ee,
-  starEmber: 0xff8866
+  hot: 0xc5d4e8,
+  mid: 0x6f98c0,
+  accent: 0x4a7aab,
+  ember: 0xb8895c,
+  outer: 0x080e18,
+  horizonGlow: 0xb8c8dc,
+  starWarm: 0xe8d4bc,
+  starCool: 0xa8c0dc,
+  starEmber: 0x6a88b0
 } as const;

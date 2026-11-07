@@ -171,6 +171,8 @@ function AmbientCursor({ enabled }: { enabled: boolean }) {
       return;
     }
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const isDesk = () => Boolean(document.querySelector('.desk-root'));
+    const halfFor = () => (isDesk() ? 9 : 18);
     const target = { x: -100, y: -100 };
     const ring = { x: -100, y: -100, scale: 1 };
     let frame = 0;
@@ -207,34 +209,54 @@ function AmbientCursor({ enabled }: { enabled: boolean }) {
     frame = window.requestAnimationFrame(tick);
 
     const move = (event: PointerEvent) => {
-      target.x = event.clientX - 18;
-      target.y = event.clientY - 18;
+      if (event.buttons === 0) setPressed(false);
+      const half = halfFor();
+      target.x = event.clientX - half;
+      target.y = event.clientY - half;
       const node = event.target;
       const overHole =
         node instanceof Element &&
         Boolean(node.closest('.bh-grab') || document.querySelector('.bh-hero.is-bh-dragging'));
-      setNativeGrab(overHole);
+      const overStage =
+        node instanceof Element &&
+        Boolean(node.closest('.desk-stage, .bh-hero, .bh-grab, .bh-mount, .bh-canvas'));
+      ringRef.current?.setAttribute('data-over-stage', overStage ? 'true' : 'false');
+      // Desk keeps the glass cursor over the hole; archive still yields to native grab.
+      setNativeGrab(isDesk() ? false : overHole);
       setInteractive(
         !overHole &&
           node instanceof Element &&
           Boolean(node.closest('a, button, [role="button"], input, textarea, select, label'))
       );
     };
-    const down = () => setPressed(true);
+    const down = (event: PointerEvent) => {
+      const half = halfFor();
+      target.x = event.clientX - half;
+      target.y = event.clientY - half;
+      ring.x = target.x;
+      ring.y = target.y;
+      place();
+      setPressed(true);
+    };
     const up = () => setPressed(false);
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerdown', down);
-    window.addEventListener('pointerup', up);
+    // Capture phase: the singularity stops propagation of pointer events while dragging.
+    window.addEventListener('pointermove', move, true);
+    window.addEventListener('pointerdown', down, true);
+    window.addEventListener('pointerup', up, true);
+    window.addEventListener('pointercancel', up, true);
+    window.addEventListener('blur', up);
     return () => {
       window.cancelAnimationFrame(frame);
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerdown', down);
-      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointermove', move, true);
+      window.removeEventListener('pointerdown', down, true);
+      window.removeEventListener('pointerup', up, true);
+      window.removeEventListener('pointercancel', up, true);
+      window.removeEventListener('blur', up);
     };
   }, [enabled, mounted]);
 
   const orbit = pressed && !interactive && !nativeGrab;
-  const scale = nativeGrab ? 1 : pressed ? 0.88 : interactive ? 1.55 : 1;
+  const scale = nativeGrab ? 1 : pressed ? 1 : interactive ? 1.55 : 1;
 
   useEffect(() => {
     scaleRef.current = scale;
@@ -250,7 +272,12 @@ function AmbientCursor({ enabled }: { enabled: boolean }) {
         className="v2-ambient-cursor-ring"
         data-interactive={interactive}
         data-native-grab={nativeGrab}
-        style={{ opacity: nativeGrab ? 0 : 1, transition: 'opacity 0.18s ease' }}
+        data-pressed={pressed}
+        data-orbit={orbit}
+        style={{
+          opacity: nativeGrab ? 0 : 1,
+          transition: 'opacity 0.18s ease'
+        }}
       />
       <div
         ref={dotRef}
@@ -277,6 +304,7 @@ function AmbientCursor({ enabled }: { enabled: boolean }) {
 export function ExperienceMotion() {
   const pathname = usePathname();
   const isMachine = pathname?.includes('/machine') ?? false;
+  const isDesk = pathname === '/desk' || (pathname?.startsWith('/desk/') ?? false);
   const { kissMode } = useKissMode();
 
   useLayoutEffect(() => {
@@ -285,9 +313,9 @@ export function ExperienceMotion() {
     window.dispatchEvent(new CustomEvent('v2-cosmos-reveal'));
   }, []);
 
-  useLenisSmoothScroll(!isMachine);
-  useSectionReveals(true);
-  useTitleReveals(true, pathname, kissMode);
+  useLenisSmoothScroll(!isMachine && !isDesk);
+  useSectionReveals(!isDesk);
+  useTitleReveals(!isDesk, pathname, kissMode);
   useProjectScrollFocus();
   const [cursorOn, setCursorOn] = useState(false);
 

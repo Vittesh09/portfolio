@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { animate, motion, useInView } from 'framer-motion';
+import { animate, motion, useInView } from 'motion/react';
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 const LETTER_MS = 420;

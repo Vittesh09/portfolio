@@ -41,11 +41,11 @@ export const DEFAULT_SINGULARITY_PARAMS: SingularityParams = {
   diskSpin: 0.0045,
   diskTiltDeg: -82,
   diskBankDeg: -16,
-  colorHot: '#fff6ee',
-  colorMid: '#ff5a3a',
-  colorAccent: '#f23828',
-  colorEmber: '#7a2218',
-  colorOuter: '#1a0a08',
+  colorHot: '#c5d4e8',
+  colorMid: '#6f98c0',
+  colorAccent: '#4a7aab',
+  colorEmber: '#b8895c',
+  colorOuter: '#080e18',
   background: '#000002',
   holeCount: 1
 };
@@ -56,4 +56,11 @@ export type BlackHoleOptions = {
   mode?: SingularityMode;
   /** Live lab sliders, plus click-to-cycle palettes on the hero and 404. */
   paramsRef?: { current: SingularityParams };
+  /** Clear canvas — singularity floats on the page (desk lab). */
+  transparent?: boolean;
+  /**
+   * Play the first-load settle even in lab/desk:
+   * start oversized, ease down to rest while spinning into place.
+   */
+  playIntro?: boolean;
 };

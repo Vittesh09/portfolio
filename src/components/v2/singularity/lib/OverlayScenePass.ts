@@ -3,8 +3,8 @@ import { Pass, FullScreenQuad } from 'three/addons/postprocessing/Pass.js';
 import { CopyShader } from 'three/addons/shaders/CopyShader.js';
 
 /**
- * Draws an overlay scene (text) AFTER bloom so copy is not glowed,
- * but BEFORE lensing so gravitational warp still applies.
+ * Draws an overlay scene (warped hero copy) after bloom so type stays sharp,
+ * then BEFORE lensing so gravitational warp still applies.
  */
 export class OverlayScenePass extends Pass {
   private readonly overlayScene: THREE.Scene;

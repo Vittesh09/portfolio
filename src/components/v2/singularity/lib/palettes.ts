@@ -5,40 +5,53 @@ export type SingularityPalette = Pick<
   'colorHot' | 'colorMid' | 'colorAccent' | 'colorEmber' | 'colorOuter'
 >;
 
+/** Site chrome accent — never follow the disk palette. */
+const SITE_ACCENT_LIGHT = '#f23828';
+const SITE_ACCENT_DARK = '#ff5447';
+
+export function singularityUiAccent(_palette: SingularityPalette, dark: boolean) {
+  return dark ? SITE_ACCENT_DARK : SITE_ACCENT_LIGHT;
+}
+
+/** Keep UI on brand orange; disk clicks must not recolor the site. */
+export function applySingularityAccent(
+  _index: number,
+  dark: boolean,
+  root: Element | null = document.querySelector('.v2-root')
+) {
+  if (!root || !(root instanceof HTMLElement)) return;
+  const accent = dark ? SITE_ACCENT_DARK : SITE_ACCENT_LIGHT;
+  root.style.setProperty('--v2-accent-pop', accent);
+  root.style.setProperty('--v2-accent-blue', accent);
+}
+
+/**
+ * Three disk schemes — primary hue ladder + muted complement ember (same recipe as ice).
+ * Site accent stays brand orange separately.
+ */
 export const SINGULARITY_COLOR_SETS: SingularityPalette[] = [
   {
-    colorHot: '#fff6ee',
-    colorMid: '#ff5a3a',
-    colorAccent: '#f23828',
-    colorEmber: '#7a2218',
-    colorOuter: '#1a0a08'
+    // Ice — silver-blue + copper
+    colorHot: '#c5d4e8',
+    colorMid: '#6f98c0',
+    colorAccent: '#4a7aab',
+    colorEmber: '#b8895c',
+    colorOuter: '#080e18'
   },
   {
-    colorHot: '#eef6ff',
-    colorMid: '#4aa3ff',
-    colorAccent: '#1d4ed8',
-    colorEmber: '#16356b',
-    colorOuter: '#070c18'
+    // Ember — soft peach / terracotta + cool steel (not neon red)
+    colorHot: '#ffe4d4',
+    colorMid: '#d4785c',
+    colorAccent: '#b84a38',
+    colorEmber: '#6a8294',
+    colorOuter: '#120805'
   },
   {
-    colorHot: '#fff8e6',
-    colorMid: '#ffc14a',
-    colorAccent: '#f59e0b',
-    colorEmber: '#6b3e0a',
-    colorOuter: '#1a1206'
-  },
-  {
-    colorHot: '#f7eeff',
-    colorMid: '#c084fc',
-    colorAccent: '#7c3aed',
-    colorEmber: '#3b1764',
-    colorOuter: '#100818'
-  },
-  {
-    colorHot: '#eefff6',
-    colorMid: '#34d399',
-    colorAccent: '#059669',
-    colorEmber: '#0d4a32',
-    colorOuter: '#07140e'
+    // Sol — cream / ochre + muted violet-slate
+    colorHot: '#fff1d2',
+    colorMid: '#d4a04a',
+    colorAccent: '#b07828',
+    colorEmber: '#6e7390',
+    colorOuter: '#100c06'
   }
 ];

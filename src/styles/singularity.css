@@ -197,19 +197,39 @@
   text-rendering: geometricPrecision;
 }
 
-/* Capture source — invisible to user but still laid out for positioning */
+/* DOM type stays visible until WebGL warp is live — never leave a blank hero. */
 .v2-root .bh-hero .bh-copy-source {
-  opacity: 0 !important;
-  pointer-events: none !important;
+  opacity: 1;
+  pointer-events: none;
   user-select: none;
+  z-index: 2;
+}
+
+/* WebGL copy owns the lane — hide the capture source so it does not double. */
+.v2-root .bh-hero.bh-copy-warped:not(.bh-copy-fallback) .bh-copy-source {
+  opacity: 0 !important;
   z-index: 0;
 }
 
-/* If WebGL capture fails or the layout just changed, show the live DOM copy. */
+/* If WebGL capture fails or the layout just changed, keep the live DOM copy. */
 .v2-root .bh-hero.bh-copy-fallback .bh-copy-source {
   opacity: 1 !important;
   pointer-events: auto;
   z-index: 2;
+}
+
+/* Fallback: glow the type only — never the portrait. */
+.v2-root .bh-hero.bh-copy-fallback .bh-copy-source .archive-display,
+.v2-root .bh-hero.bh-copy-fallback .bh-copy-source .bh-copy-sub,
+.v2-root .bh-hero.bh-copy-fallback .bh-copy-source .archive-label {
+  filter: drop-shadow(
+    0 0 calc(10px * var(--bh-text-glow, 0.2))
+      rgba(111, 152, 192, calc(0.12 + 0.4 * var(--bh-text-glow, 0.2)))
+  );
+}
+
+.v2-root .bh-hero .v2-hero-portrait {
+  filter: none !important;
 }
 
 .v2-root .bh-copy .archive-display--hero,

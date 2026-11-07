@@ -17,6 +17,7 @@ type ThemeContextValue = {
   theme: V2Theme;
   preference: V2ThemePreference;
   toggleTheme: () => void;
+  setThemePreference: (preference: V2ThemePreference) => void;
 };
 
 const ThemeContext = createContext<ThemeContextValue | null>(null);
@@ -51,9 +52,12 @@ function persistPreference(preference: V2ThemePreference) {
 
 function applyTheme(theme: V2Theme) {
   const root = document.querySelector('.v2-root');
-  if (!root) return;
+  if (!root || !(root instanceof HTMLElement)) return;
   root.classList.toggle('dark', theme === 'dark');
   root.classList.remove('light');
+  // Disk palette clicks must never leave a non-orange UI accent.
+  root.style.removeProperty('--v2-accent-pop');
+  root.style.removeProperty('--v2-accent-blue');
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
@@ -82,6 +86,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     return () => media.removeEventListener('change', syncSystem);
   }, [preference]);
 
+  const setThemePreference = useCallback((next: V2ThemePreference) => {
+    const nextTheme = resolveTheme(next);
+    setPreference(next);
+    setTheme(nextTheme);
+    applyTheme(nextTheme);
+    persistPreference(next);
+  }, []);
+
   const toggleTheme = useCallback(() => {
     setPreference((prev) => {
       const next = PREFERENCE_ORDER[(PREFERENCE_ORDER.indexOf(prev) + 1) % PREFERENCE_ORDER.length];
@@ -94,7 +106,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   }, []);
 
   return (
-    <ThemeContext.Provider value={{ theme, preference, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, preference, toggleTheme, setThemePreference }}>
       {children}
     </ThemeContext.Provider>
   );
@@ -105,7 +117,8 @@ export function useV2Theme() {
     useContext(ThemeContext) ?? {
       theme: 'light' as V2Theme,
       preference: 'system' as V2ThemePreference,
-      toggleTheme: () => {}
+      toggleTheme: () => {},
+      setThemePreference: () => {}
     }
   );
 }

@@ -61,6 +61,8 @@ export const horizonFragmentShader = /* glsl */ `
   uniform float uTime;
   uniform vec3 uCameraPosition;
   uniform vec3 uGlowColor;
+  // 1 = float on paper: premultiply so glow cannot paint a dark plate.
+  uniform float uPaperLit;
   varying vec3 vNormal;
   varying vec3 vWorldPos;
 
@@ -70,7 +72,15 @@ export const horizonFragmentShader = /* glsl */ `
     fresnel = pow(fresnel, 2.5);
     vec3 glowColor = uGlowColor;
     float pulse = sin(uTime * 2.5) * 0.15 + 0.85;
-    gl_FragColor = vec4(glowColor * fresnel * pulse, fresnel * 0.4);
+    vec3 lit = glowColor * fresnel * pulse;
+    float alpha = fresnel * 0.4;
+    if (uPaperLit > 0.5) {
+      float luma = max(lit.r, max(lit.g, lit.b));
+      alpha *= smoothstep(0.02, 0.2, luma);
+      gl_FragColor = vec4(lit * alpha, alpha);
+    } else {
+      gl_FragColor = vec4(lit, alpha);
+    }
   }
 `;
 
@@ -98,6 +108,8 @@ export const diskFragmentShader = /* glsl */ `
   uniform float uDensity;
   uniform float uDiskInner;
   uniform float uDiskOuter;
+  // 1 = float on paper: drop dark outer haze that would tint the page black.
+  uniform float uPaperLit;
 
   varying vec2 vUv;
   varying float vRadius;
@@ -169,11 +181,10 @@ export const diskFragmentShader = /* glsl */ `
       wrapped.y * wrapR
     );
 
+    // Two octaves — four full snoise calls were a major fragment cost on the disc.
     float n1 = snoise(noiseP + vec3(0.0, 0.0, uTime * 0.15));
-    float n2 = snoise(noiseP * 3.0 + vec3(0.8, 0.0, uTime * 0.22));
-    float n3 = snoise(noiseP * 6.0 + vec3(1.5, 0.0, uTime * 0.3));
-    float n4 = snoise(noiseP * 11.0 + vec3(2.2, 0.0, uTime * 0.38));
-    float noiseVal = n1 * 0.38 + n2 * 0.3 + n3 * 0.2 + n4 * 0.12;
+    float n2 = snoise(noiseP * 3.2 + vec3(0.8, 0.0, uTime * 0.22));
+    float noiseVal = n1 * 0.62 + n2 * 0.38;
     noiseVal = (noiseVal + 1.0) * 0.5;
 
     vec3 color = uColorOuter;
@@ -193,7 +204,15 @@ export const diskFragmentShader = /* glsl */ `
     alpha *= (1.0 - smoothstep(0.85, 1.0, normalizedRadius));
     alpha = clamp(alpha, 0.0, 1.0);
 
-    gl_FragColor = vec4(color * brightness, alpha);
+    vec3 lit = color * brightness;
+    if (uPaperLit > 0.5) {
+      float luma = max(lit.r, max(lit.g, lit.b));
+      // Kill near-black outer rings — they read as a rectangular plate on paper.
+      alpha *= smoothstep(0.04, 0.22, luma);
+      gl_FragColor = vec4(lit * alpha, alpha);
+    } else {
+      gl_FragColor = vec4(lit, alpha);
+    }
   }
 `;
 
@@ -230,32 +249,56 @@ export const lensingFragmentShader = /* glsl */ `
       offset += lensOffset(screenPos, holePos1);
     }
 
+    vec4 centerSample = texture2D(tDiffuse, screenPos - offset);
     float r = texture2D(tDiffuse, screenPos - offset * (1.0 + chromaticAberration)).r;
-    float g = texture2D(tDiffuse, screenPos - offset).g;
+    float g = centerSample.g;
     float b = texture2D(tDiffuse, screenPos - offset * (1.0 - chromaticAberration)).b;
 
-    gl_FragColor = vec4(r, g, b, 1.0);
+    // Keep source alpha so transparent stages (desk) do not paint a black plate.
+    gl_FragColor = vec4(r, g, b, centerSample.a);
   }
 `;
 
 export const textPlaneVertexShader = /* glsl */ `
   varying vec2 vUv;
+  varying vec2 vNdc;
   void main() {
     vUv = uv;
-    gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    vec4 clip = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+    vNdc = clip.xy / max(clip.w, 1e-5);
+    gl_Position = clip;
   }
 `;
 
 export const textPlaneFragmentShader = /* glsl */ `
   uniform sampler2D uMap;
   uniform float uOpacity;
+  uniform vec3 uHoleGlowColor;
+  /** Hole center in the same NDC space as the text plane. */
+  uniform vec2 uHoleNdc;
+  uniform float uAspect;
   varying vec2 vUv;
+  varying vec2 vNdc;
 
   void main() {
     vec4 tex = texture2D(uMap, vUv);
     float a = tex.a * uOpacity;
     if (a < 0.01) discard;
-    // Non-premultiplied output for NormalBlending
-    gl_FragColor = vec4(tex.rgb, a);
+
+    // Screen-space light from the singularity onto glyphs only (portrait is not in this map).
+    vec2 d = vNdc - uHoleNdc;
+    d.x *= uAspect;
+    float dist = length(d);
+    // Stronger near the void; reach halved vs prior (σ ∝ 1/√k → k × 4).
+    float spill = exp(-dist * dist * 1.52);
+
+    vec3 glow = uHoleGlowColor;
+    // Readable near the void; still restrained so duo palettes do not wash the name.
+    vec3 lit = mix(tex.rgb, glow, spill * 0.5);
+    lit += glow * spill * 0.65;
+    float edge = smoothstep(0.04, 0.45, a) * (1.0 - smoothstep(0.55, 0.98, a));
+    lit += glow * spill * edge * 1.1;
+
+    gl_FragColor = vec4(clamp(lit, 0.0, 1.25), a);
   }
 `;
