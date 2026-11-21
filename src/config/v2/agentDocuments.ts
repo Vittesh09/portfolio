@@ -299,7 +299,6 @@ export function getPersonJsonLd() {
 export function getCreativeWorksJsonLd() {
   const record = getMachineRecord();
   return record.caseStudies.map((study) => ({
-    '@context': 'https://schema.org',
     '@type': 'CreativeWork',
     name: study.title,
     description: study.contribution,
@@ -313,7 +312,14 @@ export function getCreativeWorksJsonLd() {
 }
 
 export function getHomeJsonLd() {
-  return [getPersonJsonLd(), ...getCreativeWorksJsonLd()];
+  // Safari throws on top-level JSON-LD arrays (`r["@context"].toLowerCase`).
+  // Use @graph so the payload is always a single object.
+  const person = getPersonJsonLd();
+  const { '@context': _context, ...personNode } = person;
+  return {
+    '@context': 'https://schema.org',
+    '@graph': [personNode, ...getCreativeWorksJsonLd()]
+  };
 }
 
 export function getMachineJsonLd() {

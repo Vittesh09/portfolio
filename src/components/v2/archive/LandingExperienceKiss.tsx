@@ -11,6 +11,7 @@ import { HeroCloser, HeroIdentityMark, HeroKicker, TypewriterCloser } from '@/sr
 import { KissStarfield } from '@/src/components/v2/archive/KissStarfield';
 import { HeroPortrait } from '@/src/components/v2/archive/HeroPortrait';
 import { HeroMeta } from '@/src/components/v2/archive/HeroMeta';
+import { FurtherPaths } from '@/src/components/v2/archive/FurtherPaths';
 import { ProjectCard } from '@/src/components/v2/archive/ProjectCard';
 import { type ProjectCardData } from '@/src/config/v2/caseStudies';
 import { siteConfig } from '@/src/config/v2/site';
@@ -112,6 +113,7 @@ export function LandingExperienceKiss({ cards }: { cards: ProjectCardData[] }) {
                 <ProjectCard project={project} index={index} />
               </RevealOnScroll>
             ))}
+            <FurtherPaths className="col-span-full border-t border-border-subtle pt-6" />
           </div>
         </div>
       </section>

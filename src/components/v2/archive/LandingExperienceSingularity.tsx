@@ -20,6 +20,7 @@ import { useMobileLanding } from '@/src/components/v2/ui/useMobileLanding';
 import { HeroCloser, HeroIdentityMark, HeroKicker } from '@/src/components/v2/archive/HeroIntroCopy';
 import { HeroPortrait } from '@/src/components/v2/archive/HeroPortrait';
 import { HeroMeta } from '@/src/components/v2/archive/HeroMeta';
+import { FurtherPaths } from '@/src/components/v2/archive/FurtherPaths';
 import { ProjectCard } from '@/src/components/v2/archive/ProjectCard';
 import { type ProjectCardData } from '@/src/config/v2/caseStudies';
 import { heroCloser, v2Path } from '@/src/config/v2/profile';
@@ -146,6 +147,7 @@ export function LandingExperienceSingularity({ cards }: { cards: ProjectCardData
                 <ProjectCard project={project} index={index} />
               </motion.article>
             ))}
+            <FurtherPaths className="col-span-full border-t border-border-subtle pt-6" />
           </div>
         </div>
       </section>

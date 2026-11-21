@@ -10,37 +10,121 @@ import {
 } from '@/src/components/v2/singularity/lib/params';
 
 /**
- * Page-colour veil with a rounded hole whose edge is blurred, wobbled and
- * grain-dissolved — the canvas reads as a print fading into paper.
+ * Plane window: straight sides, large squircle corners.
+ * Inset leaves room for the blur to finish inside the stage, the same way
+ * the live veil does.
+ */
+function squirclePath(width: number, height: number, inset: number) {
+  const w = Math.max(32, width - inset * 2);
+  const h = Math.max(32, height - inset * 2);
+  const r = Math.min(w, h) * 0.34;
+  const c = r * 0.82;
+  const right = inset + w;
+  const bottom = inset + h;
+  return [
+    `M${inset + r} ${inset}`,
+    `H${right - r}`,
+    `C${right - r + c} ${inset} ${right} ${inset + r - c} ${right} ${inset + r}`,
+    `V${bottom - r}`,
+    `C${right} ${bottom - r + c} ${right - r + c} ${bottom} ${right - r} ${bottom}`,
+    `H${inset + r}`,
+    `C${inset + r - c} ${bottom} ${inset} ${bottom - r + c} ${inset} ${bottom - r}`,
+    `V${inset + r}`,
+    `C${inset} ${inset + r - c} ${inset + r - c} ${inset} ${inset + r} ${inset}`,
+    'Z'
+  ].join('');
+}
+
+/**
+ * Same picture as the window, blurred, so the canvas box fades instead of cutting.
+ */
+function DeskContentBlur() {
+  useEffect(() => {
+    const canvas = document.querySelector<HTMLCanvasElement>('.desk-stage-content-blur');
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx) return;
+    let raf = 0;
+    let alive = true;
+    const tick = () => {
+      if (!alive) return;
+      raf = requestAnimationFrame(tick);
+      const hero = canvas.parentElement;
+      const src = hero?.querySelector<HTMLCanvasElement>('.bh-canvas');
+      if (!src || !hero || src.width < 2) return;
+      const width = hero.clientWidth;
+      const height = hero.clientHeight;
+      if (width < 2 || height < 2) return;
+      const dpr = Math.min(1.5, window.devicePixelRatio || 1);
+      const bw = Math.round(width * dpr);
+      const bh = Math.round(height * dpr);
+      if (canvas.width !== bw || canvas.height !== bh) {
+        canvas.width = bw;
+        canvas.height = bh;
+      }
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      ctx.drawImage(src, 0, 0, width, height);
+    };
+    raf = requestAnimationFrame(tick);
+    return () => {
+      alive = false;
+      cancelAnimationFrame(raf);
+    };
+  }, []);
+
+  return <canvas className="desk-stage-content-blur" aria-hidden="true" />;
+}
+
+/**
+ * Paper veil with a squircle hole. The edge is blurred and grain-dissolved,
+ * the same filter as the live desk, so the picture fades like a plane window.
  * No viewBox: filter values stay in CSS px, so the edge never stretches.
  */
 function DeskStageFeather() {
-  // Fixed id: one stage per page, and useId drifted between server and client here.
   const id = 'desk-feather';
+  const svgRef = useRef<SVGSVGElement>(null);
+  const pathRef = useRef<SVGPathElement>(null);
+
+  useLayoutEffect(() => {
+    const svg = svgRef.current;
+    const path = pathRef.current;
+    if (!svg || !path) return;
+    const draw = () => {
+      const stage = svg.parentElement;
+      if (!stage) return;
+      const width = stage.clientWidth;
+      const height = stage.clientHeight;
+      if (width < 2 || height < 2) return;
+      const inset =
+        Number.parseFloat(getComputedStyle(stage).getPropertyValue('--desk-window-inset')) || 40;
+      path.setAttribute('d', squirclePath(width, height, inset));
+    };
+    draw();
+    const observer = new ResizeObserver(draw);
+    observer.observe(svg.parentElement ?? svg);
+    return () => observer.disconnect();
+  }, []);
+
   return (
-    <svg className="desk-stage-feather" aria-hidden="true" focusable="false">
+    <svg ref={svgRef} className="desk-stage-feather" aria-hidden="true" focusable="false">
       <defs>
         <filter
           id={`${id}-f`}
-          x="-20%"
-          y="-20%"
-          width="140%"
-          height="140%"
+          x="-30%"
+          y="-30%"
+          width="160%"
+          height="160%"
           colorInterpolationFilters="sRGB"
         >
-          <feGaussianBlur in="SourceGraphic" stdDeviation="14" result="soft" />
+          <feGaussianBlur in="SourceGraphic" stdDeviation="16" result="soft" />
           <feTurbulence type="fractalNoise" baseFrequency="0.011" numOctaves="2" seed="7" result="wobble" />
-          <feDisplacementMap in="soft" in2="wobble" scale="20" xChannelSelector="R" yChannelSelector="G" result="wavy" />
+          <feDisplacementMap in="soft" in2="wobble" scale="18" xChannelSelector="R" yChannelSelector="G" result="wavy" />
           <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="3" result="grain" />
-          <feDisplacementMap in="wavy" in2="grain" scale="20" xChannelSelector="R" yChannelSelector="B" />
+          <feDisplacementMap in="wavy" in2="grain" scale="22" xChannelSelector="R" yChannelSelector="B" />
         </filter>
+        <path id={`${id}-shape`} ref={pathRef} />
         <mask id={`${id}-m`} maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%">
           <rect width="100%" height="100%" fill="#fff" />
-          <rect
-            className="desk-stage-feather-hole"
-            fill="#000"
-            filter={`url(#${id}-f)`}
-          />
+          <use href={`#${id}-shape`} fill="#000" filter={`url(#${id}-f)`} />
         </mask>
       </defs>
       <rect className="desk-stage-feather-veil" width="100%" height="100%" mask={`url(#${id}-m)`} />
@@ -245,6 +329,7 @@ export function DeskSingularityStage() {
           aria-label="Interactive singularity. Drag to move, click to change color."
           onClick={onHeroClick}
         >
+          {useWebGl ? <DeskContentBlur /> : null}
           {clientReady && useWebGl ? (
             <BlackHoleLazy
               heroRef={heroRef}
