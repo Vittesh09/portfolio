@@ -1,4 +1,4 @@
-import { AboutExperience } from '@/src/components/v2/archive/AboutExperience';
+import { DeskAbout } from '@/src/components/v2/desk/DeskAbout';
 import { v2PageMetadata } from '@/src/config/v2/seo';
 
 export const metadata = {
@@ -10,6 +10,6 @@ export const metadata = {
   })
 };
 
-export default function V2AboutPage() {
-  return <AboutExperience />;
+export default function AboutPage() {
+  return <DeskAbout />;
 }

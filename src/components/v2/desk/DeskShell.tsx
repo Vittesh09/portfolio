@@ -7,18 +7,19 @@ import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
 import { DeskFooterMeta } from '@/src/components/v2/desk/DeskFooterMeta';
 import { DeskSmoothScroll } from '@/src/components/v2/desk/DeskSmoothScroll';
 import { useV2Theme } from '@/src/components/v2/layout/ThemeProvider';
+import { isDeskPath, normalizePath } from '@/src/config/v2/routes';
 import '@/src/styles/desk.css';
 
 const TABS = [
   {
-    href: '/desk',
+    href: '/',
     label: 'Home',
-    match: (path: string) => path === '/desk' || path === '/desk/'
+    match: (path: string) => path === '/'
   },
   {
-    href: '/desk/about',
+    href: '/about/',
     label: 'About',
-    match: (path: string) => path.startsWith('/desk/about')
+    match: (path: string) => path.startsWith('/about')
   }
 ] as const;
 
@@ -29,21 +30,13 @@ const LAND_HIDDEN = { opacity: 0, y: 14, filter: 'blur(8px)' };
 const LAND_SHOWN = { opacity: 1, y: 0, filter: 'blur(0px)', transitionEnd: { filter: 'none' } };
 const land = (delay: number, duration = 0.9): Transition => ({ duration, delay, ease: EASE_OUT });
 
-function normalizePath(path: string) {
-  return path.endsWith('/') ? path : `${path}/`;
-}
-
-function isDeskPath(path: string) {
-  const p = normalizePath(path);
-  return p === '/desk/' || p.startsWith('/desk/');
-}
 
 /**
  * Persistent desk chrome (mounted once by the desk layout). Nav + footer stay
  * put; only the page between them fades out/in on desk-to-desk navigation.
  */
 export function DeskShell({ children }: { children: ReactNode }) {
-  const pathname = usePathname() || '/desk';
+  const pathname = usePathname() || '/';
   const router = useRouter();
   const reduce = useReducedMotion();
   const navRef = useRef<HTMLElement>(null);

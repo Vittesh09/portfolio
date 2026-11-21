@@ -38,7 +38,7 @@ export function ArchiveHeader() {
   const [visible, setVisible] = useState(true);
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
-  const isHome = pathname === v2Path('/') || pathname === '/' || pathname === '/v2' || pathname === '/v2/';
+  const isHome = pathname === v2Path('/') || pathname === '/v2';
   const isMobile = useMobileLanding();
   const lastY = useRef(0);
   const embeddedRef = useRef(false);

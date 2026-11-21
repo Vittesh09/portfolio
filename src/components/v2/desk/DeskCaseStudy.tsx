@@ -347,7 +347,7 @@ export function DeskCaseStudy({
     <>
       <article className="desk-frame desk-case">
         <p className="desk-case-back">
-          <Link href="/desk/">← Back</Link>
+          <Link href="/">← Back</Link>
         </p>
 
         <header className="desk-case-hero">
@@ -399,7 +399,7 @@ export function DeskCaseStudy({
 
         <footer className="desk-case-next">
           <p className="desk-case-label">Next</p>
-          <Link href={`/desk/work/${nextProject.slug}/`} className="desk-case-next-link">
+          <Link href={`/work/${nextProject.slug}/`} className="desk-case-next-link">
             {nextProject.title}
           </Link>
         </footer>

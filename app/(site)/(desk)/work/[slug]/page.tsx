@@ -1,5 +1,5 @@
 import { notFound } from 'next/navigation';
-import { CaseStudyExperience } from '@/src/components/v2/archive/CaseStudyExperience';
+import { DeskCaseStudy } from '@/src/components/v2/desk/DeskCaseStudy';
 import { getAllSlugs, getProject, isPublished, projects } from '@/src/config/v2/caseStudies';
 import { v2PageMetadata } from '@/src/config/v2/seo';
 
@@ -20,16 +20,17 @@ export async function generateMetadata({ params }: PageProps) {
   });
 }
 
-export default async function V2CaseStudyPage({ params }: PageProps) {
+export default async function CaseStudyPage({ params }: PageProps) {
   const { slug } = await params;
   const project = getProject(slug);
   if (!project) notFound();
+
   const open = projects.filter(isPublished);
   const index = open.findIndex((item) => item.slug === project.slug);
   const next = open[(index + 1) % open.length];
+
   return (
-    <CaseStudyExperience
-      key={project.slug}
+    <DeskCaseStudy
       project={project}
       nextProject={{ slug: next.slug, title: next.title }}
     />

@@ -11,11 +11,15 @@ export function isUnconfirmed(value: string | null | undefined) {
 }
 
 export const SITE_URL = 'https://vittesh.com';
-/** Live site is at the origin. `/v2` URLs redirect here. */
+/** Canonical origin base for SEO and agent docs (the live desk site is at the root). */
 export const V2_BASE = '';
 
+/** The previous (archive) version of the site lives under `/v2`. */
+export const ARCHIVE_BASE = '/v2';
+
+/** Link inside the archive version (`/v2/...`). */
 export function v2Path(path = '/') {
-  const base = V2_BASE.replace(/\/$/, '');
+  const base = ARCHIVE_BASE.replace(/\/$/, '');
   if (path.startsWith('http') || path.startsWith('/assets/')) return path;
   const [raw, hash] = path.split('#');
   const suffix = raw === '' || raw === '/' ? '/' : raw.startsWith('/') ? raw : `/${raw}`;
@@ -207,7 +211,7 @@ export const profile = {
   ],
   agentNav: {
     label: 'For agents',
-    href: v2Path('/machine/'),
+    href: '/machine/',
     title: 'Machine-readable version of this portfolio for AI agents'
   }
 } as const;

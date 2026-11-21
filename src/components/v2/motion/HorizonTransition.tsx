@@ -8,28 +8,17 @@ import {
   useState,
   type ReactNode
 } from 'react';
+import { isDeskPath, normalizePath } from '@/src/config/v2/routes';
 
 type Phase = 'idle' | 'cover' | 'swap' | 'reveal';
 type Wipe = 'disc' | 'blur';
 
-function normalizePath(path: string) {
-  if (!path) return '/';
-  return path.endsWith('/') ? path : `${path}/`;
-}
-
-function isDeskPath(path: string) {
-  const p = normalizePath(path).replace(/^\/v2(?=\/)/, '');
-  return p === '/desk/' || p.startsWith('/desk/');
-}
-
 function routeLabel(path: string) {
   const p = normalizePath(path).replace(/^\/v2(?=\/)/, '') || '/';
-  if (p === '/' || p === '/v2/') return 'Home';
-  if (p.startsWith('/about') || p.startsWith('/v2/about')) return 'About';
-  if (p.startsWith('/tldr') || p.startsWith('/v2/tldr')) return 'TL;DR';
-  if (p.startsWith('/desk/work')) return 'Work';
-  if (p.startsWith('/desk')) return 'Desk';
-  if (p.startsWith('/work/') || p.startsWith('/v2/work/')) return 'Work';
+  if (p === '/') return 'Home';
+  if (p.startsWith('/about')) return 'About';
+  if (p.startsWith('/tldr')) return 'TL;DR';
+  if (p.startsWith('/work/')) return 'Work';
   if (p.startsWith('/machine')) return 'Machine';
   if (p.startsWith('/classic/workbench')) return 'Workbench';
   if (p.startsWith('/classic')) return 'Classic';

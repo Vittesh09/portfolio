@@ -9,6 +9,7 @@ import { HorizonTransition } from '@/src/components/v2/motion/HorizonTransition'
 import { useScrollToHashOnMount } from '@/src/components/v2/ui/HashNavLink';
 import { ToastProvider } from '@/src/components/v2/ui/Toast';
 import { FOOTER_LANDSCAPE_DARK, FOOTER_LANDSCAPE_LIGHT } from '@/src/config/v2/footerMedia';
+import { isDeskPath } from '@/src/config/v2/routes';
 
 function revealV2Root() {
   document.querySelector('.v2-root')?.classList.remove('v2-media-pending');
@@ -81,7 +82,7 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const isMachine = pathname?.includes('/machine') ?? false;
   const isSingularityLab = pathname?.includes('/singularity') ?? false;
-  const isDeskLab = pathname === '/desk' || pathname?.startsWith('/desk/') || false;
+  const isDeskLab = isDeskPath(pathname ?? '');
   const isTldr = pathname === '/tldr' || pathname === '/tldr/' || pathname === '/v2/tldr' || pathname === '/v2/tldr/';
   useScrollToHashOnMount();
 

@@ -1,4 +1,4 @@
-import { LandingExperienceSingularity } from '@/src/components/v2/archive/LandingExperienceSingularity';
+import { DeskHome } from '@/src/components/v2/desk/DeskHome';
 import { getProjectCards } from '@/src/config/v2/caseStudies';
 import { metaDescription } from '@/src/config/v2/profile';
 import { v2PageMetadata } from '@/src/config/v2/seo';
@@ -11,6 +11,6 @@ export const metadata = {
   })
 };
 
-export default function V2HomePage() {
-  return <LandingExperienceSingularity cards={getProjectCards()} />;
+export default function HomePage() {
+  return <DeskHome cards={getProjectCards()} />;
 }

@@ -2,10 +2,12 @@
 
 ## Critical
 
-- **Production** is the archive site at `/` (`app/(site)/`). Homepage is the singularity landing.
-- **Previous portfolio** lives under `/legacy/` (`app/legacy/`). Do not replace it.
-- Lab tools: `/classic`, `/singularity`, `/classic/workbench`, `/desk`. `/v2/*` redirects to the same paths without the prefix.
-- Case studies to edit are the pages under `app/(site)/work/` and copy in `src/config/v2/caseStudies.ts`.
+- **Production** is the desk site at `/` (`app/(site)/(desk)/`, components in `src/components/v2/desk/`): `/`, `/about/`, `/work/[slug]/`.
+- **Previous version** (singularity archive) lives under `/v2/` (`app/(site)/v2/`). Internal archive links go through `v2Path()`.
+- **Oldest portfolio** lives under `/legacy/` (`app/legacy/`). Do not replace it.
+- Lab tools: `/classic`, `/singularity`, `/classic/workbench`. `/desk/*` redirects to the same paths at the root.
+- Route checks (`isDeskPath`) live in `src/config/v2/routes.ts`.
+- Case-study copy lives in `src/config/v2/caseStudies.ts` (shared by `/work/[slug]` and `/v2/work/[slug]`).
 - Classic orbit / particle landing: `/classic`.
 
 ## Sources of truth
@@ -34,23 +36,22 @@ Hero → Trust → Why → Work → About → CTA
 
 | Path | Purpose |
 |------|---------|
-| `/` | **Primary homepage** (singularity landing) |
-| `/about` | About |
+| `/` | **Primary homepage** (desk: singularity stage + horizontal work rail) |
+| `/about` | About (desk) |
+| `/work/[slug]` | Case study (desk) |
+| `/v2/` | Previous homepage (singularity archive landing) |
+| `/v2/about` | Previous about |
+| `/v2/work/[slug]` | Previous case-study template |
 | `/tldr` | One-screen summary (identity, work, contact) |
-| `/work/[slug]` | Case-study templates (published slugs in `caseStudies.ts`) |
 | `/classic` | Archived orbit / particle landing (lab) |
 | `/classic/workbench` | Archived workbench (lab) |
 | `/singularity` | Interactive singularity playground (lab) |
-| `/desk` | Desk lab — singularity stage + horizontal work rail (not live) |
-| `/desk/about` | Desk lab about |
-| `/desk/work` | Redirects to `/desk` |
-| `/desk/work/[slug]` | Desk lab case study (separate from live `/work/[slug]`) |
+| `/desk/*` | Redirects to the same path at the root |
 | `/machine` | Plain-text agent bio |
 | `/legacy/` | Previous portfolio |
 | `/legacy/about/` | Previous about |
 | `/legacy/work/` | Previous selected work |
 | `/legacy/work-pages/virtual-humans/` | Previous Virtual Humans case study |
-| `/v2/*` | Redirects to the same path without `/v2` |
 
 ## Preview
 
@@ -63,4 +64,4 @@ npm run dev
 - Case study: `http://localhost:3000/work/vr-eeg-analytics/`
 - Previous site: `http://localhost:3000/legacy/`
 - Classic: `http://localhost:3000/classic/`
-- Desk case study: `http://localhost:3000/desk/work/vr-eeg-analytics/`
+- Previous version: `http://localhost:3000/v2/`

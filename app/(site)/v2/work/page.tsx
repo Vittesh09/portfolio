@@ -7,7 +7,7 @@ export default function WorkIndexPage() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace('/#work');
+    router.replace('/v2/#work');
   }, [router]);
 
   return null;

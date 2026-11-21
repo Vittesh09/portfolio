@@ -4,6 +4,7 @@ import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import { useKissMode } from '@/src/components/v2/layout/KissModeProvider';
 import { useLenisSmoothScroll } from '@/src/components/v2/motion/useLenisSmoothScroll';
+import { isDeskPath } from '@/src/config/v2/routes';
 
 function collectScrollTitles(root: ParentNode) {
   return Array.from(
@@ -304,7 +305,7 @@ function AmbientCursor({ enabled }: { enabled: boolean }) {
 export function ExperienceMotion() {
   const pathname = usePathname();
   const isMachine = pathname?.includes('/machine') ?? false;
-  const isDesk = pathname === '/desk' || (pathname?.startsWith('/desk/') ?? false);
+  const isDesk = isDeskPath(pathname ?? '');
   const { kissMode } = useKissMode();
 
   useLayoutEffect(() => {

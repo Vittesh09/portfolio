@@ -65,7 +65,7 @@ export function DeskWalkmanCard({ card }: { card: ProjectCardData }) {
       variants={reduce ? undefined : HOVER}
       transition={SPRING}
     >
-      <Link href={`/desk/work/${card.slug}/`} className="desk-product">
+      <Link href={`/work/${card.slug}/`} className="desk-product">
         <div className="desk-product-shell">{media}</div>
         {copy}
       </Link>
