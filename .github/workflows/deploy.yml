@@ -30,6 +30,10 @@ jobs:
           mkdir -p out
           if [ -f public/.htaccess ]; then cp public/.htaccess out/.htaccess; fi
           if [ -f public/contact.php ]; then cp public/contact.php out/contact.php; fi
+          # Hashed build files never change: cache them for a year.
+          if [ -d out/_next/static ]; then
+            printf '<IfModule mod_headers.c>\n  Header set Cache-Control "public, max-age=31536000, immutable"\n</IfModule>\n' > out/_next/static/.htaccess
+          fi
 
       - name: Deploy via SSH (rsync)
         uses: appleboy/ssh-action@v1.0.3

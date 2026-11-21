@@ -2,10 +2,11 @@
 
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 import { Lock } from 'lucide-react';
 import { useRef, type CSSProperties, type ReactNode } from 'react';
 import { type ProjectCardData } from '@/src/config/v2/caseStudies';
-import { noOrphan, v2Path } from '@/src/config/v2/profile';
+import { noOrphan, siteHref, v2Path } from '@/src/config/v2/profile';
 import { triggerHaptic } from '@/src/components/v2/ui/haptics';
 import { IosHapticSwitch } from '@/src/components/v2/ui/IosHapticSwitch';
 import { useToast } from '@/src/components/v2/ui/Toast';
@@ -83,6 +84,8 @@ function ProjectCardBody({
 }
 
 export function ProjectCard({ project, index }: { project: ProjectCardData; index: number }) {
+  // Outside /v2 (the /classic lab) the card opens the live case study.
+  const pathname = usePathname();
   const linkRef = useRef<HTMLAnchorElement>(null);
   const { showToast } = useToast();
   const locked = Boolean(project.comingSoon);
@@ -119,7 +122,7 @@ export function ProjectCard({ project, index }: { project: ProjectCardData; inde
     <div className="archive-project-card relative flex flex-col md:col-span-8 md:col-start-3 md:-mx-24">
       <Link
         ref={linkRef}
-        href={v2Path(`/work/${project.slug}/`)}
+        href={siteHref(v2Path(`/work/${project.slug}/`), pathname)}
         className="group flex flex-col"
         onClick={() => triggerHaptic('medium')}
       >

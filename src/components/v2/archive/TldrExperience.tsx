@@ -7,15 +7,15 @@ import { useToast } from '@/src/components/v2/ui/Toast';
 import { triggerHaptic } from '@/src/components/v2/ui/haptics';
 import { COPY_EMAIL_SOUND, playUiSound } from '@/src/components/v2/ui/playUiSound';
 import { type ProjectCardData } from '@/src/config/v2/caseStudies';
-import { noOrphan, v2Path, yearsExperience } from '@/src/config/v2/profile';
+import { livePath, noOrphan, yearsExperience } from '@/src/config/v2/profile';
 import { siteConfig } from '@/src/config/v2/site';
 
 const menu = [
-  { label: 'Home', href: v2Path('/'), external: false },
-  { label: 'Work', href: v2Path('/#work'), external: false },
-  { label: 'About', href: v2Path('/about/'), external: false },
+  { label: 'Home', href: livePath('/'), external: false },
+  { label: 'Work', href: livePath('/#work'), external: false },
+  { label: 'About', href: livePath('/about/'), external: false },
   { label: 'Resume', href: siteConfig.links.resume, external: true },
-  { label: 'Contact', href: v2Path('/#contact'), external: false }
+  { label: 'Contact', href: livePath('/#contact'), external: false }
 ];
 
 function TldrWorkLine({ project }: { project: ProjectCardData }) {
@@ -50,7 +50,7 @@ function TldrWorkLine({ project }: { project: ProjectCardData }) {
   return (
     <li>
       <Link
-        href={v2Path(`/work/${project.slug}/`)}
+        href={livePath(`/work/${project.slug}/`)}
         className="v2-tldr-line"
         onClick={() => triggerHaptic('medium')}
       >
@@ -101,7 +101,7 @@ export function TldrExperience({ cards }: { cards: ProjectCardData[] }) {
   return (
     <article className="v2-tldr">
       <header className="v2-tldr-bar">
-        <Link href={v2Path('/')} className="v2-tldr-wordmark">
+        <Link href={livePath('/')} className="v2-tldr-wordmark">
           {siteConfig.name}
         </Link>
         <button

@@ -36,7 +36,22 @@ function isActionClick(event: MouseEvent) {
 /** Plays menu-click.wav when a control is activated, not on empty space or text. */
 export function MenuClickSound() {
   useEffect(() => {
-    preloadUiSound(MENU_CLICK_SOUND);
+    // Keep the 87 KB click sound out of the page load: fetch it once the page is
+    // loaded and idle, or on the first press if that comes sooner.
+    let preloaded = false;
+    let idle = 0;
+    const preload = () => {
+      if (preloaded) return;
+      preloaded = true;
+      preloadUiSound(MENU_CLICK_SOUND);
+    };
+    const preloadWhenIdle = () => {
+      idle = window.requestIdleCallback?.(preload, { timeout: 4000 }) ?? 0;
+      if (!idle) preload();
+    };
+    if (document.readyState === 'complete') preloadWhenIdle();
+    else window.addEventListener('load', preloadWhenIdle, { once: true });
+    document.addEventListener('pointerdown', preload, { capture: true, once: true });
 
     const onClick = (event: MouseEvent) => {
       if (!isActionClick(event)) return;
@@ -44,7 +59,12 @@ export function MenuClickSound() {
     };
 
     document.addEventListener('click', onClick, true);
-    return () => document.removeEventListener('click', onClick, true);
+    return () => {
+      document.removeEventListener('click', onClick, true);
+      document.removeEventListener('pointerdown', preload, true);
+      window.removeEventListener('load', preloadWhenIdle);
+      if (idle) window.cancelIdleCallback(idle);
+    };
   }, []);
 
   return null;

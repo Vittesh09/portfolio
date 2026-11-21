@@ -80,6 +80,7 @@ export function DeskWorkRail({
   label = 'Selected work, scroll horizontally',
   stepLabel = 'project',
   resumeHref,
+  id,
   children
 }: {
   cards?: ProjectCardData[];
@@ -88,6 +89,8 @@ export function DeskWorkRail({
   label?: string;
   stepLabel?: string;
   resumeHref?: string;
+  /** Anchor id for the section (the home rail is `#work`). */
+  id?: string;
   children?: ReactNode;
 }) {
   const railRef = useRef<HTMLDivElement>(null);
@@ -271,7 +274,7 @@ export function DeskWorkRail({
   };
 
   return (
-    <section ref={sectionRef} className="desk-work-rail" aria-labelledby={headingId}>
+    <section ref={sectionRef} id={id} className="desk-work-rail" aria-labelledby={headingId}>
       <div className="desk-work-heading-row">
         <h2 id={headingId} className="desk-work-heading">
           {heading}

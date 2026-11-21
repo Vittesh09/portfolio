@@ -185,9 +185,25 @@ export function DeskSmoothScroll({
   }, [smooth, target]);
 
   useEffect(() => {
-    target.jump(0);
-    smooth.jump(0);
-    if (wrapperRef.current) wrapperRef.current.scrollTop = 0;
+    const wrapper = wrapperRef.current;
+    // Land on `#hash` targets (e.g. `/#work` from the labs), otherwise the top.
+    const hash = window.location.hash.replace(/^#/, '');
+    const anchor = hash ? document.getElementById(decodeURIComponent(hash)) : null;
+    let top = 0;
+    if (wrapper && anchor && wrapper.contains(anchor)) {
+      const navBottom =
+        Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--desk-nav-bottom')) ||
+        72;
+      top =
+        anchor.getBoundingClientRect().top -
+        wrapper.getBoundingClientRect().top +
+        wrapper.scrollTop -
+        navBottom;
+      top = Math.max(0, Math.min(top, wrapper.scrollHeight - wrapper.clientHeight));
+    }
+    target.jump(top);
+    smooth.jump(top);
+    if (wrapper) wrapper.scrollTop = top;
   }, [resetKey, smooth, target]);
 
   return (

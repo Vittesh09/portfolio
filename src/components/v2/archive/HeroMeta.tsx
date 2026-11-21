@@ -1,6 +1,9 @@
+'use client';
+
+import { usePathname } from 'next/navigation';
 import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
 import { siteConfig } from '@/src/config/v2/site';
-import { v2Path } from '@/src/config/v2/profile';
+import { siteHref, v2Path } from '@/src/config/v2/profile';
 
 function Label({ children }: { children: React.ReactNode }) {
   return <p className="archive-label text-text-muted">{children}</p>;
@@ -11,6 +14,8 @@ type HeroMetaProps = {
 };
 
 export function HeroMeta({ workHrefClassName }: HeroMetaProps) {
+  // Outside /v2 (the /classic lab) the work link points at the live site.
+  const pathname = usePathname();
   return (
     <>
       <div className="md:col-span-3">
@@ -37,7 +42,7 @@ export function HeroMeta({ workHrefClassName }: HeroMetaProps) {
       </div>
       <div className="flex items-end md:col-span-3 md:justify-end">
         <HashNavLink
-          href={v2Path('/#work')}
+          href={siteHref(v2Path('/#work'), pathname)}
           className={
             workHrefClassName ??
             'archive-label inline-flex items-center gap-3 bg-white px-5 py-3 text-black'

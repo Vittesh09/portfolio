@@ -17,6 +17,30 @@ export const V2_BASE = '';
 /** The previous (archive) version of the site lives under `/v2`. */
 export const ARCHIVE_BASE = '/v2';
 
+/**
+ * Link on the live (desk) site. Takes archive-style paths, so archive pieces shown
+ * outside `/v2` (labs, /tldr, /machine, 404) can point at the live site instead.
+ * The live site has no contact section, so `/#contact` becomes an email link.
+ */
+export function livePath(path = '/') {
+  if (path.startsWith('http') || path.startsWith('mailto:') || path.startsWith('/assets/')) return path;
+  const [raw, hash] = path.split('#');
+  if (hash === 'contact') return `mailto:${profile.email}`;
+  const suffix = raw === '' || raw === '/' ? '/' : raw.startsWith('/') ? raw : `/${raw}`;
+  const url = suffix === '/' ? '/' : suffix.endsWith('/') ? suffix : `${suffix}/`;
+  return hash ? `${url}#${hash}` : url;
+}
+
+/**
+ * An archive link as seen from `pathname`: unchanged inside `/v2`, rewritten to the
+ * live site everywhere else.
+ */
+export function siteHref(href: string, pathname: string | null | undefined) {
+  if (!href.startsWith(ARCHIVE_BASE)) return href;
+  if (pathname === ARCHIVE_BASE || pathname?.startsWith(`${ARCHIVE_BASE}/`)) return href;
+  return livePath(href.slice(ARCHIVE_BASE.length) || '/');
+}
+
 /** Link inside the archive version (`/v2/...`). */
 export function v2Path(path = '/') {
   const base = ARCHIVE_BASE.replace(/\/$/, '');

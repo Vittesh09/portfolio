@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { v2Path } from '@/src/config/v2/profile';
+import { livePath } from '@/src/config/v2/profile';
 import { useRef } from 'react';
 import { BlackHoleLazy } from '@/src/components/v2/singularity/BlackHoleLazy';
 import { useSingularityColorClick } from '@/src/components/v2/singularity/hooks/useSingularityColorClick';
@@ -35,7 +35,8 @@ export function NotFoundExperience() {
             <p className="notfound-line">Only those who wander discover what they’re seeking.</p>
           </div>
           <div className="notfound-links">
-            <Link href={v2Path('/')} className="archive-label notfound-home">
+            {/* Always back to the live (desk) site, not the archive. */}
+            <Link href={livePath('/')} className="archive-label notfound-home">
               Home
             </Link>
           </div>

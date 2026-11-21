@@ -26,15 +26,15 @@ const TABS = [
 const EASE_OUT = [0.16, 1, 0.3, 1] as const;
 const EASE_IN = [0.4, 0, 1, 1] as const;
 
+// First-load entrance (nav, page, footer) is CSS (`.desk-enter` in desk.css): it
+// starts at first paint instead of waiting for hydration, so the copy is visible
+// (and counted as painted) right away. Route changes below stay on Motion.
 // Opacity + transform only: both stay on the compositor. Animating `filter: blur()`
 // over the live WebGL stage re-rasterises it every frame and stutters.
-const LAND_HIDDEN = { opacity: 0, y: 12 };
-const LAND_SHOWN = { opacity: 1, y: 0 };
 const PAGE_OUT = { opacity: 0, y: -6 };
 const PAGE_IN = { opacity: 1, y: 0 };
 const OUT_TRANSITION: Transition = { duration: 0.22, ease: EASE_IN };
 const IN_TRANSITION: Transition = { duration: 0.5, ease: EASE_OUT };
-const land = (delay: number, duration = 0.9): Transition => ({ duration, delay, ease: EASE_OUT });
 
 
 /**
@@ -157,19 +157,10 @@ export function DeskShell({ children }: { children: ReactNode }) {
     void animatePage(page, PAGE_IN, IN_TRANSITION);
   }, [pathname, animatePage, pageScope, reduce]);
 
-  const landInitial = reduce ? false : LAND_HIDDEN;
-
   return (
     <div ref={rootRef} className={`desk-root${hideNav ? ' desk-root--no-nav' : ''}`}>
       {hideNav ? null : (
-        <motion.nav
-          ref={navRef}
-          className="desk-nav"
-          aria-label="Desk"
-          initial={reduce ? false : { opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={land(0.05, 0.75)}
-        >
+        <nav ref={navRef} className="desk-nav desk-enter desk-enter--nav" aria-label="Desk">
           <div className="desk-nav-pill">
             {TABS.map((tab) => {
               const current = tab.match(pathname);
@@ -192,28 +183,18 @@ export function DeskShell({ children }: { children: ReactNode }) {
               );
             })}
           </div>
-        </motion.nav>
+        </nav>
       )}
       <div className="desk-edge desk-edge--bottom" aria-hidden="true" />
       <DeskSmoothScroll resetKey={pathname}>
-        <motion.div
-          className="desk-viewport"
-          initial={landInitial}
-          animate={LAND_SHOWN}
-          transition={land(0.15)}
-        >
+        <div className="desk-viewport desk-enter desk-enter--page">
           <div ref={pageScope} className="desk-page">
             {children}
           </div>
-        </motion.div>
-        <motion.footer
-          className="desk-foot"
-          initial={landInitial}
-          animate={LAND_SHOWN}
-          transition={land(0.35, 0.8)}
-        >
+        </div>
+        <footer className="desk-foot desk-enter desk-enter--foot">
           <DeskFooterMeta />
-        </motion.footer>
+        </footer>
       </DeskSmoothScroll>
     </div>
   );

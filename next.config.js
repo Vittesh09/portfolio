@@ -13,7 +13,9 @@ const nextConfig = {
     removeConsole: process.env.NODE_ENV === 'production' ? { exclude: ['error', 'warn'] } : false
   },
   experimental: {
-    optimizePackageImports: ['lucide-react', 'framer-motion', 'three']
+    optimizePackageImports: ['lucide-react', 'framer-motion', 'three'],
+    // Inline page CSS into the HTML: no render-blocking stylesheet round trips.
+    inlineCss: true
   },
   turbopack: {
     root: path.join(__dirname)

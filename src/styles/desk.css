@@ -208,6 +208,102 @@
   width: min(100%, calc(var(--desk-stage-max-h) * var(--desk-stage-ratio)));
 }
 
+/*
+  First-load entrance, in CSS so it starts at first paint (no wait for hydration):
+  nav drops in, page and footer fade up, and the home intro lines blur into focus,
+  staggered. Same timings and ease-out curves the Motion version used.
+  Start opacity is 0.001, not 0: identical to the eye, but Chrome counts a fully
+  transparent element as unpainted, which pushed LCP behind the whole fade.
+*/
+@keyframes desk-enter-up {
+  from {
+    opacity: 0.001;
+    transform: translate3d(0, 12px, 0);
+  }
+}
+
+@keyframes desk-enter-down {
+  from {
+    opacity: 0.001;
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+@keyframes desk-enter-focus {
+  from {
+    filter: blur(6px);
+    opacity: 0.001;
+    transform: translate3d(0, 10px, 0);
+  }
+}
+
+.desk-enter--nav {
+  animation: desk-enter-down 0.75s cubic-bezier(0.16, 1, 0.3, 1) 0.05s both;
+}
+
+.desk-enter--page {
+  animation: desk-enter-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) 0.15s both;
+}
+
+.desk-enter--foot {
+  animation: desk-enter-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.35s both;
+}
+
+.desk-enter-lines > * {
+  animation: desk-enter-focus 0.8s cubic-bezier(0.215, 0.61, 0.355, 1) both;
+}
+
+.desk-enter-lines > :nth-child(1) {
+  animation-delay: 0.35s;
+}
+
+.desk-enter-lines > :nth-child(2) {
+  animation-delay: 0.44s;
+}
+
+.desk-enter-lines > :nth-child(3) {
+  animation-delay: 0.53s;
+}
+
+.desk-enter-lines > :nth-child(4) {
+  animation-delay: 0.62s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desk-enter--nav,
+  .desk-enter--page,
+  .desk-enter--foot,
+  .desk-enter-lines > * {
+    animation: none;
+  }
+}
+
+/*
+  Entrance (after shwn.design): the plate fades up and settles from a touch
+  larger, on an ease-out-cubic, once its first frame is drawn (data-shown).
+  Opacity + transform only, so it stays on the compositor over the WebGL canvas.
+*/
+.desk-stage {
+  opacity: 0;
+  transform: scale(1.035);
+  transition:
+    opacity 1.1s cubic-bezier(0.215, 0.61, 0.355, 1),
+    transform 1.8s cubic-bezier(0.215, 0.61, 0.355, 1);
+}
+
+.desk-stage[data-shown='true'] {
+  opacity: 1;
+  transform: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desk-stage {
+    opacity: 1;
+    transform: none;
+    transition: none;
+  }
+}
+
 .desk-stage-feather {
   height: 100%;
   inset: 0;

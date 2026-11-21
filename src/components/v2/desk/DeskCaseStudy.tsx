@@ -3,7 +3,8 @@
 import { motion, useReducedMotion } from 'motion/react';
 import Image from 'next/image';
 import Link from 'next/link';
-import type { ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
+import { preload } from 'react-dom';
 import { useDeskScroll } from '@/src/components/v2/desk/DeskSmoothScroll';
 import type { CaseStory, Project } from '@/src/config/v2/caseStudies';
 
@@ -57,26 +58,78 @@ function DeskCaseMedia({
   );
 }
 
+/**
+ * Autoplay video that doesn't fight the page for bandwidth. The poster shows at
+ * once (high priority for the hero); the video file is attached after the page
+ * has loaded (hero) or when it nears the viewport (the rest). Same picture, then
+ * the same loop, just without multi-MB downloads racing the first paint.
+ */
 function DeskCaseVideo({
   src,
   poster,
   alt,
   wide = false,
-  reveal = true
+  reveal = true,
+  priority = false
 }: {
   src: string;
   poster?: string;
   alt: string;
   wide?: boolean;
   reveal?: boolean;
+  priority?: boolean;
 }) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [activeSrc, setActiveSrc] = useState<string | undefined>(undefined);
+  // Below-the-fold posters wait with their video (a poster is never lazy by itself).
+  const [near, setNear] = useState(priority);
+  if (priority && poster) preload(poster, { as: 'image', fetchPriority: 'high' });
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
+    if (priority) {
+      // A beat after load, once the main thread is idle: the poster (the video's
+      // first frame) is already on screen, so the swap to playback is seamless.
+      let idle = 0;
+      let timer = 0;
+      const attach = () => setActiveSrc(src);
+      const whenIdle = () => {
+        timer = window.setTimeout(() => {
+          idle = window.requestIdleCallback?.(attach, { timeout: 2500 }) ?? 0;
+          if (!idle) attach();
+        }, 1200);
+      };
+      if (document.readyState === 'complete') whenIdle();
+      else window.addEventListener('load', whenIdle, { once: true });
+      return () => {
+        window.removeEventListener('load', whenIdle);
+        window.clearTimeout(timer);
+        if (idle) window.cancelIdleCallback(idle);
+      };
+    }
+    const io = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return;
+        io.disconnect();
+        setNear(true);
+        setActiveSrc(src);
+      },
+      { rootMargin: '600px 0px' }
+    );
+    io.observe(video);
+    return () => io.disconnect();
+  }, [priority, src]);
+
   return (
     <DeskCaseFigure wide={wide} reveal={reveal}>
       <div className="desk-case-media">
         <video
+          ref={videoRef}
           className="desk-case-media-video"
-          src={src}
-          poster={poster}
+          src={activeSrc}
+          poster={near ? poster : undefined}
+          preload="none"
           autoPlay
           muted
           loop
@@ -362,6 +415,7 @@ export function DeskCaseStudy({
               alt={project.imageAlt || project.title}
               wide
               reveal={false}
+              priority
             />
           ) : (
             <DeskCaseMedia

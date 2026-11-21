@@ -1,0 +1,5 @@
+# Images, sounds, fonts and PDFs under /assets: cache for a week.
+# (Lives here because the deploy copies nested dotfiles but not the root .htaccess.)
+<IfModule mod_headers.c>
+  Header set Cache-Control "public, max-age=604800, stale-while-revalidate=86400"
+</IfModule>

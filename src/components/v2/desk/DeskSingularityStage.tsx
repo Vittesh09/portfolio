@@ -335,14 +335,68 @@ export function DeskSingularityStage() {
   });
   const [clientReady, setClientReady] = useState(false);
   const [useWebGl, setUseWebGl] = useState(false);
+  const stageRef = useRef<HTMLDivElement>(null);
+
+  // Fade the stage in once the first frame is drawn (the mount gets `is-ready`), so
+  // the canvas never pops in mid-zoom. Falls back to showing it after 2.5s.
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    const show = () => stage.setAttribute('data-shown', 'true');
+    if (!useWebGl) {
+      if (clientReady) show();
+      return;
+    }
+    const isReady = () => Boolean(stage.querySelector('.bh-mount.is-ready'));
+    if (isReady()) {
+      show();
+      return;
+    }
+    const observer = new MutationObserver(() => {
+      if (!isReady()) return;
+      observer.disconnect();
+      window.clearTimeout(fallback);
+      requestAnimationFrame(show);
+    });
+    observer.observe(stage, { subtree: true, attributes: true, attributeFilter: ['class'], childList: true });
+    const fallback = window.setTimeout(() => {
+      observer.disconnect();
+      show();
+    }, 2500);
+    return () => {
+      observer.disconnect();
+      window.clearTimeout(fallback);
+    };
+  }, [clientReady, useWebGl]);
 
   useEffect(() => {
-    setClientReady(true);
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const fine = !reduce;
     if (window.innerWidth <= 640) paramsRef.current.lensingRadius = 0.25;
-    setUseWebGl(fine);
-    if (fine) void import('@/src/components/v2/singularity/BlackHole');
+    // Fetch the WebGL code and build the scene only once the page has loaded and the
+    // main thread is idle, so neither competes with the first paint or hydration.
+    // The stage is hidden until its first frame, so nothing pops.
+    let idle = 0;
+    let timer = 0;
+    const boot = () => {
+      if (fine) void import('@/src/components/v2/singularity/BlackHole');
+      setClientReady(true);
+      setUseWebGl(fine);
+    };
+    const whenIdle = () => {
+      if ('requestIdleCallback' in window) {
+        idle = window.requestIdleCallback(boot, { timeout: 1200 });
+      } else {
+        timer = globalThis.setTimeout(boot, 200) as unknown as number;
+      }
+    };
+    if (document.readyState === 'complete') whenIdle();
+    else window.addEventListener('load', whenIdle, { once: true });
+    return () => {
+      window.removeEventListener('load', whenIdle);
+      if (idle) window.cancelIdleCallback(idle);
+      window.clearTimeout(timer);
+    };
   }, []);
 
   const onHeroClick = useSingularityColorClick(heroRef, paramsRef, 0, useWebGl);
@@ -358,7 +412,7 @@ export function DeskSingularityStage() {
 
   return (
     <div className="desk-stage-wrap desk-frame">
-      <div className="desk-stage">
+      <div ref={stageRef} className="desk-stage">
         {!useWebGl ? <div className="desk-stage-fallback" aria-hidden="true" /> : null}
         <section
           ref={heroRef}

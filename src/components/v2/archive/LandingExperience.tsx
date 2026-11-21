@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import dynamic from 'next/dynamic';
 import { motion } from 'motion/react';
 import { BlackHoleLazy } from '@/src/components/v2/black-hole/BlackHoleLazy';
@@ -13,7 +14,7 @@ import { HeroCloser, HeroHeadlineLines, HeroKicker } from '@/src/components/v2/a
 import { HeroMeta } from '@/src/components/v2/archive/HeroMeta';
 import { ProjectCard } from '@/src/components/v2/archive/ProjectCard';
 import { type ProjectCardData } from '@/src/config/v2/caseStudies';
-import { v2Path } from '@/src/config/v2/profile';
+import { siteHref, v2Path } from '@/src/config/v2/profile';
 import { processSteps, siteConfig, whyPoints } from '@/src/config/v2/site';
 
 const LandingExperienceKiss = dynamic(
@@ -36,6 +37,8 @@ export function LandingExperience({ cards }: { cards: ProjectCardData[] }) {
 }
 
 function LandingExperienceArchive({ cards }: { cards: ProjectCardData[] }) {
+  // Outside /v2 (this page renders the /classic lab) links point at the live site.
+  const pathname = usePathname();
   return (
     <>
       <section className="v2-hero-stage v2-black-hole-hero border-b border-white/10">
@@ -166,7 +169,7 @@ function LandingExperienceArchive({ cards }: { cards: ProjectCardData[] }) {
               <p className="text-sm leading-relaxed text-text-secondary">{siteConfig.aboutShort}</p>
               <div className="flex items-end md:justify-end">
                 <Link
-                  href={v2Path('/about/')}
+                  href={siteHref(v2Path('/about/'), pathname)}
                   className="archive-label border border-text-primary px-5 py-3 transition-colors hover:bg-text-primary hover:text-bg-primary"
                 >
                   More about me →

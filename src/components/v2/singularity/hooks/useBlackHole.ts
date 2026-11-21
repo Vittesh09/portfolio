@@ -1165,6 +1165,10 @@ export function useBlackHole(
     let introStartedAt = 0;
     let introBootAt = 0;
     let introTravelAt = 0;
+    /** Desk intro: progress advanced per rendered frame (0..1), and warm-up frames drawn. */
+    let deskIntroProgress = 0;
+    let deskWarmFrames = 0;
+    let deskLastFrameAt = 0;
     /** Text gets a tiny head start; singularity begins right after. */
     const INTRO_BH_DELAY_MS = deskIntro ? 80 : 140;
     const deskHoleRest = () => {
@@ -1610,7 +1614,11 @@ export function useBlackHole(
             const rest = deskHoleRest();
             const from = rest * (mobile ? 1.2 : 2.35);
             // Desk: oversized → rest zoom. Hole stays upright; stars carry drift.
-            if (sinceBoot < INTRO_BH_DELAY_MS) {
+            // Hold the oversized pose until a few frames have actually been drawn:
+            // the first frames stall on shader compile, and starting the zoom then
+            // made the hole lurch as soon as the page caught up.
+            if (sinceBoot < INTRO_BH_DELAY_MS || deskWarmFrames < 4) {
+              deskWarmFrames += 1;
               holeA.core.position.copy(holeA.home);
               holeA.core.scale.setScalar(from);
               holeA.core.rotation.z = 0;
@@ -1621,8 +1629,16 @@ export function useBlackHole(
                 introStartedAt = introTravelAt;
                 grabProxy.style.pointerEvents = '';
               }
-              const t = Math.min(1, (performance.now() - introTravelAt) / INTRO_TRAVEL_MS);
-              const e = easeOutCubic(t);
+              // Advance by the frame time capped at 50ms, not the wall clock, so a slow
+              // frame slows the zoom instead of skipping ahead. (Measured here: the
+              // shared `delta` reads ~0 because getElapsedTime() already ticked the clock.)
+              // Smoothstep then ease-out: starts from rest, glides, and settles softly.
+              const stamp = performance.now();
+              const step = deskLastFrameAt ? Math.min(50, stamp - deskLastFrameAt) : 0;
+              deskLastFrameAt = stamp;
+              deskIntroProgress = Math.min(1, deskIntroProgress + step / INTRO_TRAVEL_MS);
+              const t = deskIntroProgress;
+              const e = easeOutCubic(t * t * (3 - 2 * t));
               holeA.core.scale.setScalar(THREE.MathUtils.lerp(from, rest, e));
               holeA.core.position.copy(holeA.home);
               holeA.core.rotation.z = 0;
@@ -1846,7 +1862,12 @@ export function useBlackHole(
       if (!disposed && running) raf = requestAnimationFrame(frame);
     };
 
+    // Hold the first frame until the scene's shaders are compiled off the main
+    // thread (KHR_parallel_shader_compile where available). Otherwise the first
+    // render compiles every program synchronously: a multi-second freeze on phones.
+    let shadersReady = false;
     const start = () => {
+      if (!shadersReady) return;
       if (running && raf) return;
       running = true;
       // Flush a stale delta instead of resetting elapsed time (avoids "frozen then jump")
@@ -1908,6 +1929,12 @@ export function useBlackHole(
 
     resize();
     observer.observe(mount);
+    const onShadersReady = () => {
+      if (disposed || shadersReady) return;
+      shadersReady = true;
+      if (inViewport && !document.hidden) start();
+    };
+    renderer.compileAsync(scene, camera).then(onShadersReady, onShadersReady);
     window.addEventListener('resize', resize, { passive: true });
     window.visualViewport?.addEventListener('resize', resize, { passive: true });
     document.addEventListener('visibilitychange', onVisibility);

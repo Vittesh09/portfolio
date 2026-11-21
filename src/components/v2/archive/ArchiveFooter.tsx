@@ -1,7 +1,10 @@
+'use client';
+
 import Image from 'next/image';
 import Link from 'next/link';
+import { usePathname } from 'next/navigation';
 import { siteConfig } from '@/src/config/v2/site';
-import { profile, v2Path } from '@/src/config/v2/profile';
+import { profile, siteHref, v2Path } from '@/src/config/v2/profile';
 import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
 import { FOOTER_LANDSCAPE_DARK, FOOTER_LANDSCAPE_LIGHT } from '@/src/config/v2/footerMedia';
 
@@ -29,6 +32,10 @@ function FooterLandscape() {
 }
 
 export function ArchiveFooter() {
+  // Outside /v2 (the labs) these links point at the live site.
+  const pathname = usePathname();
+  const href = (path: string) => siteHref(path, pathname);
+  const contact = href(v2Path('/#contact'));
   return (
     <footer className="v2-footer">
       <div className="v2-footer-inner">
@@ -38,10 +45,10 @@ export function ArchiveFooter() {
               Explore
             </p>
             <div className="mt-4 flex flex-col gap-2 text-sm">
-              <HashNavLink href={v2Path('/#work')} className="underline-offset-4 hover:underline">
+              <HashNavLink href={href(v2Path('/#work'))} className="underline-offset-4 hover:underline">
                 Work
               </HashNavLink>
-              <Link href={v2Path('/about/')} className="underline-offset-4 hover:underline">
+              <Link href={href(v2Path('/about/'))} className="underline-offset-4 hover:underline">
                 About
               </Link>
               <a
@@ -53,9 +60,15 @@ export function ArchiveFooter() {
                 Resume <span className="v2-visually-hidden">(opens in a new tab)</span>
                 <span aria-hidden> ↗</span>
               </a>
-              <HashNavLink href={v2Path('/#contact')} className="underline-offset-4 hover:underline">
-                Contact
-              </HashNavLink>
+              {contact.startsWith('mailto:') ? (
+                <a href={contact} className="underline-offset-4 hover:underline">
+                  Contact
+                </a>
+              ) : (
+                <HashNavLink href={contact} className="underline-offset-4 hover:underline">
+                  Contact
+                </HashNavLink>
+              )}
             </div>
           </nav>
           <nav className="v2-footer-nav v2-footer-nav--more" aria-label="Elsewhere">

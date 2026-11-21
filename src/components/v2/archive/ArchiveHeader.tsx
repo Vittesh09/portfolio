@@ -4,7 +4,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useEffect, useLayoutEffect, useRef, useState, type MouseEvent } from 'react';
 import { siteConfig } from '@/src/config/v2/site';
-import { v2Path } from '@/src/config/v2/profile';
+import { siteHref, v2Path } from '@/src/config/v2/profile';
 import { triggerHaptic } from '@/src/components/v2/ui/haptics';
 import { IosHapticSwitch } from '@/src/components/v2/ui/IosHapticSwitch';
 import { ThemeToggle } from '@/src/components/v2/ui/ThemeToggle';
@@ -39,6 +39,9 @@ export function ArchiveHeader() {
   const [scrolled, setScrolled] = useState(false);
   const pathname = usePathname();
   const isHome = pathname === v2Path('/') || pathname === '/v2';
+  // Outside /v2 (the labs) the archive header points at the live site.
+  const href = (path: string) => siteHref(path, pathname);
+  const nav = siteConfig.nav.map((item) => ({ ...item, href: href(item.href) }));
   const isMobile = useMobileLanding();
   const lastY = useRef(0);
   const embeddedRef = useRef(false);
@@ -235,7 +238,7 @@ export function ArchiveHeader() {
       >
         <div className="v2-archive-header-bar mx-auto flex max-w-[1600px] items-center justify-between px-4 py-3 md:px-8">
           <Link
-            href={v2Path('/')}
+            href={href(v2Path('/'))}
             onClick={goHome}
             aria-label="Vittesh Sinha, home"
             className={`${navOptionClass} v2-archive-wordmark font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 max-md:hidden`}
@@ -244,7 +247,7 @@ export function ArchiveHeader() {
             <span className="v2-visually-hidden">, home</span>
           </Link>
           <nav className="hidden items-center gap-7 md:flex" aria-label="Primary">
-            {siteConfig.nav.map((item) => {
+            {nav.map((item) => {
               if (item.external) {
                 return (
                   <a
@@ -256,6 +259,13 @@ export function ArchiveHeader() {
                   >
                     <RollText>{item.label}</RollText>
                     <span className="v2-visually-hidden"> (opens in a new tab)</span>
+                  </a>
+                );
+              }
+              if (item.href.startsWith('mailto:')) {
+                return (
+                  <a key={item.href} href={item.href} className={navOptionClass}>
+                    <RollText>{item.label}</RollText>
                   </a>
                 );
               }
@@ -304,7 +314,7 @@ export function ArchiveHeader() {
             aria-label="Mobile"
           >
             <div className="flex flex-col">
-              {[{ label: 'Home', href: v2Path('/'), external: false }, ...siteConfig.nav].map((item, index) => {
+              {[{ label: 'Home', href: href(v2Path('/')), external: false }, ...nav].map((item, index) => {
                 if (item.external) {
                   return (
                     <a
@@ -319,6 +329,21 @@ export function ArchiveHeader() {
                         {item.label}
                         <span className="v2-visually-hidden"> (opens in a new tab)</span>
                       </span>
+                      <span className="archive-label text-accent-pop" aria-hidden>
+                        0{index + 1}
+                      </span>
+                    </a>
+                  );
+                }
+                if (item.href.startsWith('mailto:')) {
+                  return (
+                    <a
+                      key={item.href}
+                      href={item.href}
+                      onClick={() => setOpen(false)}
+                      className="v2-nav-mobile-row flex min-h-11 items-baseline justify-between border-b border-border-subtle"
+                    >
+                      <span className="text-2xl font-semibold tracking-tight">{item.label}</span>
                       <span className="archive-label text-accent-pop" aria-hidden>
                         0{index + 1}
                       </span>
