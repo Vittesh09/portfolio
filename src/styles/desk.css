@@ -24,6 +24,7 @@
   --desk-blur: 18px;
   --desk-nav-h: 4.25rem;
   --desk-stage-radius: clamp(1.35rem, 3.2vw, 2.35rem);
+  --desk-bleed: 140px;
   background: var(--desk-bg);
   color: var(--desk-ink);
   display: flex;
@@ -193,8 +194,9 @@
   Width is derived from the height cap so the ratio never squeezes.
 */
 .desk-stage {
+  --desk-bleed: 140px;
   --desk-stage-ratio: 2.35;
-  --desk-stage-max-h: min(60svh, 34rem);
+  --desk-stage-max-h: min(60svh, 34rem, calc(100svh - 12.75rem));
   aspect-ratio: var(--desk-stage-ratio) / 1;
   background: transparent;
   border: 0;
@@ -240,16 +242,6 @@
   fill: var(--desk-bg);
 }
 
-/* Inset ≥ blur reach (3σ) + displacement so the veil is solid at the stage edge */
-.desk-stage-feather-hole {
-  --hole-inset: 56px;
-  height: calc(100% - 2 * var(--hole-inset));
-  rx: clamp(14px, 2.2vw, 26px);
-  width: calc(100% - 2 * var(--hole-inset));
-  x: var(--hole-inset);
-  y: var(--hole-inset);
-}
-
 .desk-stage .bh-hero {
   background: #000 !important;
   border: 0;
@@ -271,6 +263,17 @@
   display: none !important;
 }
 
+/* Blurred copy of the picture. The sharp canvas fades into this at its box. */
+.desk-stage-content-blur {
+  filter: blur(28px);
+  height: 100%;
+  inset: 0;
+  pointer-events: none;
+  position: absolute;
+  width: 100%;
+  z-index: 0;
+}
+
 .desk-stage .bh-mount {
   border: 0;
   border-radius: 0;
@@ -278,6 +281,15 @@
   inset: 0;
   overflow: hidden;
   position: absolute;
+  z-index: 1;
+  -webkit-mask-image:
+    linear-gradient(to bottom, transparent, #000 44px, #000 calc(100% - 44px), transparent),
+    linear-gradient(to right, transparent, #000 44px, #000 calc(100% - 44px), transparent);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to bottom, transparent, #000 44px, #000 calc(100% - 44px), transparent),
+    linear-gradient(to right, transparent, #000 44px, #000 calc(100% - 44px), transparent);
+  mask-composite: intersect;
 }
 
 .desk-stage .bh-canvas {
@@ -303,12 +315,13 @@
 .desk-home-copy {
   flex: none;
   margin-top: 1.75rem;
-  /* Extra inset beyond the shared desk-frame gutter */
   padding-top: 0.25rem;
   padding-bottom: 0.25rem;
   padding-left: var(--desk-copy-inset);
   padding-right: var(--desk-copy-inset);
+  position: relative;
   text-align: left;
+  z-index: 7;
 }
 
 .desk-kicker {
@@ -394,6 +407,7 @@
 
 /* Horizontal work rail — scroll / drag; starts below first viewport */
 .desk-work-rail {
+  /* Match .desk-home-copy: copy-inset overrides frame gutter on the same element. */
   --desk-text-start: calc(
     max(0px, (100% - min(100%, var(--desk-max))) / 2) + var(--desk-copy-inset)
   );
@@ -403,6 +417,16 @@
   width: 100%;
 }
 
+.desk-work-heading-row {
+  align-items: center;
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  margin: 0 0 1.5rem;
+  padding-left: var(--desk-text-start);
+  padding-right: var(--desk-text-start);
+}
+
 .desk-work-heading {
   color: var(--desk-ink);
   font-family: var(--font-geist), system-ui, sans-serif;
@@ -410,9 +434,59 @@
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.3;
-  margin: 0 0 1.5rem;
-  padding-left: var(--desk-text-start);
-  padding-right: var(--desk-gutter);
+  margin: 0;
+}
+
+.desk-work-resume {
+  align-items: center;
+  color: var(--desk-muted);
+  display: inline-flex;
+  flex-shrink: 0;
+  font-family: var(--font-geist), system-ui, sans-serif;
+  font-size: 14px;
+  font-weight: 400;
+  gap: 0.4rem;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+.desk-work-resume-icon {
+  display: block;
+  overflow: visible;
+}
+
+.desk-work-resume-arrow {
+  transform-box: fill-box;
+  transform-origin: center;
+  transition: transform 0.2s ease;
+}
+
+.desk-work-resume:hover {
+  color: var(--desk-ink);
+}
+
+.desk-work-resume:hover .desk-work-resume-arrow {
+  animation: desk-resume-download 0.9s ease-in 1;
+}
+
+@keyframes desk-resume-download {
+  0% {
+    transform: translateY(0);
+  }
+  55% {
+    transform: translateY(3.5px);
+  }
+  100% {
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desk-work-resume:hover .desk-work-resume-arrow {
+    animation: none;
+    transform: translateY(1.5px);
+  }
 }
 
 .desk-work-rail-scroller {
@@ -659,26 +733,71 @@
 }
 
 .desk-foot-quote {
-  color: color-mix(in srgb, var(--desk-ink) 72%, var(--desk-muted));
-  font-family: var(--font-instrument), Georgia, 'Times New Roman', serif;
-  font-size: clamp(0.95rem, 1.6vw, 1.1rem);
-  font-style: italic;
+  color: var(--desk-muted);
+  cursor: default;
+  font-family: var(--font-geist), system-ui, sans-serif;
+  font-size: 0.78rem;
+  font-style: normal;
   font-weight: 400;
   letter-spacing: -0.01em;
   line-height: 1.45;
   margin: 0;
-  max-width: 26rem;
+  max-width: 22rem;
+  transition: color 0.35s ease;
+}
+
+.desk-foot-quote-seg {
+  white-space: nowrap;
+}
+
+.desk-foot-quote:hover {
+  animation: desk-quote-oil 20s linear infinite;
+  background-image: linear-gradient(
+    110deg,
+    #1d4ed8,
+    #0d9488,
+    #eab308,
+    #f59e0b,
+    #a855f7,
+    #06b6d4,
+    #22c55e,
+    #ec4899,
+    #1d4ed8
+  );
+  background-size: 320% 100%;
+  color: transparent;
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+
+@keyframes desk-quote-oil {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 320% 50%;
+  }
 }
 
 .desk-foot-meta {
+  align-items: center;
   color: var(--desk-muted);
+  display: inline-flex;
   font-family: var(--font-geist), system-ui, sans-serif;
   font-size: 0.8rem;
   font-weight: 400;
+  gap: 0.35rem;
   letter-spacing: -0.01em;
   line-height: 1.3;
   margin: 0;
   text-align: center;
+}
+
+.desk-foot-pin {
+  display: block;
+  flex-shrink: 0;
+  opacity: 0.9;
+  translate: 0 -0.04em;
 }
 
 .desk-theme-icon {
@@ -799,6 +918,218 @@
   letter-spacing: -0.012em;
   line-height: 1.45;
   margin: 0;
+}
+
+.desk-tools {
+  margin-top: 0.5rem;
+  padding-bottom: 2.5rem;
+}
+
+.desk-tools .desk-title {
+  font-size: 14px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  margin-top: 2.25rem;
+}
+
+.desk-tools .desk-title:first-child {
+  margin-top: 0;
+}
+
+.desk-section-link {
+  color: inherit;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28em;
+  text-decoration: none;
+}
+
+.desk-section-link-arrow {
+  display: inline-block;
+  font-size: 0.85em;
+  line-height: 1;
+  opacity: 0;
+  transform: translateX(-0.15em);
+  transition:
+    opacity 0.2s ease,
+    transform 0.2s ease;
+}
+
+.desk-section-link:hover .desk-section-link-arrow,
+.desk-section-link:focus-visible .desk-section-link-arrow {
+  opacity: 0.7;
+  transform: translateX(0);
+}
+
+.desk-tool-list {
+  margin-top: 1.1rem;
+}
+
+.desk-tool {
+  color: inherit;
+  display: block;
+  padding: 0.85rem 0;
+  text-decoration: none;
+}
+
+.desk-tool .desk-lede {
+  display: block;
+  font-size: 11px;
+  margin: 0.35rem 0 0;
+}
+
+.desk-tool .desk-tool-tags {
+  margin: 0 0 0.25rem;
+}
+
+.desk-tool-row {
+  align-items: flex-end;
+  display: flex;
+  gap: 1rem 1.5rem;
+  justify-content: space-between;
+}
+
+.desk-tool-title {
+  font-family: var(--font-geist), system-ui, sans-serif;
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.2;
+  margin: 0;
+  min-width: 0;
+}
+
+.desk-tool .desk-tool-date {
+  flex-shrink: 0;
+  margin: 0;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.desk-tool:hover .desk-tool-title {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.desk-publish {
+  margin-top: 0;
+  padding-bottom: 3.5rem;
+  padding-top: calc(var(--desk-nav-h) + 1.5rem);
+}
+
+.desk-root--no-nav .desk-publish {
+  padding-top: 1.75rem;
+}
+
+.desk-publish-index {
+  box-sizing: border-box;
+  min-height: 100svh;
+}
+
+.desk-publish-back {
+  margin: 0 0 1.25rem;
+}
+
+.desk-publish-note {
+  margin: 0.35rem 0 0;
+  max-width: 34rem;
+}
+
+.desk-publish-list {
+  list-style: none;
+  margin: 1.15rem 0 0;
+  padding: 0;
+}
+
+.desk-publish-list a {
+  color: inherit;
+  display: block;
+  padding: 0.9rem 0;
+  text-decoration: none;
+}
+
+.desk-publish-list a:hover .desk-publish-title {
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.desk-publish-title {
+  display: block;
+  font-family: var(--font-geist), system-ui, sans-serif;
+  font-size: clamp(1.05rem, 2vw, 1.25rem);
+  letter-spacing: -0.02em;
+}
+
+.desk-publish-list .desk-lede {
+  display: block;
+  font-size: 11px;
+  margin: 0.35rem 0 0;
+}
+
+.desk-publish-list .desk-tool-tags {
+  margin: 0 0 0.25rem;
+}
+
+.desk-essay-core {
+  color: var(--desk-muted);
+  font-family: var(--font-geist), system-ui, sans-serif;
+  font-size: clamp(0.88rem, 1.45vw, 1rem);
+  font-style: italic;
+  font-weight: 400;
+  letter-spacing: -0.012em;
+  line-height: 1.45;
+  margin: 0 0 2rem;
+  text-align: center;
+}
+
+.desk-essay {
+  margin-top: 1.75rem;
+  max-width: 34rem;
+}
+
+.desk-essay .desk-desc {
+  max-width: none;
+}
+
+.desk-essay h2 {
+  font-family: var(--font-geist), system-ui, sans-serif;
+  font-size: 1.05rem;
+  font-weight: 400;
+  letter-spacing: -0.02em;
+  line-height: 1.25;
+  margin: 2rem 0 0.75rem;
+}
+
+.desk-essay .desk-desc + .desk-desc {
+  margin-top: 0.9rem;
+}
+
+.desk-substack {
+  margin: 1.75rem 0 0;
+}
+
+.desk-substack-link {
+  align-items: center;
+  color: var(--desk-muted);
+  display: inline-flex;
+  font-family: var(--font-geist), system-ui, sans-serif;
+  font-size: 0.88rem;
+  font-weight: 400;
+  gap: 0.4rem;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  text-decoration: none;
+}
+
+.desk-substack-logo {
+  color: #ff6719;
+  display: block;
+  flex-shrink: 0;
+}
+
+.desk-substack-link:hover {
+  color: var(--desk-ink);
 }
 
 /* Case study — same shell language as home/about */
@@ -1212,6 +1543,12 @@
     animation: none;
     transform: scale(0.92);
   }
+
+  .desk-foot-quote:hover {
+    animation: none;
+    background-image: linear-gradient(110deg, #1d4ed8, #0d9488, #eab308, #a855f7);
+    background-position: 40% 50%;
+  }
 }
 
 /* Landing + route transitions are timed by Motion in DeskShell */
@@ -1226,21 +1563,89 @@
 }
 
 @media (max-width: 768px), (pointer: coarse) {
-  .desk-stage {
-    --desk-stage-ratio: 0.55;
-    --desk-stage-max-h: min(80svh, 44rem);
-  }
-
-  .desk-stage-feather-hole {
-    --hole-inset: 40px;
+  .desk-shell-host,
+  .desk-shell-host #v2-main {
+    height: 100dvh;
+    max-height: 100dvh;
   }
 
   .desk-root {
-    --desk-copy-inset: clamp(2.25rem, 10vw, 4rem);
+    --desk-gutter: 16px;
+    --desk-copy-inset: 16px;
+    height: 100dvh;
+    max-height: 100dvh;
+  }
+
+  /* Backdrop-blur edge reads as a hard hairline on phones. */
+  .desk-edge--bottom {
+    display: none;
+  }
+
+  .desk-scroll {
+    -webkit-overflow-scrolling: touch;
+    overscroll-behavior-y: contain;
+    touch-action: pan-y;
+  }
+
+  .desk-nav {
+    padding-top: 0.45rem;
+  }
+
+  .desk-stage-wrap {
+    container-type: inline-size;
+    padding-bottom: 0.35rem;
+    padding-top: 0;
+  }
+
+  .desk-home-copy {
+    margin-top: 0.65rem;
+  }
+
+  .desk-lede {
+    margin-bottom: 0.45rem;
+  }
+
+  .desk-contacts {
+    margin-top: 0.85rem;
+  }
+
+  .desk-stage {
+    /* Taller plate. The canvas fills it, so the only edge is the blurred window. */
+    --desk-stage-ratio: 1.25;
+    --desk-window-inset: 56px;
+    aspect-ratio: auto;
+    background: #000;
+    /* Keep the elongated phone plate, but never let it push the intro off a short screen. */
+    height: min(calc(100cqw / var(--desk-stage-ratio) + 8rem), calc(100svh - 16rem));
+    width: 100%;
+  }
+
+  .desk-hero {
+    min-height: auto;
+    padding-bottom: 0.35rem;
+    padding-top: 3rem;
+  }
+
+  .desk-work-rail {
+    margin-top: 2.25rem;
+    padding-bottom: 3rem;
   }
 
   .desk-work-track-item {
-    width: min(22rem, 86vw);
+    width: min(22rem, calc(100vw - 32px));
+  }
+
+  .desk-work-rail-scroller {
+    /* Vertical page scroll wins; sideways pans still move the rail. */
+    touch-action: pan-x pan-y;
+  }
+
+  .desk-rail-controls {
+    padding-right: var(--desk-gutter);
+  }
+
+  .desk-foot {
+    padding: 2.25rem var(--desk-gutter) calc(1.75rem + env(safe-area-inset-bottom, 0px));
   }
 
   .desk-about {
@@ -1256,6 +1661,19 @@
     --desk-text-start: calc(
       max(0px, (100% - min(100%, var(--desk-max))) / 2) + var(--desk-copy-inset)
     );
+  }
+}
+
+/* Touch laptops and tablets were inheriting the phone plate and growing it past the screen. */
+@media (min-width: 769px) {
+  .desk-stage {
+    --desk-stage-ratio: 2.35;
+    --desk-stage-max-h: min(60svh, 34rem, calc(100svh - 12.75rem));
+    --desk-window-inset: 40px;
+    aspect-ratio: var(--desk-stage-ratio) / 1;
+    background: transparent;
+    height: auto;
+    width: min(100%, calc(var(--desk-stage-max-h) * var(--desk-stage-ratio)));
   }
 }
 

@@ -76,9 +76,14 @@ export function DeskSmoothScroll({
   useEffect(() => {
     const wrapper = wrapperRef.current;
     if (!wrapper) return;
-    const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const reduceMq = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const narrowMq = window.matchMedia('(max-width: 768px)');
+    const coarseMq = window.matchMedia('(pointer: coarse)');
+    // Live check — phones/narrow viewports keep native touch; spring writes fight momentum.
+    const useNative = () => narrowMq.matches || coarseMq.matches;
 
     const unsubscribe = smooth.on('change', (value) => {
+      if (useNative()) return;
       wrapper.scrollTop = value;
     });
 
@@ -89,6 +94,7 @@ export function DeskSmoothScroll({
     let lastWheelAt = 0;
 
     const onWheel = (event: WheelEvent) => {
+      if (useNative()) return;
       if (event.ctrlKey) return;
       const origin = event.target as Element | null;
       // The singularity grab proxy is fixed outside the scroller but must still scroll the page.
@@ -128,7 +134,7 @@ export function DeskSmoothScroll({
       event.preventDefault();
       if (event.shiftKey) return;
       const next = Math.min(maxScroll(), Math.max(0, target.get() + dy));
-      if (reduce) {
+      if (reduceMq.matches) {
         target.jump(next);
         smooth.jump(next);
       } else {
@@ -138,6 +144,11 @@ export function DeskSmoothScroll({
 
     // Keyboard, scrollbar, touch and anchors scroll natively; re-seat the spring there.
     const onScroll = () => {
+      if (useNative()) {
+        target.jump(wrapper.scrollTop);
+        smooth.jump(wrapper.scrollTop);
+        return;
+      }
       if (smooth.isAnimating() || Math.abs(wrapper.scrollTop - smooth.get()) < 1.5) return;
       target.jump(wrapper.scrollTop);
       smooth.jump(wrapper.scrollTop);

@@ -46,12 +46,20 @@ export function DeskShell({ children }: { children: ReactNode }) {
   const mounted = useRef(false);
   const fallbackTimer = useRef<number | undefined>(undefined);
   const { setThemePreference } = useV2Theme();
+  const hideNav = pathname.startsWith('/blog');
 
   useEffect(() => {
     setThemePreference('light');
   }, [setThemePreference]);
 
   useLayoutEffect(() => {
+    if (hideNav) {
+      document.documentElement.style.setProperty('--desk-nav-bottom', '0px');
+      return () => {
+        document.documentElement.style.removeProperty('--desk-nav-bottom');
+      };
+    }
+
     const nav = navRef.current;
     if (!nav) return;
     const sync = () => {
@@ -66,7 +74,7 @@ export function DeskShell({ children }: { children: ReactNode }) {
       window.removeEventListener('resize', sync);
       document.documentElement.style.removeProperty('--desk-nav-bottom');
     };
-  }, []);
+  }, [hideNav]);
 
   // Desk → desk links: fade the page out, then navigate. Capture phase so
   // Next's <Link> handler never runs a second navigation.
@@ -148,38 +156,40 @@ export function DeskShell({ children }: { children: ReactNode }) {
   const landInitial = reduce ? false : LAND_HIDDEN;
 
   return (
-    <div ref={rootRef} className="desk-root">
-      <motion.nav
-        ref={navRef}
-        className="desk-nav"
-        aria-label="Desk"
-        initial={reduce ? false : { opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={land(0.05, 0.75)}
-      >
-        <div className="desk-nav-pill">
-          {TABS.map((tab) => {
-            const current = tab.match(pathname);
-            return (
-              <Link
-                key={tab.href}
-                href={tab.href}
-                className="desk-nav-link"
-                aria-current={current ? 'page' : undefined}
-              >
-                {current && !reduce ? (
-                  <motion.span
-                    className="desk-nav-current"
-                    layoutId="desk-nav-current"
-                    transition={{ type: 'spring', bounce: 0, visualDuration: 0.35 }}
-                  />
-                ) : null}
-                {tab.label}
-              </Link>
-            );
-          })}
-        </div>
-      </motion.nav>
+    <div ref={rootRef} className={`desk-root${hideNav ? ' desk-root--no-nav' : ''}`}>
+      {hideNav ? null : (
+        <motion.nav
+          ref={navRef}
+          className="desk-nav"
+          aria-label="Desk"
+          initial={reduce ? false : { opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={land(0.05, 0.75)}
+        >
+          <div className="desk-nav-pill">
+            {TABS.map((tab) => {
+              const current = tab.match(pathname);
+              return (
+                <Link
+                  key={tab.href}
+                  href={tab.href}
+                  className="desk-nav-link"
+                  aria-current={current ? 'page' : undefined}
+                >
+                  {current && !reduce ? (
+                    <motion.span
+                      className="desk-nav-current"
+                      layoutId="desk-nav-current"
+                      transition={{ type: 'spring', bounce: 0, visualDuration: 0.35 }}
+                    />
+                  ) : null}
+                  {tab.label}
+                </Link>
+              );
+            })}
+          </div>
+        </motion.nav>
+      )}
       <div className="desk-edge desk-edge--bottom" aria-hidden="true" />
       <DeskSmoothScroll resetKey={pathname}>
         <motion.div

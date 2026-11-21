@@ -137,7 +137,13 @@ export function useBlackHole(
     // centers the target, so world X alone cannot push it right.
     const HOME = new THREE.Vector3(0, isLab ? 0 : mobile ? 0.55 : 0.48, 0);
     // Transparent desk: keep the void small so paper shows around it (no black plate).
-    const holeRest = transparent ? 0.58 : isLab || spinScene ? 1 : HERO_HOLE_SCALE;
+    const holeRest = transparent
+      ? 0.58
+      : isLab || spinScene
+        ? mobile && deskIntro
+          ? 0.72
+          : 1
+        : HERO_HOLE_SCALE;
     const heroLensRadius = 0.46 * holeRest;
 
     const scene = new THREE.Scene();
@@ -186,7 +192,9 @@ export function useBlackHole(
       // Premultiplied + paper-lit shaders keep glow from darkening the page.
       premultipliedAlpha: transparent,
       stencil: false,
-      powerPreference: 'high-performance'
+      powerPreference: 'high-performance',
+      // The desk copies this frame into a blurred edge layer.
+      preserveDrawingBuffer: isLab
     });
     renderer.outputColorSpace = THREE.SRGBColorSpace;
     renderer.toneMapping = transparent ? THREE.NoToneMapping : THREE.ACESFilmicToneMapping;
@@ -202,8 +210,9 @@ export function useBlackHole(
     // OrbitControls calls these directly. A pointer that already ended throws.
     guardPointerCapture(renderer.domElement);
 
-    // Orbit pivot = singularity center
-    const controls = new OrbitControls(camera, renderer.domElement);
+    // Orbit pivot = singularity center. The desk canvas ignores pointers, so orbit
+    // listens on the mount and a drag there changes the viewing angle.
+    const controls = new OrbitControls(camera, deskIntro ? mount : renderer.domElement);
     // Live drag is direct; release coast uses an ease curve (below)
     controls.enableDamping = true;
     controls.dampingFactor = 0.06;
@@ -211,19 +220,20 @@ export function useBlackHole(
     controls.enablePan = false;
     controls.enableZoom = false;
     controls.target.copy(HOME);
-    controls.minPolarAngle = 0.25;
-    controls.maxPolarAngle = Math.PI * 0.78;
+    // Desk uses the full polar range. A tight clamp on the rolled camera
+    // snapped the first drag and left the angle stuck.
+    controls.minPolarAngle = deskIntro ? 0 : 0.25;
+    controls.maxPolarAngle = deskIntro ? Math.PI : Math.PI * 0.78;
     // Free azimuth — clamped limits made orbit feel "stuck" after a few turns
     controls.minAzimuthAngle = -Infinity;
     controls.maxAzimuthAngle = Infinity;
     controls.autoRotate = false;
-    // Desk camera is rolled. OrbitControls was built for an upright camera, so a
-    // drag on the canvas clamps immediately and holds the pointer. Drag still moves the hole.
-    controls.enabled = !deskIntro && !mobile && !reduceMotion;
+    controls.enabled = !reduceMotion && !deskIntro && !mobile;
     if (deskIntro) {
-      controls.disconnect();
-      renderer.domElement.style.touchAction = 'pan-y';
+      renderer.domElement.style.touchAction = 'none';
+      mount.style.touchAction = 'none';
     }
+    const allowOrbit = () => !reduceMotion && (deskIntro || !mobile);
     controls.update();
     const homeCamPos = camera.position.clone();
     controls.saveState();
@@ -330,7 +340,7 @@ export function useBlackHole(
     const easeOutCubic = (t: number) => 1 - Math.pow(1 - t, 3);
 
     const beginOrbitCoast = () => {
-      if (holding || returning || mobile || reduceMotion) return;
+      if (holding || returning || mobile || reduceMotion || deskIntro) return;
       readOrbitSpherical(orbitSpherical);
       // Integrate recent angular velocity into a short coast arc
       const coastSec = ORBIT_COAST_MS / 1000;
@@ -339,7 +349,7 @@ export function useBlackHole(
       if (Math.abs(orbitCoastDTheta) < 0.002 && Math.abs(orbitCoastDPhi) < 0.002) {
         orbitCoasting = false;
         if (!holding && !returning && introDone) {
-          if (!deskIntro && !mobile && !reduceMotion) controls.enabled = true;
+          if (allowOrbit()) controls.enabled = true;
         }
         return;
       }
@@ -364,7 +374,7 @@ export function useBlackHole(
         orbitCoasting = false;
         orbitAngVel.theta = 0;
         orbitAngVel.phi = 0;
-        if (!holding && !returning && introDone && !deskIntro && !mobile && !reduceMotion) {
+        if (!holding && !returning && introDone && allowOrbit()) {
           controls.enabled = true;
         }
       }
@@ -663,7 +673,7 @@ export function useBlackHole(
       core.position.copy(home);
       core.scale.setScalar(
         deskIntro && !reduceMotion
-          ? holeRest * 2.35
+          ? holeRest * (mobile ? 1.2 : 2.35)
           : isLab || reduceMotion
             ? holeRest
             : 0.001
@@ -1133,6 +1143,9 @@ export function useBlackHole(
       sizeStreakCanvas(width, height);
       updateHoleScreen();
       placeTextPlane();
+      if (introDone && !holding && !returning) {
+        holeA.core.scale.setScalar(deskHoleRest());
+      }
       // Debounce recapture on resize / browser zoom so text doesn't thrash mid-drag
       window.clearTimeout(resizeCaptureTimer);
       if (layoutChanged) {
@@ -1152,7 +1165,16 @@ export function useBlackHole(
     let introTravelAt = 0;
     /** Text gets a tiny head start; singularity begins right after. */
     const INTRO_BH_DELAY_MS = deskIntro ? 80 : 140;
-    const INTRO_SCALE_FROM = holeRest * 2.35;
+    const deskHoleRest = () => {
+      // A taller phone panel shows more sky. Shrink the disk by the same
+      // ratio so it stays the size it had on the 1.25 plate. Never enlarge it
+      // when a short panel is capped below that plate.
+      if (!(deskIntro && mobile)) return holeRest;
+      const width = Math.max(1, mount.clientWidth);
+      const height = Math.max(1, mount.clientHeight);
+      if (width < 2 || height < 2) return holeRest;
+      return holeRest * Math.min(1, width / 1.25 / height);
+    };
     const prevPos = new THREE.Vector3();
     const sampleVel = new THREE.Vector3();
     const DRAG_THRESHOLD_PX = 3;
@@ -1180,7 +1202,7 @@ export function useBlackHole(
 
     const enableOrbitIfAllowed = () => {
       if ((spinScene && !centerRevealDone) || !introDone || holding || returning || orbitCoasting) return;
-      if (!deskIntro && !mobile && !reduceMotion) controls.enabled = true;
+      if (allowOrbit()) controls.enabled = true;
       controls.target.copy(HOME);
       controls.update();
     };
@@ -1210,7 +1232,7 @@ export function useBlackHole(
 
     const completeIntroVisuals = () => {
       introDone = true;
-      holeA.core.scale.setScalar(holeRest);
+      holeA.core.scale.setScalar(deskHoleRest());
       holeA.core.rotation.z = 0;
       bloomPass.strength = BLOOM_TARGET;
       diskMaterial.uniforms.uDensity.value = DISK_DENSITY_TARGET;
@@ -1245,7 +1267,7 @@ export function useBlackHole(
       if (deskIntro) {
         hero?.classList.add('is-copy-in');
         holeA.core.position.copy(holeA.home);
-        holeA.core.scale.setScalar(INTRO_SCALE_FROM);
+        holeA.core.scale.setScalar(deskHoleRest() * (mobile ? 1.2 : 2.35));
         holeA.core.rotation.z = 0;
         bloomPass.strength = BLOOM_TARGET;
         diskMaterial.uniforms.uDensity.value = DISK_DENSITY_TARGET;
@@ -1516,10 +1538,9 @@ export function useBlackHole(
           }
         }
 
-        // Starfield drifts; the hole stays put. Desk/lab use a slow sky crawl.
+        // Desk sky is slow. One turn is about four minutes. The hole stays put.
         if (!reduceMotion && !spinScene) {
-          const periodSec = isLab ? 3.5 * 60 : 8 * 60;
-          const skyTurn = elapsed * ((Math.PI * 2) / periodSec);
+          const skyTurn = elapsed * ((Math.PI * 2) / (isLab ? 240 : 48));
           stars.rotation.y = skyTurn;
           stars.rotation.x = skyTurn * (isLab ? 0.1 : 0.12);
         }
@@ -1583,11 +1604,13 @@ export function useBlackHole(
           const sinceBoot = introBootAt ? performance.now() - introBootAt : 0;
           controls.enabled = false;
 
-          if (deskIntro) {
+            if (deskIntro) {
+            const rest = deskHoleRest();
+            const from = rest * (mobile ? 1.2 : 2.35);
             // Desk: oversized → rest zoom. Hole stays upright; stars carry drift.
             if (sinceBoot < INTRO_BH_DELAY_MS) {
               holeA.core.position.copy(holeA.home);
-              holeA.core.scale.setScalar(INTRO_SCALE_FROM);
+              holeA.core.scale.setScalar(from);
               holeA.core.rotation.z = 0;
               lensingPass.uniforms.lensingStrength.value = lensIdle * 0.35;
             } else {
@@ -1598,9 +1621,7 @@ export function useBlackHole(
               }
               const t = Math.min(1, (performance.now() - introTravelAt) / INTRO_TRAVEL_MS);
               const e = easeOutCubic(t);
-              holeA.core.scale.setScalar(
-                THREE.MathUtils.lerp(INTRO_SCALE_FROM, holeRest, e)
-              );
+              holeA.core.scale.setScalar(THREE.MathUtils.lerp(from, rest, e));
               holeA.core.position.copy(holeA.home);
               holeA.core.rotation.z = 0;
               bloomPass.strength = BLOOM_TARGET;
@@ -1668,7 +1689,7 @@ export function useBlackHole(
             sinceNudge < 0 ? 0 : Math.sin(Math.PI * nudgeT)
           );
           controls.target.copy(HOME);
-          if (!deskIntro && !mobile && !reduceMotion) {
+          if (allowOrbit()) {
             controls.enabled = true;
             controls.update();
           }
@@ -1683,7 +1704,7 @@ export function useBlackHole(
           throwVel.set(0, 0, 0);
           if (!spinScene || centerRevealDone) {
             controls.target.copy(HOME);
-            if (!deskIntro && !mobile && !reduceMotion) {
+            if (allowOrbit()) {
               controls.enabled = true;
               controls.update();
             }
@@ -1692,7 +1713,7 @@ export function useBlackHole(
           // Dual mode: leave positions free so mutual gravity can warp them
           throwVel.set(0, 0, 0);
           controls.target.copy(HOME);
-          if (!deskIntro && !mobile && !reduceMotion) {
+          if (allowOrbit()) {
             controls.enabled = true;
             controls.update();
           }

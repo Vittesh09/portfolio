@@ -1,0 +1,74 @@
+.continue-ai {
+  background: transparent;
+  border: 0;
+  color: var(--v2-text-primary);
+  font-family: var(--font-geist), system-ui, sans-serif;
+  margin-top: 2.25rem;
+  max-width: 28rem;
+  padding: 0;
+}
+
+.continue-ai h2 {
+  font-size: 14px;
+  font-weight: 600;
+  letter-spacing: -0.01em;
+  line-height: 1.3;
+  margin: 0;
+}
+
+.continue-ai-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem 0.75rem;
+  margin-top: 0.55rem;
+}
+
+.continue-ai button {
+  appearance: none;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+  font: inherit;
+  margin: 0;
+  padding: 0;
+}
+
+.continue-ai button:focus-visible {
+  outline: 1px solid currentColor;
+  outline-offset: 3px;
+}
+
+.continue-ai-icon {
+  align-items: center;
+  color: var(--v2-text-secondary);
+  display: inline-flex;
+  height: 1.35rem;
+  justify-content: center;
+  opacity: 0.72;
+  transition: opacity 0.18s ease, color 0.18s ease;
+  width: 1.35rem;
+}
+
+.continue-ai-icon:hover {
+  color: var(--v2-text-primary);
+  opacity: 1;
+}
+
+.desk-root .continue-ai {
+  color: var(--desk-ink);
+  max-width: 28rem;
+}
+
+.desk-root .continue-ai-icon {
+  color: var(--desk-muted);
+}
+
+.desk-root .continue-ai-icon:hover {
+  color: var(--desk-ink);
+}
+
+.desk-root .continue-ai button:focus-visible {
+  outline-color: var(--desk-ink);
+}

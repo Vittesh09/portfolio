@@ -2,7 +2,7 @@
 
 ## Critical
 
-- **Production** is the desk site at `/` (`app/(site)/(desk)/`, components in `src/components/v2/desk/`): `/`, `/about/`, `/work/[slug]/`.
+- **Production** is the desk site at `/` (`app/(site)/(desk)/`, components in `src/components/v2/desk/`): `/`, `/about/`, `/work/[slug]/`, `/blog/`.
 - **Previous version** (singularity archive) lives under `/v2/` (`app/(site)/v2/`). Internal archive links go through `v2Path()`.
 - **Oldest portfolio** lives under `/legacy/` (`app/legacy/`). Do not replace it.
 - Lab tools: `/classic`, `/singularity`, `/classic/workbench`. `/desk/*` redirects to the same paths at the root.
@@ -39,9 +39,11 @@ Hero → Trust → Why → Work → About → CTA
 | `/` | **Primary homepage** (desk: singularity stage + horizontal work rail) |
 | `/about` | About (desk) |
 | `/work/[slug]` | Case study (desk) |
+| `/blog/`, `/blog/[slug]` | Blog (desk); posts and published tools in `src/config/v2/publishing.ts` |
 | `/v2/` | Previous homepage (singularity archive landing) |
 | `/v2/about` | Previous about |
 | `/v2/work/[slug]` | Previous case-study template |
+| `/v2/blog/`, `/v2/blog/[slug]` | Previous blog template |
 | `/tldr` | One-screen summary (identity, work, contact) |
 | `/classic` | Archived orbit / particle landing (lab) |
 | `/classic/workbench` | Archived workbench (lab) |

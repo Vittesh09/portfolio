@@ -19,6 +19,7 @@ function routeLabel(path: string) {
   if (p.startsWith('/about')) return 'About';
   if (p.startsWith('/tldr')) return 'TL;DR';
   if (p.startsWith('/work/')) return 'Work';
+  if (p.startsWith('/blog')) return 'Blog';
   if (p.startsWith('/machine')) return 'Machine';
   if (p.startsWith('/classic/workbench')) return 'Workbench';
   if (p.startsWith('/classic')) return 'Classic';

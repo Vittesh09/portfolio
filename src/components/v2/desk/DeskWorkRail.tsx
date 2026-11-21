@@ -40,12 +40,46 @@ function DragIcon() {
   );
 }
 
+function DownloadIcon() {
+  return (
+    <svg
+      className="desk-work-resume-icon"
+      viewBox="0 0 16 16"
+      width="14"
+      height="14"
+      aria-hidden="true"
+      focusable="false"
+    >
+      <g className="desk-work-resume-arrow">
+        <path
+          d="M8 2.5v6.4M5.4 6.6 8 9.2l2.6-2.6"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="1.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </g>
+      <path
+        className="desk-work-resume-tray"
+        d="M3.25 11.1v1.65c0 .55.45 1 1 1h7.5c.55 0 1-.45 1-1V11.1"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="1.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 export function DeskWorkRail({
   cards,
   heading = 'Selected Work',
   headingId = 'desk-work-heading',
   label = 'Selected work, scroll horizontally',
   stepLabel = 'project',
+  resumeHref,
   children
 }: {
   cards?: ProjectCardData[];
@@ -53,6 +87,7 @@ export function DeskWorkRail({
   headingId?: string;
   label?: string;
   stepLabel?: string;
+  resumeHref?: string;
   children?: ReactNode;
 }) {
   const railRef = useRef<HTMLDivElement>(null);
@@ -111,12 +146,23 @@ export function DeskWorkRail({
     railSmooth.jump(0);
     syncEdges();
 
+    const narrowMq = window.matchMedia('(max-width: 768px)');
+    const coarseMq = window.matchMedia('(pointer: coarse)');
+    const useNative = () => narrowMq.matches || coarseMq.matches;
+
     const unsubscribe = railSmooth.on('change', (value) => {
+      // On phones, native overflow owns the pan; only follow the spring for button steps.
+      if (useNative() && !railSmooth.isAnimating()) return;
       el.scrollLeft = value;
     });
     // Touch pans scroll natively; re-seat the spring so the next move starts there.
     const onScroll = () => {
       syncEdges();
+      if (useNative()) {
+        railTarget.jump(el.scrollLeft);
+        railSmooth.jump(el.scrollLeft);
+        return;
+      }
       if (railSmooth.isAnimating() || Math.abs(el.scrollLeft - railSmooth.get()) < 1.5) return;
       railTarget.jump(el.scrollLeft);
       railSmooth.jump(el.scrollLeft);
@@ -226,9 +272,23 @@ export function DeskWorkRail({
 
   return (
     <section ref={sectionRef} className="desk-work-rail" aria-labelledby={headingId}>
-      <h2 id={headingId} className="desk-work-heading">
-        {heading}
-      </h2>
+      <div className="desk-work-heading-row">
+        <h2 id={headingId} className="desk-work-heading">
+          {heading}
+        </h2>
+        {resumeHref ? (
+          <a
+            className="desk-work-resume"
+            href={resumeHref}
+            download
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            Resume
+            <DownloadIcon />
+          </a>
+        ) : null}
+      </div>
       <div
         ref={railRef}
         className="desk-work-rail-scroller"

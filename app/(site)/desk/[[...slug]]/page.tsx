@@ -1,4 +1,5 @@
 import { getAllSlugs } from '@/src/config/v2/caseStudies';
+import { blogPosts } from '@/src/config/v2/publishing';
 import DeskToRootRedirect from './redirect';
 
 export const metadata = {
@@ -12,7 +13,9 @@ export function generateStaticParams() {
     { slug: [] },
     { slug: ['about'] },
     { slug: ['work'] },
-    ...getAllSlugs().map((slug) => ({ slug: ['work', slug] }))
+    { slug: ['blog'] },
+    ...getAllSlugs().map((slug) => ({ slug: ['work', slug] })),
+    ...blogPosts.map((post) => ({ slug: ['blog', post.slug] }))
   ];
 }
 

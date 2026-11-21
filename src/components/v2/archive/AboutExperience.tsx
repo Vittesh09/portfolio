@@ -1,9 +1,11 @@
 'use client';
 
 import Image from 'next/image';
+import Link from 'next/link';
 import { motion } from 'motion/react';
 import { ContactPanel } from '@/src/components/v2/ui/ContactPanel';
 import { HashNavLink } from '@/src/components/v2/ui/HashNavLink';
+import { publishedTools } from '@/src/config/v2/publishing';
 import { yearsExperience, v2Path } from '@/src/config/v2/profile';
 import { experience, siteConfig } from '@/src/config/v2/site';
 
@@ -97,6 +99,44 @@ export function AboutExperience() {
               <span className="v2-visually-hidden"> (opens in a new tab)</span>
             </a>
           </div>
+        </div>
+      </section>
+
+      <section id="tools" className="scroll-mt-16 border-b border-border-subtle" aria-labelledby="about-tools-heading">
+        <div className="mx-auto max-w-[1600px] px-4 py-16 md:px-8 md:py-24">
+          <p className="archive-label text-text-muted">Things I publish</p>
+          <h2
+            id="about-tools-heading"
+            className="archive-display mt-5 text-[clamp(2.75rem,8vw,6rem)]"
+          >
+            Tools.
+          </h2>
+          <div className="mt-12 border-t border-border-subtle">
+            {publishedTools.map((tool, index) => (
+              <a
+                key={tool.href}
+                href={tool.href}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="grid gap-x-6 gap-y-1 border-b border-border-subtle py-5 transition-colors hover:text-accent-pop md:grid-cols-12"
+              >
+                <span className="archive-label text-accent-pop md:col-span-1">0{index + 1}</span>
+                <div className="md:col-span-4">
+                  <h3 className="text-xl font-semibold leading-none tracking-tight">{tool.title}</h3>
+                  <p className="archive-label mt-2 text-text-muted">{tool.kind}</p>
+                </div>
+                <p className="text-sm leading-relaxed text-text-secondary md:col-span-6">{tool.summary}</p>
+                <span className="archive-label text-text-muted md:col-span-1 md:text-right">
+                  ↗<span className="v2-visually-hidden"> (opens in a new tab)</span>
+                </span>
+              </a>
+            ))}
+          </div>
+          <p className="archive-label mt-10 text-text-muted">
+            <Link href={v2Path('/blog/')} className="transition-colors hover:text-text-primary">
+              Blog
+            </Link>
+          </p>
         </div>
       </section>
 
