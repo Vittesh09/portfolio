@@ -29,10 +29,13 @@ export function useDeskScroll() {
 
 /** A wheel gesture ends after this much silence; trackpad momentum keeps it alive. */
 const GESTURE_GAP_MS = 140;
-/** Page counts as moving while the spring is faster than this (px/s). */
-const STILL_VELOCITY = 40;
-/** Horizontal wins only when clearly sideways. */
-const HORIZONTAL_BIAS = 1.25;
+/**
+ * An event is "clearly" on one axis when it beats the other by this ratio and moves
+ * at least INTENT_PX. Clear events may switch the lock mid-gesture; diagonal noise
+ * keeps whatever lock is active, so the page never wobbles between axes.
+ */
+const AXIS_RATIO = 1.6;
+const INTENT_PX = 2;
 
 const SCROLL_SPRING = { stiffness: 210, damping: 34, mass: 0.7, restDelta: 0.4 };
 
@@ -43,9 +46,11 @@ function wheelPixels(event: WheelEvent, page: number) {
 
 /**
  * Desk page scroller. Vertical wheel motion is eased with a framer-motion spring.
- * Each wheel gesture is locked to one axis when it starts, and it may only go
- * horizontal (to the work rail) if the page is at rest — so a vertical flick
- * never leaks sideways and the rail never steals a page scroll.
+ * Each wheel event is assigned to one axis. Over a registered horizontal scroller
+ * (the work rail) a clearly sideways swipe moves the rail, even right after a
+ * vertical flick whose momentum is still arriving; vertical momentum is pure dy,
+ * so it can never be mistaken for a sideways swipe, and a clearly vertical move
+ * hands control straight back to the page.
  */
 export function DeskSmoothScroll({
   children,
@@ -93,6 +98,14 @@ export function DeskSmoothScroll({
     let lockRail: HorizontalHandler | null = null;
     let lastWheelAt = 0;
 
+    const railUnder = (node: EventTarget | null) => {
+      if (!(node instanceof Node)) return null;
+      for (const [el, handler] of handlers.current) {
+        if (el.contains(node)) return handler;
+      }
+      return null;
+    };
+
     const onWheel = (event: WheelEvent) => {
       if (useNative()) return;
       if (event.ctrlKey) return;
@@ -106,21 +119,29 @@ export function DeskSmoothScroll({
       }
       lastWheelAt = now;
 
-      const { dx: rawDx, dy } = wheelPixels(event, wrapper.clientHeight);
-      const dx = rawDx !== 0 ? rawDx : event.shiftKey ? dy : 0;
+      const { dx: rawDx, dy: rawDy } = wheelPixels(event, wrapper.clientHeight);
+      // Shift + mouse wheel means sideways.
+      const dx = rawDx !== 0 ? rawDx : event.shiftKey ? rawDy : 0;
+      const dy = event.shiftKey && rawDx === 0 ? 0 : rawDy;
+      const ax = Math.abs(dx);
+      const ay = Math.abs(dy);
+      const clearlySideways = ax >= INTENT_PX && ax > ay * AXIS_RATIO;
+      const clearlyVertical = ay >= INTENT_PX && ay > ax * AXIS_RATIO;
 
-      if (!lock) {
-        const pageStill = Math.abs(smooth.getVelocity()) < STILL_VELOCITY && !smooth.isAnimating();
-        const sideways = Math.abs(dx) > Math.abs(event.shiftKey ? 0 : dy) * HORIZONTAL_BIAS;
-        let rail: HorizontalHandler | null = null;
-        if (pageStill && sideways) {
-          for (const [el, handler] of handlers.current) {
-            if (el.contains(event.target as Node)) {
-              rail = handler;
-              break;
-            }
-          }
+      if (clearlySideways && lock !== 'horizontal') {
+        const rail = railUnder(event.target);
+        if (rail) {
+          lock = 'horizontal';
+          lockRail = rail;
+        } else if (!lock) {
+          lock = 'vertical';
         }
+      } else if (clearlyVertical && lock !== 'vertical') {
+        lock = 'vertical';
+        lockRail = null;
+      } else if (!lock) {
+        // Tiny or diagonal first event: follow whichever axis it leans to.
+        const rail = ax > ay ? railUnder(event.target) : null;
         lock = rail ? 'horizontal' : 'vertical';
         lockRail = rail;
       }
@@ -132,7 +153,7 @@ export function DeskSmoothScroll({
       }
 
       event.preventDefault();
-      if (event.shiftKey) return;
+      if (dy === 0) return;
       const next = Math.min(maxScroll(), Math.max(0, target.get() + dy));
       if (reduceMq.matches) {
         target.jump(next);

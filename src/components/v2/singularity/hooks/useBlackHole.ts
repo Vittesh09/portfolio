@@ -139,11 +139,13 @@ export function useBlackHole(
     // Transparent desk: keep the void small so paper shows around it (no black plate).
     const holeRest = transparent
       ? 0.58
-      : isLab || spinScene
-        ? mobile && deskIntro
-          ? 0.72
-          : 1
-        : HERO_HOLE_SCALE;
+      : deskIntro
+        ? mobile
+          ? 0.86
+          : 1.12
+        : isLab || spinScene
+          ? 1
+          : HERO_HOLE_SCALE;
     const heroLensRadius = 0.46 * holeRest;
 
     const scene = new THREE.Scene();
@@ -1167,13 +1169,13 @@ export function useBlackHole(
     const INTRO_BH_DELAY_MS = deskIntro ? 80 : 140;
     const deskHoleRest = () => {
       // A taller phone panel shows more sky. Shrink the disk by the same
-      // ratio so it stays the size it had on the 1.25 plate. Never enlarge it
+      // ratio so it stays the size it had on the 1.05 plate. Never enlarge it
       // when a short panel is capped below that plate.
       if (!(deskIntro && mobile)) return holeRest;
       const width = Math.max(1, mount.clientWidth);
       const height = Math.max(1, mount.clientHeight);
       if (width < 2 || height < 2) return holeRest;
-      return holeRest * Math.min(1, width / 1.25 / height);
+      return holeRest * Math.min(1, width / 1.05 / height);
     };
     const prevPos = new THREE.Vector3();
     const sampleVel = new THREE.Vector3();

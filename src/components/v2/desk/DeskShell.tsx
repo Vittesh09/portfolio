@@ -26,8 +26,14 @@ const TABS = [
 const EASE_OUT = [0.16, 1, 0.3, 1] as const;
 const EASE_IN = [0.4, 0, 1, 1] as const;
 
-const LAND_HIDDEN = { opacity: 0, y: 14, filter: 'blur(8px)' };
-const LAND_SHOWN = { opacity: 1, y: 0, filter: 'blur(0px)', transitionEnd: { filter: 'none' } };
+// Opacity + transform only: both stay on the compositor. Animating `filter: blur()`
+// over the live WebGL stage re-rasterises it every frame and stutters.
+const LAND_HIDDEN = { opacity: 0, y: 12 };
+const LAND_SHOWN = { opacity: 1, y: 0 };
+const PAGE_OUT = { opacity: 0, y: -6 };
+const PAGE_IN = { opacity: 1, y: 0 };
+const OUT_TRANSITION: Transition = { duration: 0.22, ease: EASE_IN };
+const IN_TRANSITION: Transition = { duration: 0.5, ease: EASE_OUT };
 const land = (delay: number, duration = 0.9): Transition => ({ duration, delay, ease: EASE_OUT });
 
 
@@ -76,8 +82,8 @@ export function DeskShell({ children }: { children: ReactNode }) {
     };
   }, [hideNav]);
 
-  // Desk → desk links: fade the page out, then navigate. Capture phase so
-  // Next's <Link> handler never runs a second navigation.
+  // Desk → desk links: fade the page out, then navigate, then fade the new page in.
+  // Capture phase so Next's <Link> handler never runs a second navigation.
   useEffect(() => {
     const root = rootRef.current;
     if (!root) return;
@@ -109,20 +115,24 @@ export function DeskShell({ children }: { children: ReactNode }) {
 
       const href = `${next.pathname}${next.search}${next.hash}`;
       navigating.current = true;
-      // Navigate in parallel with the fade so a slow route never leaves a blank page;
-      // if the route still hasn't committed, fall back to a hard load.
-      router.push(href);
-      window.clearTimeout(fallbackTimer.current);
-      fallbackTimer.current = window.setTimeout(() => {
-        if (navigating.current) window.location.assign(href);
-      }, 4000);
+      // Warm the route while the old page fades, so it is usually ready by the time
+      // we push. Pushing only after the fade means the swap always happens while the
+      // page is invisible, never halfway through the fade.
+      router.prefetch(href);
+      const go = () => {
+        router.push(href);
+        window.clearTimeout(fallbackTimer.current);
+        // If the route still hasn't committed, fall back to a hard load.
+        fallbackTimer.current = window.setTimeout(() => {
+          if (navigating.current) window.location.assign(href);
+        }, 4000);
+      };
       const page = pageScope.current;
-      if (reduce || !page) return;
-      void animatePage(
-        page,
-        { opacity: 0, y: -8, filter: 'blur(6px)' },
-        { duration: 0.24, ease: EASE_IN }
-      );
+      if (reduce || !page) {
+        go();
+        return;
+      }
+      void animatePage(page, PAGE_OUT, OUT_TRANSITION).then(go, go);
     };
 
     root.addEventListener('click', onClick, true);
@@ -140,17 +150,11 @@ export function DeskShell({ children }: { children: ReactNode }) {
     const page = pageScope.current;
     if (!page) return;
     if (reduce) {
-      void animatePage(page, { opacity: 1, y: 0, filter: 'blur(0px)' }, { duration: 0 });
+      void animatePage(page, PAGE_IN, { duration: 0 });
       return;
     }
-    // Picks up from wherever the fade-out got to, so fast routes don't flash.
-    void animatePage(
-      page,
-      { opacity: 1, y: 0, filter: 'blur(0px)' },
-      { duration: 0.55, ease: EASE_OUT }
-    ).then(() => {
-      page.style.filter = 'none';
-    });
+    // Back/forward never faded out, so this is a no-op for them.
+    void animatePage(page, PAGE_IN, IN_TRANSITION);
   }, [pathname, animatePage, pageScope, reduce]);
 
   const landInitial = reduce ? false : LAND_HIDDEN;

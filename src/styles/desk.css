@@ -248,14 +248,18 @@
   border-radius: 0;
   box-shadow: none;
   color: #f2efe6;
-  height: 100%;
+  /*
+    Keeps the black plate's sub-pixel edge under the solid part of the veil on
+    every side. Height must stay auto: with height:100% the inset only applies
+    at the top and the plate's bottom edge lands on the stage edge as a hairline.
+  */
+  height: auto !important;
+  inset: 2px;
   isolation: isolate;
   min-height: 0 !important;
   outline: none;
   overflow: hidden;
   position: absolute;
-  /* Keeps the black plate's sub-pixel edge under the solid part of the veil */
-  inset: 2px;
   z-index: 1;
 }
 
@@ -308,7 +312,8 @@
     radial-gradient(ellipse 28% 24% at 50% 52%, rgba(184, 137, 92, 0.2), transparent 62%),
     #000;
   border-radius: inherit;
-  inset: 0;
+  /* Same 2px tuck as .bh-hero so no plate edge can peek past the veil. */
+  inset: 2px;
   position: absolute;
 }
 
@@ -732,50 +737,90 @@
   text-align: center;
 }
 
+/*
+  Holographic foil quote: spectral bands over a silver base, clipped to the text.
+  The bands drift on their own (--holo-drift) and slide with the pointer
+  (--holo-tilt, set in DeskFooterMeta) like tilting a foil card. A narrow glint
+  layer sweeps across on top. Hues are deep enough to read on the paper.
+*/
+@property --holo-drift {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: 0%;
+}
+
+@property --holo-glint {
+  syntax: '<percentage>';
+  inherits: false;
+  initial-value: -40%;
+}
+
 .desk-foot-quote {
-  color: var(--desk-muted);
+  --holo-tilt: 0%;
+  animation:
+    desk-quote-holo 16s ease-in-out infinite alternate,
+    desk-quote-glint 7s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+  background-image:
+    linear-gradient(
+      105deg,
+      transparent calc(var(--holo-glint) - 6%),
+      rgba(255, 255, 255, 0.55) var(--holo-glint),
+      transparent calc(var(--holo-glint) + 6%)
+    ),
+    linear-gradient(
+      115deg,
+      #7b8494 0%,
+      #6e5bd6 12%,
+      #2f86d8 24%,
+      #129c95 36%,
+      #5f9d3c 46%,
+      #b98313 56%,
+      #d9547e 66%,
+      #8a5cf6 76%,
+      #7b8494 88%,
+      #6e5bd6 100%
+    );
+  background-position:
+    0 50%,
+    calc(var(--holo-drift) + var(--holo-tilt)) 50%;
+  background-repeat: no-repeat, repeat;
+  background-size:
+    100% 100%,
+    170% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
   cursor: default;
   font-family: var(--font-geist), system-ui, sans-serif;
   font-size: 0.78rem;
   font-style: normal;
-  font-weight: 400;
+  font-weight: 450;
   letter-spacing: -0.01em;
   line-height: 1.45;
   margin: 0;
   max-width: 22rem;
-  transition: color 0.35s ease;
 }
 
 .desk-foot-quote-seg {
   white-space: nowrap;
 }
 
-.desk-foot-quote:hover {
-  animation: desk-quote-oil 20s linear infinite;
-  background-image: linear-gradient(
-    110deg,
-    #1d4ed8,
-    #0d9488,
-    #eab308,
-    #f59e0b,
-    #a855f7,
-    #06b6d4,
-    #22c55e,
-    #ec4899,
-    #1d4ed8
-  );
-  background-size: 320% 100%;
-  color: transparent;
-  -webkit-background-clip: text;
-  background-clip: text;
+@keyframes desk-quote-holo {
+  from {
+    --holo-drift: 0%;
+  }
+  to {
+    --holo-drift: 100%;
+  }
 }
 
-@keyframes desk-quote-oil {
-  0% {
-    background-position: 0% 50%;
+@keyframes desk-quote-glint {
+  0%,
+  55% {
+    --holo-glint: -40%;
   }
   100% {
-    background-position: 320% 50%;
+    --holo-glint: 140%;
   }
 }
 
@@ -1544,10 +1589,9 @@
     transform: scale(0.92);
   }
 
-  .desk-foot-quote:hover {
+  /* Still foil: no drift or glint, the bands stay put. */
+  .desk-foot-quote {
     animation: none;
-    background-image: linear-gradient(110deg, #1d4ed8, #0d9488, #eab308, #a855f7);
-    background-position: 40% 50%;
   }
 }
 
@@ -1610,13 +1654,17 @@
   }
 
   .desk-stage {
-    /* Taller plate. The canvas fills it, so the only edge is the blurred window. */
-    --desk-stage-ratio: 1.25;
-    --desk-window-inset: 56px;
+    /*
+      Near-square phone plate. No background here: the black lives on the
+      inset .bh-hero, so the plate's own edge can never show as a hairline
+      while the page fades in.
+    */
+    --desk-stage-ratio: 1.05;
+    --desk-window-inset: 26px;
     aspect-ratio: auto;
-    background: #000;
-    /* Keep the elongated phone plate, but never let it push the intro off a short screen. */
-    height: min(calc(100cqw / var(--desk-stage-ratio) + 8rem), calc(100svh - 16rem));
+    background: transparent;
+    /* Never let it push the intro off a short screen. */
+    height: min(calc(100cqw / var(--desk-stage-ratio)), calc(100svh - 18rem));
     width: 100%;
   }
 

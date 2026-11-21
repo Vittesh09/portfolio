@@ -2449,76 +2449,18 @@ html.v2-disc-lock body {
   animation: v2-disc-page-in 0.7s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+/* Desk ↔ archive veil. Opacity is driven by Motion in HorizonTransition. */
 .v2-root .v2-blur-wipe {
-  background: color-mix(in srgb, var(--v2-bg-primary, #fbfbfb) 35%, transparent);
+  background: var(--v2-bg-primary, #f9f9f7);
   inset: 0;
-  opacity: 0;
   pointer-events: none;
   position: fixed;
+  will-change: opacity;
   z-index: 950;
 }
 
-.v2-root .v2-blur-wipe[data-phase='cover'] {
-  animation: v2-blur-wipe-in 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.v2-root .v2-blur-wipe[data-phase='swap'],
-.v2-root .v2-blur-wipe[data-phase='reveal'] {
-  animation: v2-blur-wipe-out 0.32s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-}
-
-.v2-root .v2-disc-stage[data-phase='blur-cover'] {
-  animation: v2-blur-content-out 0.28s cubic-bezier(0.22, 1, 0.36, 1) forwards;
-  filter: blur(0);
-}
-
-.v2-root .v2-disc-stage[data-phase='blur-swap'],
-.v2-root .v2-disc-stage[data-phase='blur-reveal'] {
-  animation: v2-blur-content-in 0.36s cubic-bezier(0.22, 1, 0.36, 1) both;
-}
-
-@keyframes v2-blur-wipe-in {
-  from {
-    backdrop-filter: blur(0);
-    -webkit-backdrop-filter: blur(0);
-    opacity: 0;
-  }
-  to {
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    opacity: 1;
-  }
-}
-
-@keyframes v2-blur-wipe-out {
-  from {
-    backdrop-filter: blur(14px);
-    -webkit-backdrop-filter: blur(14px);
-    opacity: 1;
-  }
-  to {
-    backdrop-filter: blur(0);
-    -webkit-backdrop-filter: blur(0);
-    opacity: 0;
-  }
-}
-
-@keyframes v2-blur-content-out {
-  to {
-    filter: blur(12px);
-    opacity: 0.35;
-  }
-}
-
-@keyframes v2-blur-content-in {
-  from {
-    filter: blur(12px);
-    opacity: 0;
-  }
-  to {
-    filter: blur(0);
-    opacity: 1;
-  }
+.v2-root:has(.desk-root) .v2-blur-wipe {
+  background: #f9f9f7;
 }
 
 html.v2-disc-lock .v2-root .v2-page-enter {

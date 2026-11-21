@@ -1,5 +1,6 @@
 'use client';
 
+import { AnimatePresence, motion } from 'motion/react';
 import { usePathname, useRouter } from 'next/navigation';
 import {
   useCallback,
@@ -150,8 +151,9 @@ export function HorizonTransition({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     if (phase !== 'cover') return;
-    // Blur wipe needs a beat to settle before swap; disc keeps the longer beat.
-    const delay = wipeRef.current === 'blur' ? 340 : 920;
+    // The paper veil pushes as soon as it is opaque (onAnimationComplete); this is
+    // only its failsafe. The disc keeps its longer beat.
+    const delay = wipeRef.current === 'blur' ? 600 : 920;
     const failSafe = window.setTimeout(pushPending, delay);
     return () => window.clearTimeout(failSafe);
   }, [phase, pushPending]);
@@ -180,7 +182,8 @@ export function HorizonTransition({ children }: { children: ReactNode }) {
   useEffect(() => {
     if (phase !== 'reveal') return;
     document.getElementById('v2-main')?.focus({ preventScroll: true });
-    const delay = wipeRef.current === 'blur' ? 480 : 700;
+    // Veil fade-out runs as an exit animation; give it time to finish.
+    const delay = wipeRef.current === 'blur' ? 420 : 700;
     const failSafe = window.setTimeout(finish, delay);
     return () => window.clearTimeout(failSafe);
   }, [phase, finish]);
@@ -212,13 +215,28 @@ export function HorizonTransition({ children }: { children: ReactNode }) {
           <p className="v2-disc-label">{label}</p>
         </div>
       ) : null}
-      {phase !== 'idle' && wipe === 'blur' ? (
-        <div className="v2-blur-wipe" data-phase={phase} aria-hidden="true" />
-      ) : null}
-      <div
-        className="v2-disc-stage"
-        data-phase={wipe === 'blur' && phase !== 'idle' ? `blur-${phase}` : phase}
-      >
+      {/*
+        Desk ↔ archive/lab: a solid paper veil fades in over the old page, the route
+        swaps underneath while it is fully opaque, then the veil fades away. Opacity
+        only, so it stays on the compositor even over the WebGL stage.
+      */}
+      <AnimatePresence>
+        {wipe === 'blur' && (phase === 'cover' || phase === 'swap') ? (
+          <motion.div
+            key="veil"
+            className="v2-blur-wipe"
+            aria-hidden="true"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0, transition: { duration: 0.38, ease: [0.16, 1, 0.3, 1] } }}
+            transition={{ duration: 0.26, ease: [0.4, 0, 1, 1] }}
+            onAnimationComplete={() => {
+              if (phaseRef.current === 'cover') pushPending();
+            }}
+          />
+        ) : null}
+      </AnimatePresence>
+      <div className="v2-disc-stage" data-phase={wipe === 'blur' ? 'idle' : phase}>
         {children}
       </div>
     </>

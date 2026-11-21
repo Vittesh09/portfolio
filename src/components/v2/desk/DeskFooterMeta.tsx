@@ -1,7 +1,7 @@
 'use client';
 
 import { usePathname } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 function formatLocalTime(date: Date) {
   return new Intl.DateTimeFormat(undefined, {
@@ -165,6 +165,33 @@ export function DeskFooterMeta() {
     return () => window.clearInterval(id);
   }, [allowed]);
 
+  // Holographic quote: the pointer slides the foil bands, like tilting a card.
+  const quoteRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    const quote = quoteRef.current;
+    if (!quote) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    let raf = 0;
+    let target = 0;
+    let current = 0;
+    const step = () => {
+      current += (target - current) * 0.08;
+      quote.style.setProperty('--holo-tilt', `${current.toFixed(2)}%`);
+      raf = Math.abs(target - current) > 0.05 ? requestAnimationFrame(step) : 0;
+    };
+    const onMove = (event: PointerEvent) => {
+      const nx = event.clientX / window.innerWidth - 0.5;
+      const ny = event.clientY / window.innerHeight - 0.5;
+      target = (nx * 0.8 + ny * 0.4) * 60;
+      if (!raf) raf = requestAnimationFrame(step);
+    };
+    window.addEventListener('pointermove', onMove, { passive: true });
+    return () => {
+      window.removeEventListener('pointermove', onMove);
+      cancelAnimationFrame(raf);
+    };
+  }, [isLanding]);
+
   const text = allowed
     ? `${country ? `${country}, ` : ''}Earth · ${time || formatLocalTime(new Date())}`
     : 'Earth, Milkyway';
@@ -172,7 +199,7 @@ export function DeskFooterMeta() {
   return (
     <div className="desk-foot-meta-wrap">
       {isLanding ? (
-        <p className="desk-foot-quote">
+        <p ref={quoteRef} className="desk-foot-quote">
           <span className="desk-foot-quote-seg">Experience is at the heart of being human.</span>{' '}
           <span className="desk-foot-quote-seg">I try to make it better everyday.</span>
         </p>

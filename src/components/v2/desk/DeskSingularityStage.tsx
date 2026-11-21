@@ -38,6 +38,10 @@ function squirclePath(width: number, height: number, inset: number) {
 /**
  * Same picture as the window, blurred, so the canvas box fades instead of cutting.
  */
+/** The copy is blurred 28px anyway, so a quarter-resolution, ~30 fps copy looks the same. */
+const BLUR_COPY_SCALE = 0.25;
+const BLUR_COPY_INTERVAL_MS = 33;
+
 function DeskContentBlur() {
   useEffect(() => {
     const canvas = document.querySelector<HTMLCanvasElement>('.desk-stage-content-blur');
@@ -45,28 +49,38 @@ function DeskContentBlur() {
     if (!canvas || !ctx) return;
     let raf = 0;
     let alive = true;
-    const tick = () => {
-      if (!alive) return;
+    let visible = true;
+    let lastDraw = 0;
+    const tick = (now: number) => {
+      raf = 0;
+      if (!alive || !visible) return;
       raf = requestAnimationFrame(tick);
+      if (now - lastDraw < BLUR_COPY_INTERVAL_MS) return;
+      lastDraw = now;
       const hero = canvas.parentElement;
       const src = hero?.querySelector<HTMLCanvasElement>('.bh-canvas');
       if (!src || !hero || src.width < 2) return;
       const width = hero.clientWidth;
       const height = hero.clientHeight;
       if (width < 2 || height < 2) return;
-      const dpr = Math.min(1.5, window.devicePixelRatio || 1);
-      const bw = Math.round(width * dpr);
-      const bh = Math.round(height * dpr);
+      const bw = Math.max(1, Math.round(width * BLUR_COPY_SCALE));
+      const bh = Math.max(1, Math.round(height * BLUR_COPY_SCALE));
       if (canvas.width !== bw || canvas.height !== bh) {
         canvas.width = bw;
         canvas.height = bh;
       }
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-      ctx.drawImage(src, 0, 0, width, height);
+      ctx.drawImage(src, 0, 0, bw, bh);
     };
+    // Only copy while the stage is on screen (the WebGL loop pauses there too).
+    const io = new IntersectionObserver(([entry]) => {
+      visible = entry.isIntersecting;
+      if (visible && !raf) raf = requestAnimationFrame(tick);
+    });
+    io.observe(canvas);
     raf = requestAnimationFrame(tick);
     return () => {
       alive = false;
+      io.disconnect();
       cancelAnimationFrame(raf);
     };
   }, []);
@@ -79,10 +93,28 @@ function DeskContentBlur() {
  * the same filter as the live desk, so the picture fades like a plane window.
  * No viewBox: filter values stay in CSS px, so the edge never stretches.
  */
+/**
+ * Feather strength per stage size. The edge spreads about 2.5σ of blur plus half of
+ * each displacement, and the hole must stay at least that far from the stage box:
+ * anything closer is clipped by the stage's overflow and reads as a hard line.
+ */
+function featherFor(width: number) {
+  return width < 769
+    ? { blur: 10, wobble: 10, grain: 14 }
+    : { blur: 14, wobble: 14, grain: 18 };
+}
+
+function featherReach({ blur, wobble, grain }: ReturnType<typeof featherFor>) {
+  return Math.ceil(blur * 2.5 + (wobble + grain) / 2) + 2;
+}
+
 function DeskStageFeather() {
   const id = 'desk-feather';
   const svgRef = useRef<SVGSVGElement>(null);
   const pathRef = useRef<SVGPathElement>(null);
+  const blurRef = useRef<SVGFEGaussianBlurElement>(null);
+  const wobbleRef = useRef<SVGFEDisplacementMapElement>(null);
+  const grainRef = useRef<SVGFEDisplacementMapElement>(null);
 
   useLayoutEffect(() => {
     const svg = svgRef.current;
@@ -94,8 +126,13 @@ function DeskStageFeather() {
       const width = stage.clientWidth;
       const height = stage.clientHeight;
       if (width < 2 || height < 2) return;
-      const inset =
+      const feather = featherFor(window.innerWidth);
+      blurRef.current?.setAttribute('stdDeviation', String(feather.blur));
+      wobbleRef.current?.setAttribute('scale', String(feather.wobble));
+      grainRef.current?.setAttribute('scale', String(feather.grain));
+      const wanted =
         Number.parseFloat(getComputedStyle(stage).getPropertyValue('--desk-window-inset')) || 40;
+      const inset = Math.max(wanted, featherReach(feather));
       path.setAttribute('d', squirclePath(width, height, inset));
     };
     draw();
@@ -115,11 +152,11 @@ function DeskStageFeather() {
           height="160%"
           colorInterpolationFilters="sRGB"
         >
-          <feGaussianBlur in="SourceGraphic" stdDeviation="16" result="soft" />
+          <feGaussianBlur ref={blurRef} in="SourceGraphic" stdDeviation="14" result="soft" />
           <feTurbulence type="fractalNoise" baseFrequency="0.011" numOctaves="2" seed="7" result="wobble" />
-          <feDisplacementMap in="soft" in2="wobble" scale="18" xChannelSelector="R" yChannelSelector="G" result="wavy" />
+          <feDisplacementMap ref={wobbleRef} in="soft" in2="wobble" scale="14" xChannelSelector="R" yChannelSelector="G" result="wavy" />
           <feTurbulence type="fractalNoise" baseFrequency="0.85" numOctaves="2" seed="3" result="grain" />
-          <feDisplacementMap in="wavy" in2="grain" scale="22" xChannelSelector="R" yChannelSelector="B" />
+          <feDisplacementMap ref={grainRef} in="wavy" in2="grain" scale="18" xChannelSelector="R" yChannelSelector="B" />
         </filter>
         <path id={`${id}-shape`} ref={pathRef} />
         <mask id={`${id}-m`} maskUnits="userSpaceOnUse" x="0" y="0" width="100%" height="100%">
@@ -288,7 +325,7 @@ export function DeskSingularityStage() {
     diskTiltDeg: -100,
     diskBankDeg: -8,
     diskDensity: 2.2,
-    lensingRadius: 0.27,
+    lensingRadius: 0.3,
     bloomStrength: 0.9,
     bloomRadius: 0.8,
     bloomThreshold: 0.7,
@@ -303,7 +340,7 @@ export function DeskSingularityStage() {
     setClientReady(true);
     const reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     const fine = !reduce;
-    if (window.innerWidth <= 640) paramsRef.current.lensingRadius = 0.2;
+    if (window.innerWidth <= 640) paramsRef.current.lensingRadius = 0.25;
     setUseWebGl(fine);
     if (fine) void import('@/src/components/v2/singularity/BlackHole');
   }, []);

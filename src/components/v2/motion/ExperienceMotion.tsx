@@ -106,8 +106,10 @@ function useSectionReveals(enabled: boolean) {
 }
 
 /** Touch stand-in for card hover: the thumb settles and takes colour as it rises into view. */
-function useProjectScrollFocus() {
+function useProjectScrollFocus(enabled: boolean) {
   useEffect(() => {
+    // Desk pages have no archive cards; don't keep a per-frame loop alive for nothing.
+    if (!enabled) return;
     const touch =
       window.matchMedia('(hover: none)').matches || window.matchMedia('(pointer: coarse)').matches;
     if (!touch) return;
@@ -147,7 +149,7 @@ function useProjectScrollFocus() {
 
     frame = window.requestAnimationFrame(tick);
     return () => window.cancelAnimationFrame(frame);
-  }, []);
+  }, [enabled]);
 }
 
 function AmbientCursor({ enabled }: { enabled: boolean }) {
@@ -158,6 +160,8 @@ function AmbientCursor({ enabled }: { enabled: boolean }) {
   const [nativeGrab, setNativeGrab] = useState(false);
   const [mounted, setMounted] = useState(false);
   const scaleRef = useRef(1);
+  /** Restarts the follow loop after it has gone idle (set by the loop effect). */
+  const wakeRef = useRef<() => void>(() => {});
 
   useEffect(() => {
     setMounted(true);
@@ -188,8 +192,16 @@ function AmbientCursor({ enabled }: { enabled: boolean }) {
     };
 
     let last = performance.now();
-    const tick = (now: number) => {
+    // The loop sleeps once the ring has caught the pointer, and wakes on the next
+    // move, press or scale change, so an idle page draws nothing.
+    const wake = () => {
+      if (frame) return;
+      last = performance.now();
       frame = window.requestAnimationFrame(tick);
+    };
+    wakeRef.current = wake;
+    const tick = (now: number) => {
+      frame = 0;
       if (!Number.isFinite(ring.x) || !Number.isFinite(ring.y)) {
         ring.x = target.x;
         ring.y = target.y;
@@ -206,14 +218,20 @@ function AmbientCursor({ enabled }: { enabled: boolean }) {
       }
       last = now;
       place();
+      const settled =
+        Math.abs(target.x - ring.x) < 0.1 &&
+        Math.abs(target.y - ring.y) < 0.1 &&
+        Math.abs(scaleRef.current - ring.scale) < 0.001;
+      if (!settled) frame = window.requestAnimationFrame(tick);
     };
-    frame = window.requestAnimationFrame(tick);
+    wake();
 
     const move = (event: PointerEvent) => {
       if (event.buttons === 0) setPressed(false);
       const half = halfFor();
       target.x = event.clientX - half;
       target.y = event.clientY - half;
+      wake();
       const node = event.target;
       const overHole =
         node instanceof Element &&
@@ -248,6 +266,8 @@ function AmbientCursor({ enabled }: { enabled: boolean }) {
     window.addEventListener('blur', up);
     return () => {
       window.cancelAnimationFrame(frame);
+      frame = 0;
+      wakeRef.current = () => {};
       window.removeEventListener('pointermove', move, true);
       window.removeEventListener('pointerdown', down, true);
       window.removeEventListener('pointerup', up, true);
@@ -261,6 +281,7 @@ function AmbientCursor({ enabled }: { enabled: boolean }) {
 
   useEffect(() => {
     scaleRef.current = scale;
+    wakeRef.current();
   }, [scale]);
 
   if (!mounted || !enabled) return null;
@@ -317,7 +338,7 @@ export function ExperienceMotion() {
   useLenisSmoothScroll(!isMachine && !isDesk);
   useSectionReveals(!isDesk);
   useTitleReveals(!isDesk, pathname, kissMode);
-  useProjectScrollFocus();
+  useProjectScrollFocus(!isDesk);
   const [cursorOn, setCursorOn] = useState(false);
 
   useEffect(() => {
