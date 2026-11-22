@@ -6,7 +6,7 @@ Last updated: 2026-10-25
 Name: Vittesh Sinha
 Title: Senior Product Designer
 Email: hello@vittesh.com
-Years: 8
+Years: 7
 Location: India
 
 Employers:

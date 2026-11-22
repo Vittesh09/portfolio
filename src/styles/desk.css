@@ -834,55 +834,72 @@
 }
 
 /*
-  Holographic foil quote: spectral bands over a silver base, clipped to the text.
-  The bands drift on their own (--holo-drift) and slide with the pointer
-  (--holo-tilt, set in DeskFooterMeta) like tilting a foil card. A narrow glint
-  layer sweeps across on top. Hues are deep enough to read on the paper.
+  Holographic foil quote, clipped to the text. Three layers, like real foil:
+  1. fine repeating spectral bands (several hues across every line), drifting;
+  2. a silvery sheen at another angle drifting the other way, so the colours
+     shimmer and shift over each other instead of sliding as one gradient;
+  3. a soft, wide glint that sweeps across slowly every few seconds.
+  The pointer slides the two foil layers in opposite directions (--holo-tilt, set
+  in DeskFooterMeta), like tilting a card under a light. Hues stay deep enough to
+  read on the paper.
 */
 @property --holo-drift {
-  syntax: '<percentage>';
+  syntax: '<length>';
   inherits: false;
-  initial-value: 0%;
+  initial-value: 0px;
+}
+
+@property --holo-sheen {
+  syntax: '<length>';
+  inherits: false;
+  initial-value: 0px;
 }
 
 @property --holo-glint {
   syntax: '<percentage>';
   inherits: false;
-  initial-value: -40%;
+  initial-value: -30%;
 }
 
 .desk-foot-quote {
-  --holo-tilt: 0%;
+  --holo-band: 9rem;
+  --holo-tilt: 0px;
   animation:
-    desk-quote-holo 16s ease-in-out infinite alternate,
-    desk-quote-glint 7s cubic-bezier(0.45, 0, 0.25, 1) infinite;
+    desk-quote-bands 7s linear infinite,
+    desk-quote-sheen 11s linear infinite,
+    desk-quote-glint 9s cubic-bezier(0.45, 0, 0.55, 1) infinite;
   background-image:
     linear-gradient(
-      105deg,
-      transparent calc(var(--holo-glint) - 6%),
-      rgba(255, 255, 255, 0.55) var(--holo-glint),
-      transparent calc(var(--holo-glint) + 6%)
+      100deg,
+      transparent calc(var(--holo-glint) - 16%),
+      rgb(255 255 255 / 0.32) calc(var(--holo-glint) - 5%),
+      rgb(255 255 255 / 0.62) var(--holo-glint),
+      rgb(255 255 255 / 0.32) calc(var(--holo-glint) + 5%),
+      transparent calc(var(--holo-glint) + 16%)
     ),
-    linear-gradient(
+    repeating-linear-gradient(
+      62deg,
+      rgb(140 150 166 / 0) 0,
+      rgb(140 150 166 / 0.42) 2.2rem,
+      rgb(140 150 166 / 0) 4.6rem,
+      rgb(140 150 166 / 0.18) 6.2rem,
+      rgb(140 150 166 / 0) 7.4rem
+    ),
+    repeating-linear-gradient(
       115deg,
-      #7b8494 0%,
-      #6e5bd6 12%,
-      #2f86d8 24%,
-      #129c95 36%,
-      #5f9d3c 46%,
-      #b98313 56%,
-      #d9547e 66%,
-      #8a5cf6 76%,
-      #7b8494 88%,
-      #6e5bd6 100%
+      #6e5bd6 0,
+      #2f86d8 calc(var(--holo-band) * 0.17),
+      #129c95 calc(var(--holo-band) * 0.33),
+      #5f9d3c calc(var(--holo-band) * 0.48),
+      #b98313 calc(var(--holo-band) * 0.62),
+      #d9547e calc(var(--holo-band) * 0.78),
+      #8a5cf6 calc(var(--holo-band) * 0.9),
+      #6e5bd6 var(--holo-band)
     );
   background-position:
     0 50%,
+    calc(var(--holo-sheen) - var(--holo-tilt) * 0.6) 50%,
     calc(var(--holo-drift) + var(--holo-tilt)) 50%;
-  background-repeat: no-repeat, repeat;
-  background-size:
-    100% 100%,
-    170% 100%;
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -901,22 +918,33 @@
   white-space: nowrap;
 }
 
-@keyframes desk-quote-holo {
+/* One band period per loop, so the drift repeats seamlessly. */
+@keyframes desk-quote-bands {
   from {
-    --holo-drift: 0%;
+    --holo-drift: 0px;
   }
   to {
-    --holo-drift: 100%;
+    --holo-drift: 9rem;
   }
 }
 
+@keyframes desk-quote-sheen {
+  from {
+    --holo-sheen: 0px;
+  }
+  to {
+    --holo-sheen: -7.4rem;
+  }
+}
+
+/* Rests off to the left, then glides across in ~3.5s. */
 @keyframes desk-quote-glint {
   0%,
-  55% {
-    --holo-glint: -40%;
+  60% {
+    --holo-glint: -30%;
   }
   100% {
-    --holo-glint: 140%;
+    --holo-glint: 130%;
   }
 }
 
@@ -1703,8 +1731,14 @@
 }
 
 @media (max-width: 768px), (pointer: coarse) {
+  /*
+    The page scrolls inside .desk-scroll, not the window, so Safari's toolbar never
+    collapses mid-scroll and 100dvh stays put. 100vh first for browsers without dvh.
+  */
   .desk-shell-host,
   .desk-shell-host #v2-main {
+    height: 100vh;
+    max-height: 100vh;
     height: 100dvh;
     max-height: 100dvh;
   }
@@ -1712,6 +1746,8 @@
   .desk-root {
     --desk-gutter: 16px;
     --desk-copy-inset: 16px;
+    height: 100vh;
+    max-height: 100vh;
     height: 100dvh;
     max-height: 100dvh;
   }
@@ -1731,14 +1767,17 @@
     padding-top: 0.45rem;
   }
 
+  /* Edge to edge: the feathered window keeps its own margin inside the plate. */
   .desk-stage-wrap {
     container-type: inline-size;
     padding-bottom: 0.35rem;
+    padding-left: 0;
+    padding-right: 0;
     padding-top: 0;
   }
 
   .desk-home-copy {
-    margin-top: 0.65rem;
+    margin-top: 1.1rem;
   }
 
   .desk-lede {
@@ -1755,19 +1794,30 @@
       inset .bh-hero, so the plate's own edge can never show as a hairline
       while the page fades in.
     */
-    --desk-stage-ratio: 1.05;
+    --desk-stage-ratio: 0.94;
     --desk-window-inset: 26px;
     aspect-ratio: auto;
     background: transparent;
-    /* Never let it push the intro off a short screen. */
-    height: min(calc(100cqw / var(--desk-stage-ratio)), calc(100svh - 18rem));
+    /*
+      A touch taller than wide. The cap keeps the intro (through email ·
+      LinkedIn) plus breathing room inside the first screen on short phones.
+    */
+    height: min(calc(100cqw / var(--desk-stage-ratio)), calc(100vh - 19rem));
+    height: min(calc(100cqw / var(--desk-stage-ratio)), calc(100dvh - 19rem));
     width: 100%;
   }
 
+  /*
+    First screen on phones = stage + intro (through email · LinkedIn), centred
+    under the nav. Exactly one viewport tall, so Selected Work starts below the
+    fold and only appears on scroll. Safe areas keep it clear of the notch/home bar.
+  */
   .desk-hero {
-    min-height: auto;
-    padding-bottom: 0.35rem;
-    padding-top: 3rem;
+    justify-content: center;
+    min-height: 100vh;
+    min-height: 100dvh;
+    padding-bottom: calc(1.25rem + env(safe-area-inset-bottom, 0px));
+    padding-top: calc(3rem + env(safe-area-inset-top, 0px));
   }
 
   .desk-work-rail {

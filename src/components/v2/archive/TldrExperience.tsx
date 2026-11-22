@@ -174,7 +174,7 @@ export function TldrExperience({ cards }: { cards: ProjectCardData[] }) {
             {siteConfig.name}
           </h1>
           <p className="v2-tldr-bio">
-            {noOrphan(`${siteConfig.role}. ${yearsExperience} years. ${siteConfig.location}.`)}
+            {noOrphan(`${siteConfig.role}. ${yearsExperience}+ years. ${siteConfig.location}.`)}
           </p>
 
           <section aria-labelledby="tldr-work-heading">

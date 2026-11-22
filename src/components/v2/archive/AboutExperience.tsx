@@ -9,7 +9,7 @@ import { publishedTools } from '@/src/config/v2/publishing';
 import { yearsExperience, v2Path } from '@/src/config/v2/profile';
 import { experience, siteConfig } from '@/src/config/v2/site';
 
-const ABOUT_INTRO = `I'm a senior product designer with ${yearsExperience} years across automotive, logistics, cloud and VR. I work from research through launch, and I'm most useful when a product has a lot of data, several user roles and a messy workflow that needs one clear path.`;
+const ABOUT_INTRO = `I'm a senior product designer with ${yearsExperience}+ years across automotive, logistics, cloud and VR. I work from research through launch, and I'm most useful when a product has a lot of data, several user roles and a messy workflow that needs one clear path.`;
 
 export function AboutExperience() {
   return (

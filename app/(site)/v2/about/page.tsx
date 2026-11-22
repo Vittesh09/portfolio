@@ -5,7 +5,7 @@ export const metadata = {
   ...v2PageMetadata({
     title: 'About, Vittesh Sinha, Senior Product Designer',
     description:
-      "Senior product designer with 8 years across automotive, logistics, cloud and VR. How I work, where I've worked, and what I'm best at.",
+      "Senior product designer with 7+ years across automotive, logistics, cloud and VR. How I work, where I've worked, and what I'm best at.",
     path: '/v2/about/'
   }),
   robots: { index: false, follow: true }

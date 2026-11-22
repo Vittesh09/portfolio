@@ -51,6 +51,7 @@ function DeskContentBlur() {
     let alive = true;
     let visible = true;
     let lastDraw = 0;
+    let pending = false;
     const tick = (now: number) => {
       raf = 0;
       if (!alive || !visible) return;
@@ -69,7 +70,20 @@ function DeskContentBlur() {
         canvas.width = bw;
         canvas.height = bh;
       }
-      ctx.drawImage(src, 0, 0, bw, bh);
+      // Snapshot asynchronously (scaled on the GPU side): a direct drawImage of a
+      // WebGL canvas makes the main thread wait for the GPU, which shows up as the
+      // cursor briefly sticking on weaker graphics.
+      if (pending) return;
+      pending = true;
+      createImageBitmap(src, { resizeWidth: bw, resizeHeight: bh, resizeQuality: 'low' })
+        .then((bitmap) => {
+          if (alive) ctx.drawImage(bitmap, 0, 0);
+          bitmap.close();
+        })
+        .catch(() => {})
+        .finally(() => {
+          pending = false;
+        });
     };
     // Only copy while the stage is on screen (the WebGL loop pauses there too).
     const io = new IntersectionObserver(([entry]) => {

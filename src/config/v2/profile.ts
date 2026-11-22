@@ -56,8 +56,8 @@ export const lastUpdated = '2026-10-25';
 /** Canonical domain vocabulary and order. Cloud stays until a published case study confirms or drops it. */
 export const domains = ['Automotive', 'Logistics', 'Cloud', 'VR'] as const;
 
-/** Oct 2018 → Oct 2026. */
-export const yearsExperience = '8';
+/** Shown as "7+ years" across the site. */
+export const yearsExperience = '7';
 export const city = 'TODO: [FILL: city]';
 export const timezone = 'TODO: [FILL: timezone]';
 export const openTo = 'TODO: [FILL: open to remote / relocation]';
@@ -216,7 +216,7 @@ export const profile = {
   aboutShort: noOrphan(
     'I take data-heavy products and make the next action obvious.'
   ),
-  about: `I'm a senior product designer with ${yearsExperience} years across automotive, logistics, cloud and VR. I work from research through launch, and I'm most useful when a product has a lot of data, several user roles and a messy workflow that needs one clear path.`,
+  about: `I'm a senior product designer with ${yearsExperience}+ years across automotive, logistics, cloud and VR. I work from research through launch, and I'm most useful when a product has a lot of data, several user roles and a messy workflow that needs one clear path.`,
   personality: workingStyle.join(' '),
   heroHeadline,
   heroIntro,

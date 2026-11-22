@@ -176,13 +176,14 @@ export function DeskFooterMeta() {
     let current = 0;
     const step = () => {
       current += (target - current) * 0.08;
-      quote.style.setProperty('--holo-tilt', `${current.toFixed(2)}%`);
+      quote.style.setProperty('--holo-tilt', `${current.toFixed(1)}px`);
       raf = Math.abs(target - current) > 0.05 ? requestAnimationFrame(step) : 0;
     };
     const onMove = (event: PointerEvent) => {
       const nx = event.clientX / window.innerWidth - 0.5;
       const ny = event.clientY / window.innerHeight - 0.5;
-      target = (nx * 0.8 + ny * 0.4) * 60;
+      // Up to about ±70px of band travel across the screen.
+      target = (nx * 0.8 + ny * 0.4) * 120;
       if (!raf) raf = requestAnimationFrame(step);
     };
     window.addEventListener('pointermove', onMove, { passive: true });

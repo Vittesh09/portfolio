@@ -1173,13 +1173,13 @@ export function useBlackHole(
     const INTRO_BH_DELAY_MS = deskIntro ? 80 : 140;
     const deskHoleRest = () => {
       // A taller phone panel shows more sky. Shrink the disk by the same
-      // ratio so it stays the size it had on the 1.05 plate. Never enlarge it
+      // ratio so it stays the size it had on the 0.94 plate. Never enlarge it
       // when a short panel is capped below that plate.
       if (!(deskIntro && mobile)) return holeRest;
       const width = Math.max(1, mount.clientWidth);
       const height = Math.max(1, mount.clientHeight);
       if (width < 2 || height < 2) return holeRest;
-      return holeRest * Math.min(1, width / 1.05 / height);
+      return holeRest * Math.min(1, width / 0.94 / height);
     };
     const prevPos = new THREE.Vector3();
     const sampleVel = new THREE.Vector3();
@@ -1934,7 +1934,57 @@ export function useBlackHole(
       shadersReady = true;
       if (inViewport && !document.hidden) start();
     };
-    renderer.compileAsync(scene, camera).then(onShadersReady, onShadersReady);
+    // Warm every program the first frame would compile, in the variants it will
+    // actually use: the composer renders into an offscreen target (linear, no tone
+    // mapping) and only the last pass draws to the canvas. Covers the main scene,
+    // the star/overlay/streak scenes and every post-processing material.
+    const warmShaders = async () => {
+      const quad = new THREE.PlaneGeometry(2, 2);
+      const passScene = new THREE.Scene();
+      const seen = new Set<THREE.Material>();
+      const addMaterial = (value: unknown) => {
+        if (value instanceof THREE.Material && !seen.has(value)) {
+          seen.add(value);
+          passScene.add(new THREE.Mesh(quad, value));
+        }
+      };
+      for (const pass of composer.passes) {
+        for (const value of Object.values(pass)) {
+          if (Array.isArray(value)) value.forEach(addMaterial);
+          else addMaterial(value);
+        }
+        addMaterial((pass as { fsQuad?: { material?: unknown } }).fsQuad?.material);
+      }
+      // compile() hands every program to the driver; with KHR_parallel_shader_compile
+      // (Chrome, Safari) that happens on background threads and doesn't block. A short
+      // head start then lets the first frame find them ready. (compileAsync's own
+      // readiness poll throws on materials whose state is reset meanwhile, so it isn't
+      // used here.)
+      const previous = renderer.getRenderTarget();
+      try {
+        renderer.setRenderTarget(composer.renderTarget1);
+        renderer.compile(scene, camera);
+        renderer.compile(starScene, camera);
+        renderer.compile(overlayScene, overlayCamera);
+        renderer.compile(streakScene, overlayCamera);
+        renderer.compile(passScene, overlayCamera);
+        renderer.setRenderTarget(null);
+        renderer.compile(passScene, overlayCamera);
+      } finally {
+        renderer.setRenderTarget(previous);
+        passScene.clear();
+        quad.dispose();
+      }
+      await new Promise<void>((resolve) => window.setTimeout(resolve, 150));
+    };
+    // three.js keeps polling until each program is ready and throws if the
+    // renderer/materials were disposed meanwhile; cleanup waits for this to settle.
+    let warmSettled = false;
+    const warmPromise = warmShaders()
+      .then(onShadersReady, onShadersReady)
+      .finally(() => {
+        warmSettled = true;
+      });
     window.addEventListener('resize', resize, { passive: true });
     window.visualViewport?.addEventListener('resize', resize, { passive: true });
     document.addEventListener('visibilitychange', onVisibility);
@@ -2009,31 +2059,36 @@ export function useBlackHole(
       if (grabProxy.parentNode) grabProxy.parentNode.removeChild(grabProxy);
       if (hintEl?.parentNode) hintEl.parentNode.removeChild(hintEl);
 
-      starGeometry.dispose();
-      starMaterial.dispose();
-      diskGeo.dispose();
-      diskMaterial.dispose();
-      horizonGeo.dispose();
-      horizonMat.dispose();
-      voidGeo.dispose();
-      voidMat.dispose();
-      scene.remove(holeA.core);
-      if (holeB) scene.remove(holeB.core);
-      textMesh.geometry.dispose();
-      textMaterial.dispose();
-      textTexture.dispose();
-      streakMesh.geometry.dispose();
-      streakMaterial.dispose();
-      streakTexture.dispose();
-      overlayPass.dispose();
-      streakPass.dispose();
-      composer.dispose();
-      composerTarget?.dispose();
-      renderer.dispose();
-      renderer.forceContextLoss();
-      if (renderer.domElement.parentNode === mount) {
-        mount.removeChild(renderer.domElement);
-      }
+      const releaseGpu = () => {
+        starGeometry.dispose();
+        starMaterial.dispose();
+        diskGeo.dispose();
+        diskMaterial.dispose();
+        horizonGeo.dispose();
+        horizonMat.dispose();
+        voidGeo.dispose();
+        voidMat.dispose();
+        scene.remove(holeA.core);
+        if (holeB) scene.remove(holeB.core);
+        textMesh.geometry.dispose();
+        textMaterial.dispose();
+        textTexture.dispose();
+        streakMesh.geometry.dispose();
+        streakMaterial.dispose();
+        streakTexture.dispose();
+        overlayPass.dispose();
+        streakPass.dispose();
+        composer.dispose();
+        composerTarget?.dispose();
+        renderer.dispose();
+        renderer.forceContextLoss();
+        if (renderer.domElement.parentNode === mount) {
+          mount.removeChild(renderer.domElement);
+        }
+      };
+      // Don't pull GPU resources out from under an in-flight shader warm-up.
+      if (warmSettled) releaseGpu();
+      else void warmPromise.finally(releaseGpu);
     };
   }, [mountRef, heroRef, isLab, spinScene, paramsRef, transparent, deskIntro]);
 }

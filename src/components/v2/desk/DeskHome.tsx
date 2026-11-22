@@ -28,7 +28,7 @@ export function DeskHome({ cards }: { cards: ProjectCardData[] }) {
             >
               @Nagarro
             </a>{' '}
-            • 7+ years
+            • {profile.yearsExperience}+ years
           </p>
           <p className="desk-desc">
             I love exploring where design and technology come together, turning ideas into digital

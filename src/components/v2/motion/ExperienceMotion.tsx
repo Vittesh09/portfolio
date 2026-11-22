@@ -211,7 +211,8 @@ function AmbientCursor({ enabled }: { enabled: boolean }) {
         ring.y = target.y;
       } else {
         const dt = Math.min(0.05, (now - last) / 1000);
-        const follow = 1 - Math.exp(-14 * dt);
+        // Snappier follow: less trailing, so a dropped frame reads as motion, not a stall.
+        const follow = 1 - Math.exp(-22 * dt);
         ring.x += (target.x - ring.x) * follow;
         ring.y += (target.y - ring.y) * follow;
         ring.scale += (scaleRef.current - ring.scale) * follow;
