@@ -20,20 +20,21 @@ const ACTION_SELECTOR = [
   'input[type="radio"]'
 ].join(', ');
 
-function isActionClick(event: MouseEvent) {
-  if (event.button !== 0) return false;
-  const target = event.target;
-  if (!(target instanceof Element)) return false;
+function actionControl(target: EventTarget | null) {
+  if (!(target instanceof Element)) return null;
   const control = target.closest(ACTION_SELECTOR);
-  if (!control) return false;
-  if (control instanceof HTMLButtonElement && control.disabled) return false;
-  if (control instanceof HTMLInputElement && control.disabled) return false;
-  if (control.getAttribute('aria-disabled') === 'true') return false;
-  if (control.closest('[data-sound="copy-email"]')) return false;
-  return true;
+  if (!control) return null;
+  if (control instanceof HTMLButtonElement && control.disabled) return null;
+  if (control instanceof HTMLInputElement && control.disabled) return null;
+  if (control.getAttribute('aria-disabled') === 'true') return null;
+  if (control.closest('[data-sound="copy-email"]')) return null;
+  return control;
 }
 
-/** Plays menu-click.wav when a control is activated, not on empty space or text. */
+/** Draggable areas: a press there may become a drag, so wait for the real click. */
+const DRAG_AREA = '.desk-work-rail-scroller';
+
+/** Plays menu-click.wav when a control is pressed, not on empty space or text. */
 export function MenuClickSound() {
   useEffect(() => {
     // Keep the 87 KB click sound out of the page load: fetch it once the page is
@@ -53,13 +54,33 @@ export function MenuClickSound() {
     else window.addEventListener('load', preloadWhenIdle, { once: true });
     document.addEventListener('pointerdown', preload, { capture: true, once: true });
 
+    // Mouse: sound on press, like a physical button, instead of after release.
+    // Touch/pen and keyboard: on click, because a touch press may turn into a scroll.
+    let pressed: Element | null = null;
+    let pressedAt = 0;
+    const onPointerDown = (event: PointerEvent) => {
+      if (event.pointerType !== 'mouse' || event.button !== 0) return;
+      const control = actionControl(event.target);
+      if (!control || control.closest(DRAG_AREA)) return;
+      pressed = control;
+      pressedAt = performance.now();
+      playUiSound(MENU_CLICK_SOUND, MENU_CLICK_VOLUME);
+    };
     const onClick = (event: MouseEvent) => {
-      if (!isActionClick(event)) return;
+      if (event.button !== 0) return;
+      const control = actionControl(event.target);
+      const pressedThis = pressed !== null && pressed === control && performance.now() - pressedAt < 2000;
+      pressed = null;
+      if (!control || pressedThis) return;
+      // The click that ends a rail drag is swallowed by the rail; stay silent too.
+      if (control.closest('[data-suppress-click="1"]')) return;
       playUiSound(MENU_CLICK_SOUND, MENU_CLICK_VOLUME);
     };
 
+    document.addEventListener('pointerdown', onPointerDown, true);
     document.addEventListener('click', onClick, true);
     return () => {
+      document.removeEventListener('pointerdown', onPointerDown, true);
       document.removeEventListener('click', onClick, true);
       document.removeEventListener('pointerdown', preload, true);
       window.removeEventListener('load', preloadWhenIdle);

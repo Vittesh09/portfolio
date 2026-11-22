@@ -145,15 +145,45 @@ export function HorizonTransition({ children }: { children: ReactNode }) {
       beginCover(next.href, fromDesk || toDesk ? 'blur' : 'disc');
     };
 
+    // Warm the target route on hover/press so the swap under the veil is instant.
+    const prefetched = new Set<string>();
+    const warm = (event: Event) => {
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const anchor = target.closest('a');
+      if (!anchor || (anchor.target && anchor.target !== '_self') || anchor.hasAttribute('download')) return;
+      const raw = anchor.getAttribute('href');
+      if (!raw || raw.startsWith('mailto:') || raw.startsWith('tel:') || raw.startsWith('#')) return;
+      let next: URL;
+      try {
+        next = new URL(anchor.href);
+      } catch {
+        return;
+      }
+      if (next.origin !== window.location.origin || !isSitePath(next.pathname)) return;
+      // Files (resume PDF, llms.txt, …) are not routes.
+      if (/\.[a-z0-9]+$/i.test(next.pathname)) return;
+      const path = normalizePath(next.pathname);
+      if (prefetched.has(path) || path === normalizePath(window.location.pathname)) return;
+      prefetched.add(path);
+      router.prefetch(`${next.pathname}${next.search}`);
+    };
+
+    root.addEventListener('pointerover', warm, { passive: true });
+    root.addEventListener('pointerdown', warm, { passive: true, capture: true });
     root.addEventListener('click', onClick, true);
-    return () => root.removeEventListener('click', onClick, true);
-  }, [beginCover]);
+    return () => {
+      root.removeEventListener('click', onClick, true);
+      root.removeEventListener('pointerover', warm);
+      root.removeEventListener('pointerdown', warm, true);
+    };
+  }, [beginCover, router]);
 
   useEffect(() => {
     if (phase !== 'cover') return;
     // The paper veil pushes as soon as it is opaque (onAnimationComplete); this is
     // only its failsafe. The disc keeps its longer beat.
-    const delay = wipeRef.current === 'blur' ? 600 : 920;
+    const delay = wipeRef.current === 'blur' ? 400 : 920;
     const failSafe = window.setTimeout(pushPending, delay);
     return () => window.clearTimeout(failSafe);
   }, [phase, pushPending]);
@@ -172,8 +202,11 @@ export function HorizonTransition({ children }: { children: ReactNode }) {
     // Wait for the route to land, then one paint before reveal.
     // Failsafe keeps desk blur from sticking in swap.
     if (matched) {
-      const id = window.setTimeout(reveal, 48);
-      return () => window.clearTimeout(id);
+      // Two frames: the new route has painted once under the veil.
+      let raf = window.requestAnimationFrame(() => {
+        raf = window.requestAnimationFrame(reveal);
+      });
+      return () => window.cancelAnimationFrame(raf);
     }
     const failSafe = window.setTimeout(reveal, 280);
     return () => window.clearTimeout(failSafe);
@@ -183,7 +216,7 @@ export function HorizonTransition({ children }: { children: ReactNode }) {
     if (phase !== 'reveal') return;
     document.getElementById('v2-main')?.focus({ preventScroll: true });
     // Veil fade-out runs as an exit animation; give it time to finish.
-    const delay = wipeRef.current === 'blur' ? 420 : 700;
+    const delay = wipeRef.current === 'blur' ? 340 : 700;
     const failSafe = window.setTimeout(finish, delay);
     return () => window.clearTimeout(failSafe);
   }, [phase, finish]);
@@ -228,8 +261,8 @@ export function HorizonTransition({ children }: { children: ReactNode }) {
             aria-hidden="true"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            exit={{ opacity: 0, transition: { duration: 0.38, ease: [0.16, 1, 0.3, 1] } }}
-            transition={{ duration: 0.26, ease: [0.4, 0, 1, 1] }}
+            exit={{ opacity: 0, transition: { duration: 0.3, ease: [0.16, 1, 0.3, 1] } }}
+            transition={{ duration: 0.16, ease: [0.4, 0, 1, 1] }}
             onAnimationComplete={() => {
               if (phaseRef.current === 'cover') pushPending();
             }}

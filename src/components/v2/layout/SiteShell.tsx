@@ -61,10 +61,6 @@ const BackgroundMusic = dynamic(
   () => import('@/src/components/v2/ui/BackgroundMusic').then((mod) => mod.BackgroundMusic),
   { ssr: false }
 );
-const ButtonHoverSound = dynamic(
-  () => import('@/src/components/v2/ui/ButtonHoverSound').then((mod) => mod.ButtonHoverSound),
-  { ssr: false }
-);
 const MenuClickSound = dynamic(
   () => import('@/src/components/v2/ui/MenuClickSound').then((mod) => mod.MenuClickSound),
   { ssr: false }
@@ -101,7 +97,6 @@ export function SiteShell({ children }: { children: React.ReactNode }) {
         {isMachine ? null : (
           <>
             <MenuClickSound />
-            <ButtonHoverSound />
             {isDeskLab ? null : <BackgroundMusic />}
           </>
         )}

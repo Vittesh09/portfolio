@@ -1,7 +1,7 @@
 import { notFound } from 'next/navigation';
 import { DeskCaseStudy } from '@/src/components/v2/desk/DeskCaseStudy';
 import { getAllSlugs, getProject, isPublished, projects } from '@/src/config/v2/caseStudies';
-import { v2PageMetadata } from '@/src/config/v2/seo';
+import { DESK_TAB_TITLE, v2PageMetadata } from '@/src/config/v2/seo';
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -12,9 +12,10 @@ export function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
   const project = getProject(slug);
-  if (!project) return { title: 'Case study' };
+  if (!project) return { title: { absolute: DESK_TAB_TITLE } };
   return v2PageMetadata({
     title: project.seoTitle ?? `${project.title} | Vittesh Sinha`,
+    tabTitle: DESK_TAB_TITLE,
     description: project.summary,
     path: `/work/${slug}/`
   });

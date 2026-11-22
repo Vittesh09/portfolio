@@ -21,7 +21,7 @@ function ArrowIcon({ dir }: { dir: 'left' | 'right' }) {
   );
 }
 
-const RAIL_SPRING = { stiffness: 230, damping: 32, mass: 0.7, restDelta: 0.4 };
+const RAIL_SPRING = { stiffness: 340, damping: 26, mass: 0.5, restDelta: 0.4 };
 /** px of glide per px/ms of release velocity. */
 const FLING_MS = 220;
 

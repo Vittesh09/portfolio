@@ -101,7 +101,27 @@
   padding: 0.28rem;
   pointer-events: auto;
   position: relative;
+  transition:
+    transform 0.42s cubic-bezier(0.16, 1, 0.3, 1),
+    opacity 0.3s ease;
   z-index: 1;
+}
+
+/* Scrolling down tucks the pill up out of view; scrolling up brings it back.
+   Keyboard focus always shows it. */
+.desk-nav[data-tucked='true'] .desk-nav-pill {
+  opacity: 0;
+  pointer-events: none;
+  transform: translate3d(0, calc(-100% - 1.25rem), 0);
+  transition:
+    transform 0.34s cubic-bezier(0.4, 0, 1, 1),
+    opacity 0.24s ease 0.06s;
+}
+
+.desk-nav[data-tucked='true']:focus-within .desk-nav-pill {
+  opacity: 1;
+  pointer-events: auto;
+  transform: none;
 }
 
 .desk-nav-link {
@@ -270,6 +290,15 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
+  .desk-nav-pill,
+  .desk-nav[data-tucked='true'] .desk-nav-pill {
+    transition: opacity 0.2s linear;
+  }
+
+  .desk-nav[data-tucked='true'] .desk-nav-pill {
+    transform: none;
+  }
+
   .desk-enter--nav,
   .desk-enter--page,
   .desk-enter--foot,
@@ -834,72 +863,50 @@
 }
 
 /*
-  Holographic foil quote, clipped to the text. Three layers, like real foil:
-  1. fine repeating spectral bands (several hues across every line), drifting;
-  2. a silvery sheen at another angle drifting the other way, so the colours
-     shimmer and shift over each other instead of sliding as one gradient;
-  3. a soft, wide glint that sweeps across slowly every few seconds.
-  The pointer slides the two foil layers in opposite directions (--holo-tilt, set
-  in DeskFooterMeta), like tilting a card under a light. Hues stay deep enough to
-  read on the paper.
+  Footer quote — "ink and aurora".
+  At rest the words are a deep midnight ink with a slow champagne-gold glint passing
+  over them, like light on gold foil. A second copy of the text sits exactly on top
+  (.desk-foot-quote-aurora), filled with a slowly turning aurora (indigo, violet,
+  magenta, rose, amber, azure) and masked to a soft lens. The lens follows the
+  pointer near the quote, and sweeps across once on its own when the quote scrolls
+  into view (so touch screens get it too). DeskFooterMeta drives --mx/--my and
+  data-lens; data-live pauses the animations while the quote is off screen.
 */
-@property --holo-drift {
-  syntax: '<length>';
-  inherits: false;
-  initial-value: 0px;
-}
-
-@property --holo-sheen {
-  syntax: '<length>';
-  inherits: false;
-  initial-value: 0px;
-}
-
-@property --holo-glint {
+@property --quote-glint {
   syntax: '<percentage>';
-  inherits: false;
+  inherits: true;
   initial-value: -30%;
 }
 
+@property --quote-lens {
+  syntax: '<length>';
+  inherits: true;
+  initial-value: 0px;
+}
+
+@property --quote-aurora {
+  syntax: '<angle>';
+  inherits: true;
+  initial-value: 0deg;
+}
+
 .desk-foot-quote {
-  --holo-band: 9rem;
-  --holo-tilt: 0px;
-  animation:
-    desk-quote-bands 7s linear infinite,
-    desk-quote-sheen 11s linear infinite,
-    desk-quote-glint 9s cubic-bezier(0.45, 0, 0.55, 1) infinite;
-  background-image:
+  --mx: 50%;
+  --my: 50%;
+  --quote-lens: 0px;
+  animation: desk-quote-glint 8s cubic-bezier(0.45, 0, 0.55, 1) infinite;
+  /* Shared with the heart word, which paints its own copy of this fill. */
+  --quote-ink-fill:
     linear-gradient(
       100deg,
-      transparent calc(var(--holo-glint) - 16%),
-      rgb(255 255 255 / 0.32) calc(var(--holo-glint) - 5%),
-      rgb(255 255 255 / 0.62) var(--holo-glint),
-      rgb(255 255 255 / 0.32) calc(var(--holo-glint) + 5%),
-      transparent calc(var(--holo-glint) + 16%)
+      transparent calc(var(--quote-glint) - 14%),
+      rgb(176 140 78 / 0.55) calc(var(--quote-glint) - 5%),
+      rgb(236 212 160 / 0.95) var(--quote-glint),
+      rgb(176 140 78 / 0.55) calc(var(--quote-glint) + 5%),
+      transparent calc(var(--quote-glint) + 14%)
     ),
-    repeating-linear-gradient(
-      62deg,
-      rgb(140 150 166 / 0) 0,
-      rgb(140 150 166 / 0.42) 2.2rem,
-      rgb(140 150 166 / 0) 4.6rem,
-      rgb(140 150 166 / 0.18) 6.2rem,
-      rgb(140 150 166 / 0) 7.4rem
-    ),
-    repeating-linear-gradient(
-      115deg,
-      #6e5bd6 0,
-      #2f86d8 calc(var(--holo-band) * 0.17),
-      #129c95 calc(var(--holo-band) * 0.33),
-      #5f9d3c calc(var(--holo-band) * 0.48),
-      #b98313 calc(var(--holo-band) * 0.62),
-      #d9547e calc(var(--holo-band) * 0.78),
-      #8a5cf6 calc(var(--holo-band) * 0.9),
-      #6e5bd6 var(--holo-band)
-    );
-  background-position:
-    0 50%,
-    calc(var(--holo-sheen) - var(--holo-tilt) * 0.6) 50%,
-    calc(var(--holo-drift) + var(--holo-tilt)) 50%;
+    linear-gradient(90deg, #26272e 0%, #363553 48%, #2b2c3a 100%);
+  background-image: var(--quote-ink-fill);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -912,39 +919,155 @@
   line-height: 1.45;
   margin: 0;
   max-width: 22rem;
+  position: relative;
+  transition: --quote-lens 0.7s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.desk-foot-quote[data-lens='on'] {
+  --quote-lens: 6.5rem;
+  transition-duration: 0.45s;
+}
+
+.desk-foot-quote-aurora {
+  animation: desk-quote-aurora 7s linear infinite;
+  --quote-aurora-fill: conic-gradient(
+    from var(--quote-aurora) at var(--mx) var(--my),
+    #4f46e5,
+    #7c3aed,
+    #c026d3,
+    #e11d48,
+    #f59e0b,
+    #0ea5e9,
+    #4f46e5
+  );
+  background-image: var(--quote-aurora-fill);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: block;
+  inset: 0;
+  -webkit-mask-image: radial-gradient(
+    circle var(--quote-lens) at var(--mx) var(--my),
+    #000 0%,
+    rgb(0 0 0 / 0.85) 38%,
+    transparent 100%
+  );
+  mask-image: radial-gradient(
+    circle var(--quote-lens) at var(--mx) var(--my),
+    #000 0%,
+    rgb(0 0 0 / 0.85) 38%,
+    transparent 100%
+  );
+  pointer-events: none;
+  position: absolute;
+  user-select: none;
+}
+
+.desk-foot-quote[data-live='false'],
+.desk-foot-quote[data-live='false'] .desk-foot-quote-aurora {
+  animation-play-state: paused;
 }
 
 .desk-foot-quote-seg {
   white-space: nowrap;
 }
 
-/* One band period per loop, so the drift repeats seamlessly. */
-@keyframes desk-quote-bands {
-  from {
-    --holo-drift: 0px;
+/*
+  "heart" beats when the pointer comes near it. A transformed word drops out of its
+  parent's text clip, so the word always paints its own copy of the fill, sized to
+  the whole quote and shifted by its offset (--hx/--hy/--qw/--qh from
+  DeskFooterMeta), which makes it seamless with the words around it. While beating
+  it warms to crimson (::after, cross-faded) with a soft glow, and its aurora copy
+  steps aside so the crimson shows.
+*/
+.desk-foot-quote-heart {
+  background-image: var(--quote-ink-fill);
+  background-position: calc(var(--hx, 0px) * -1) calc(var(--hy, 0px) * -1);
+  background-repeat: no-repeat;
+  background-size: var(--qw, 100%) var(--qh, 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  display: inline-block;
+  filter: drop-shadow(0 0 0 rgb(225 29 72 / 0));
+  position: relative;
+  transform: translateZ(0);
+  transform-origin: 50% 62%;
+  transition: filter 0.4s ease;
+}
+
+.desk-foot-quote-aurora .desk-foot-quote-heart {
+  background-image: var(--quote-aurora-fill);
+  filter: none;
+  transition: opacity 0.3s ease;
+}
+
+.desk-foot-quote-heart::after {
+  background-image: linear-gradient(160deg, #fb7185 0%, #e11d48 45%, #9f1239 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  content: 'heart';
+  inset: 0;
+  opacity: 0;
+  position: absolute;
+  transition: opacity 0.35s ease;
+}
+
+.desk-foot-quote-aurora .desk-foot-quote-heart::after {
+  content: none;
+}
+
+.desk-foot-quote[data-beat='on'] .desk-foot-quote-heart {
+  animation: desk-quote-heartbeat 1s cubic-bezier(0.33, 0, 0.2, 1) infinite;
+}
+
+.desk-foot-quote[data-beat='on'] > .desk-foot-quote-seg .desk-foot-quote-heart {
+  filter: drop-shadow(0 0 0.45em rgb(225 29 72 / 0.35));
+}
+
+.desk-foot-quote[data-beat='on'] > .desk-foot-quote-seg .desk-foot-quote-heart::after {
+  opacity: 1;
+}
+
+.desk-foot-quote[data-beat='on'] .desk-foot-quote-aurora .desk-foot-quote-heart {
+  opacity: 0;
+}
+
+/* Lub-dub: a strong beat, a softer echo, then rest. */
+@keyframes desk-quote-heartbeat {
+  0% {
+    transform: translateZ(0) scale(1);
   }
-  to {
-    --holo-drift: 9rem;
+  14% {
+    transform: translateZ(0) scale(1.14);
+  }
+  28% {
+    transform: translateZ(0) scale(1);
+  }
+  42% {
+    transform: translateZ(0) scale(1.07);
+  }
+  64%,
+  100% {
+    transform: translateZ(0) scale(1);
   }
 }
 
-@keyframes desk-quote-sheen {
-  from {
-    --holo-sheen: 0px;
-  }
-  to {
-    --holo-sheen: -7.4rem;
-  }
-}
-
-/* Rests off to the left, then glides across in ~3.5s. */
+/* Rests off to the left, then glides across in ~3s. */
 @keyframes desk-quote-glint {
   0%,
-  60% {
-    --holo-glint: -30%;
+  62% {
+    --quote-glint: -30%;
   }
   100% {
-    --holo-glint: 130%;
+    --quote-glint: 130%;
+  }
+}
+
+@keyframes desk-quote-aurora {
+  to {
+    --quote-aurora: 360deg;
   }
 }
 
@@ -1713,8 +1836,11 @@
     transform: scale(0.92);
   }
 
-  /* Still foil: no drift or glint, the bands stay put. */
-  .desk-foot-quote {
+  /* Still ink: no glint, turning aurora or beating; the lens still follows the
+     pointer and "heart" still warms to crimson. */
+  .desk-foot-quote,
+  .desk-foot-quote-aurora,
+  .desk-foot-quote[data-beat='on'] .desk-foot-quote-heart {
     animation: none;
   }
 }
@@ -1731,6 +1857,10 @@
 }
 
 @media (max-width: 768px), (pointer: coarse) {
+  .desk-foot-quote[data-lens='on'] {
+    --quote-lens: 5rem;
+  }
+
   /*
     The page scrolls inside .desk-scroll, not the window, so Safari's toolbar never
     collapses mid-scroll and 100dvh stays put. 100vh first for browsers without dvh.

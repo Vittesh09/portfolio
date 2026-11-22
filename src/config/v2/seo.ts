@@ -19,6 +19,9 @@ export function v2Canonical(path = '/') {
 
 export const v2DefaultTitle = `${profile.name} | ${profile.title}`;
 
+/** Browser-tab title on every main-site page. Link previews keep the page's own title. */
+export const DESK_TAB_TITLE = 'Vittesh | Product Designer';
+
 const shareImage = {
   url: `${SITE_URL}/opengraph-image.png`,
   width: 1200,
@@ -29,16 +32,21 @@ const shareImage = {
 
 export function v2PageMetadata({
   title,
+  tabTitle,
   description = metaDescription,
   path = '/'
 }: {
+  /** Used for link previews (Open Graph / Twitter), and the tab unless tabTitle is set. */
   title: string;
+  /** Overrides only the browser-tab <title>. */
+  tabTitle?: string;
   description?: string;
   path?: string;
 }) {
   const canonical = v2Canonical(path);
   return {
-    title,
+    // `absolute` so no layout title template is ever added around it.
+    title: tabTitle ? { absolute: tabTitle } : title,
     description,
     robots: v2Robots(),
     alternates: {

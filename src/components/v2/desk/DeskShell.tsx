@@ -3,7 +3,7 @@
 import { motion, useAnimate, useReducedMotion, type Transition } from 'motion/react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { useEffect, useLayoutEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
 import { DeskFooterMeta } from '@/src/components/v2/desk/DeskFooterMeta';
 import { DeskSmoothScroll } from '@/src/components/v2/desk/DeskSmoothScroll';
 import { useV2Theme } from '@/src/components/v2/layout/ThemeProvider';
@@ -33,8 +33,8 @@ const EASE_IN = [0.4, 0, 1, 1] as const;
 // over the live WebGL stage re-rasterises it every frame and stutters.
 const PAGE_OUT = { opacity: 0, y: -6 };
 const PAGE_IN = { opacity: 1, y: 0 };
-const OUT_TRANSITION: Transition = { duration: 0.22, ease: EASE_IN };
-const IN_TRANSITION: Transition = { duration: 0.5, ease: EASE_OUT };
+const OUT_TRANSITION: Transition = { duration: 0.14, ease: EASE_IN };
+const IN_TRANSITION: Transition = { duration: 0.36, ease: EASE_OUT };
 
 
 /**
@@ -53,6 +53,8 @@ export function DeskShell({ children }: { children: ReactNode }) {
   const fallbackTimer = useRef<number | undefined>(undefined);
   const { setThemePreference } = useV2Theme();
   const hideNav = pathname.startsWith('/blog');
+  const [navTucked, setNavTucked] = useState(false);
+  const navTuckedRef = useRef(false);
 
   useEffect(() => {
     setThemePreference('light');
@@ -82,7 +84,54 @@ export function DeskShell({ children }: { children: ReactNode }) {
     };
   }, [hideNav]);
 
-  // Desk → desk links: fade the page out, then navigate, then fade the new page in.
+  // Tuck the Home/About pill away while scrolling down; bring it back on any scroll up
+  // (or near the top). The anchor follows the scroll in the current direction, so a
+  // small reversal of TUCK_PX is enough to flip it, however far you scrolled before.
+  // The scroller persists across desk routes; a route change resets it to the top,
+  // and that scroll event brings the pill back.
+  useEffect(() => {
+    if (hideNav) return;
+    const scroller = rootRef.current?.querySelector<HTMLElement>('.desk-scroll');
+    if (!scroller) return;
+    const TUCK_PX = 8;
+    const TOP_PX = 48;
+    let anchor = scroller.scrollTop;
+    const set = (next: boolean) => {
+      if (next === navTuckedRef.current) return;
+      navTuckedRef.current = next;
+      setNavTucked(next);
+    };
+    const onScroll = () => {
+      const max = scroller.scrollHeight - scroller.clientHeight;
+      const y = scroller.scrollTop;
+      // iOS rubber-band overscroll runs past the ends; it is not a direction change.
+      if (y < 0 || y > max) return;
+      if (y <= TOP_PX) {
+        anchor = y;
+        set(false);
+        return;
+      }
+      if (navTuckedRef.current) {
+        if (y > anchor) anchor = y;
+        else if (anchor - y >= TUCK_PX) {
+          anchor = y;
+          set(false);
+        }
+      } else if (y < anchor) {
+        anchor = y;
+      } else if (y - anchor >= TUCK_PX) {
+        anchor = y;
+        set(true);
+      }
+    };
+    onScroll();
+    scroller.addEventListener('scroll', onScroll, { passive: true });
+    return () => scroller.removeEventListener('scroll', onScroll);
+  }, [hideNav]);
+
+  // Desk → desk links: navigate at once while the page dips out, then fade the new
+  // page in. router.push is a transition, so the old page stays on screen until the
+  // new one is ready; nothing waits on the fade.
   // Capture phase so Next's <Link> handler never runs a second navigation.
   useEffect(() => {
     const root = rootRef.current;
@@ -115,36 +164,54 @@ export function DeskShell({ children }: { children: ReactNode }) {
 
       const href = `${next.pathname}${next.search}${next.hash}`;
       navigating.current = true;
-      // Warm the route while the old page fades, so it is usually ready by the time
-      // we push. Pushing only after the fade means the swap always happens while the
-      // page is invisible, never halfway through the fade.
-      router.prefetch(href);
-      const go = () => {
-        router.push(href);
-        window.clearTimeout(fallbackTimer.current);
-        // If the route still hasn't committed, fall back to a hard load.
-        fallbackTimer.current = window.setTimeout(() => {
-          if (navigating.current) window.location.assign(href);
-        }, 4000);
-      };
       const page = pageScope.current;
-      if (reduce || !page) {
-        go();
-        return;
-      }
-      void animatePage(page, PAGE_OUT, OUT_TRANSITION).then(go, go);
+      if (!reduce && page) void animatePage(page, PAGE_OUT, OUT_TRANSITION);
+      router.push(href);
+      window.clearTimeout(fallbackTimer.current);
+      // If the route still hasn't committed, fall back to a hard load.
+      fallbackTimer.current = window.setTimeout(() => {
+        if (navigating.current) window.location.assign(href);
+      }, 4000);
     };
 
+    // Warm desk routes on hover/press so the push above commits without a fetch.
+    const prefetched = new Set<string>();
+    const warm = (event: Event) => {
+      if (!(event.target instanceof Element)) return;
+      const anchor = event.target.closest('a');
+      if (!anchor) return;
+      let next: URL;
+      try {
+        next = new URL(anchor.href);
+      } catch {
+        return;
+      }
+      if (next.origin !== window.location.origin || !isDeskPath(next.pathname)) return;
+      const path = normalizePath(next.pathname);
+      if (prefetched.has(path)) return;
+      prefetched.add(path);
+      router.prefetch(`${next.pathname}${next.search}`);
+    };
+
+    root.addEventListener('pointerover', warm, { passive: true });
+    root.addEventListener('pointerdown', warm, { passive: true, capture: true });
     root.addEventListener('click', onClick, true);
-    return () => root.removeEventListener('click', onClick, true);
+    return () => {
+      root.removeEventListener('click', onClick, true);
+      root.removeEventListener('pointerover', warm);
+      root.removeEventListener('pointerdown', warm, true);
+    };
   }, [animatePage, pageScope, reduce, router]);
 
-  // New route committed (scroll already reset by DeskSmoothScroll): fade in.
-  useEffect(() => {
+  // New route committed. Layout effect, so a page we navigated to starts invisible
+  // before its first paint (the scroll reset in DeskSmoothScroll lands under it),
+  // then fades up. Back/forward never dipped out, so they just settle in place.
+  useLayoutEffect(() => {
     if (!mounted.current) {
       mounted.current = true;
       return;
     }
+    const fromClick = navigating.current;
     navigating.current = false;
     window.clearTimeout(fallbackTimer.current);
     const page = pageScope.current;
@@ -153,14 +220,24 @@ export function DeskShell({ children }: { children: ReactNode }) {
       void animatePage(page, PAGE_IN, { duration: 0 });
       return;
     }
-    // Back/forward never faded out, so this is a no-op for them.
+    if (fromClick) {
+      page.style.setProperty('opacity', '0');
+      page.style.setProperty('transform', 'translateY(6px)');
+      void animatePage(page, { opacity: [0, 1], y: [6, 0] }, IN_TRANSITION);
+      return;
+    }
     void animatePage(page, PAGE_IN, IN_TRANSITION);
   }, [pathname, animatePage, pageScope, reduce]);
 
   return (
     <div ref={rootRef} className={`desk-root${hideNav ? ' desk-root--no-nav' : ''}`}>
       {hideNav ? null : (
-        <nav ref={navRef} className="desk-nav desk-enter desk-enter--nav" aria-label="Desk">
+        <nav
+          ref={navRef}
+          className="desk-nav desk-enter desk-enter--nav"
+          aria-label="Desk"
+          data-tucked={navTucked ? 'true' : undefined}
+        >
           <div className="desk-nav-pill">
             {TABS.map((tab) => {
               const current = tab.match(pathname);

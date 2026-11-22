@@ -10,7 +10,6 @@ import {
   type ReactNode,
   type RefObject
 } from 'react';
-import { useMotionValue, useSpring } from 'motion/react';
 
 /** Receives horizontal wheel delta (px). Returns false if it could not move (at an edge). */
 type HorizontalHandler = (dx: number) => boolean;
@@ -37,7 +36,64 @@ const GESTURE_GAP_MS = 140;
 const AXIS_RATIO = 1.6;
 const INTENT_PX = 2;
 
-const SCROLL_SPRING = { stiffness: 210, damping: 34, mass: 0.7, restDelta: 0.4 };
+/**
+ * Ease-out follow: every frame the page closes a fixed share of the remaining
+ * distance (exponential decay, time constant SCROLL_TAU). It starts moving on the
+ * very next frame and glides into a long, soft stop, instead of a spring's
+ * slow start and abrupt finish. 0.16s ≈ 63% of the way in 0.16s, settled by ~0.8s.
+ */
+const SCROLL_TAU = 0.16;
+const SETTLE_PX = 0.35;
+
+type Follower = {
+  get: () => number;
+  target: () => number;
+  set: (value: number) => void;
+  jump: (value: number) => void;
+  isAnimating: () => boolean;
+  stop: () => void;
+};
+
+function createFollower(write: (value: number) => void): Follower {
+  let current = 0;
+  let goal = 0;
+  let raf = 0;
+  let last = 0;
+  const tick = (now: number) => {
+    // Clamp dt so a stalled tab doesn't jump the whole way in one frame.
+    const dt = Math.min(0.05, Math.max(0, (now - last) / 1000));
+    last = now;
+    current += (goal - current) * (1 - Math.exp(-dt / SCROLL_TAU));
+    if (Math.abs(goal - current) < SETTLE_PX) {
+      current = goal;
+      raf = 0;
+    } else {
+      raf = requestAnimationFrame(tick);
+    }
+    write(current);
+  };
+  return {
+    get: () => current,
+    target: () => goal,
+    set: (value) => {
+      goal = value;
+      if (raf) return;
+      last = performance.now();
+      raf = requestAnimationFrame(tick);
+    },
+    jump: (value) => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+      current = value;
+      goal = value;
+    },
+    isAnimating: () => raf !== 0,
+    stop: () => {
+      if (raf) cancelAnimationFrame(raf);
+      raf = 0;
+    }
+  };
+}
 
 function wheelPixels(event: WheelEvent, page: number) {
   const unit = event.deltaMode === 1 ? 16 : event.deltaMode === 2 ? page : 1;
@@ -45,7 +101,7 @@ function wheelPixels(event: WheelEvent, page: number) {
 }
 
 /**
- * Desk page scroller. Vertical wheel motion is eased with a framer-motion spring.
+ * Desk page scroller. Vertical wheel motion is eased with an exponential ease-out.
  * Each wheel event is assigned to one axis. Over a registered horizontal scroller
  * (the work rail) a clearly sideways swipe moves the rail, even right after a
  * vertical flick whose momentum is still arriving; vertical momentum is pure dy,
@@ -64,8 +120,7 @@ export function DeskSmoothScroll({
   const contentRef = useRef<HTMLDivElement>(null);
   const handlers = useRef(new Map<HTMLElement, HorizontalHandler>());
 
-  const target = useMotionValue(0);
-  const smooth = useSpring(target, SCROLL_SPRING);
+  const followerRef = useRef<Follower | null>(null);
 
   const registerHorizontal = useCallback((el: HTMLElement, handler: HorizontalHandler) => {
     handlers.current.set(el, handler);
@@ -85,12 +140,14 @@ export function DeskSmoothScroll({
     const narrowMq = window.matchMedia('(max-width: 768px)');
     const coarseMq = window.matchMedia('(pointer: coarse)');
     // Live check — phones/narrow viewports keep native touch; spring writes fight momentum.
-    const useNative = () => narrowMq.matches || coarseMq.matches;
+    const isNative = () => narrowMq.matches || coarseMq.matches;
 
-    const unsubscribe = smooth.on('change', (value) => {
-      if (useNative()) return;
+    const smooth = createFollower((value) => {
+      if (isNative()) return;
       wrapper.scrollTop = value;
     });
+    smooth.jump(wrapper.scrollTop);
+    followerRef.current = smooth;
 
     const maxScroll = () => Math.max(0, wrapper.scrollHeight - wrapper.clientHeight);
 
@@ -107,7 +164,7 @@ export function DeskSmoothScroll({
     };
 
     const onWheel = (event: WheelEvent) => {
-      if (useNative()) return;
+      if (isNative()) return;
       if (event.ctrlKey) return;
       const origin = event.target as Element | null;
       // The singularity grab proxy is fixed outside the scroller but must still scroll the page.
@@ -154,35 +211,34 @@ export function DeskSmoothScroll({
 
       event.preventDefault();
       if (dy === 0) return;
-      const next = Math.min(maxScroll(), Math.max(0, target.get() + dy));
+      const next = Math.min(maxScroll(), Math.max(0, smooth.target() + dy));
       if (reduceMq.matches) {
-        target.jump(next);
         smooth.jump(next);
+        wrapper.scrollTop = next;
       } else {
-        target.set(next);
+        smooth.set(next);
       }
     };
 
     // Keyboard, scrollbar, touch and anchors scroll natively; re-seat the spring there.
     const onScroll = () => {
-      if (useNative()) {
-        target.jump(wrapper.scrollTop);
+      if (isNative()) {
         smooth.jump(wrapper.scrollTop);
         return;
       }
       if (smooth.isAnimating() || Math.abs(wrapper.scrollTop - smooth.get()) < 1.5) return;
-      target.jump(wrapper.scrollTop);
       smooth.jump(wrapper.scrollTop);
     };
 
     window.addEventListener('wheel', onWheel, { passive: false });
     wrapper.addEventListener('scroll', onScroll, { passive: true });
     return () => {
-      unsubscribe();
+      smooth.stop();
+      followerRef.current = null;
       window.removeEventListener('wheel', onWheel);
       wrapper.removeEventListener('scroll', onScroll);
     };
-  }, [smooth, target]);
+  }, []);
 
   useEffect(() => {
     const wrapper = wrapperRef.current;
@@ -201,10 +257,9 @@ export function DeskSmoothScroll({
         navBottom;
       top = Math.max(0, Math.min(top, wrapper.scrollHeight - wrapper.clientHeight));
     }
-    target.jump(top);
-    smooth.jump(top);
+    followerRef.current?.jump(top);
     if (wrapper) wrapper.scrollTop = top;
-  }, [resetKey, smooth, target]);
+  }, [resetKey]);
 
   return (
     <DeskScrollContext.Provider value={api}>

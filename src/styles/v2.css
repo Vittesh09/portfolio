@@ -9,6 +9,12 @@ body {
   min-height: 100%;
 }
 
+/* Taps fire at once: no double-tap-to-zoom wait on controls. Zero specificity, so any
+   component that needs touch-action: none (singularity grab, drag areas) still wins. */
+:where(a[href], button, summary, label, [role='button'], [role='link'], [role='tab'], input, select, textarea) {
+  touch-action: manipulation;
+}
+
 html {
   overflow-x: clip;
 }
