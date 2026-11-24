@@ -129,10 +129,10 @@ export type Talk = {
 export const talks: Talk[] = [
   {
     slug: 'navigating-the-ai-shift-in-product-design',
-    title: 'Navigating the AI Shift in Product Design',
+    title: 'Navigating the AI Shift',
     tags: ['Talk', 'AI'],
-    published: '2026-11-01',
-    publishedLabel: '1 November 2026',
+    published: '2026-10-23',
+    publishedLabel: '23 October 2026',
     host: 'orbis.community',
     covers: [
       { src: '/assets/talks/ai-shift-poster.jpg', alt: 'Workshop poster: Meet our speaker, Vittesh', fit: 'contain' },

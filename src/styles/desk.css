@@ -2011,23 +2011,6 @@
 
 /* ---------- Writing & Speaking: talks ---------- */
 
-.desk-tool-play {
-  align-items: center;
-  border: 1px solid var(--desk-line);
-  border-radius: 999px;
-  display: inline-flex;
-  height: 1.35em;
-  justify-content: center;
-  margin-right: 0.5em;
-  transform: translateY(-0.08em);
-  vertical-align: middle;
-  width: 1.35em;
-}
-
-.desk-tool-play svg {
-  margin-left: 0.1em;
-}
-
 .desk-talk-eyebrow {
   font-size: 11px;
   margin: 0 0 0.35rem;
