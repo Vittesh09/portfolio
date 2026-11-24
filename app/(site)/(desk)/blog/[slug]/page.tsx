@@ -1,7 +1,5 @@
-import { notFound } from 'next/navigation';
-import { DeskBlogPost } from '@/src/components/v2/desk/DeskBlog';
-import { blogPosts, getBlogPost } from '@/src/config/v2/publishing';
-import { DESK_TAB_TITLE, v2PageMetadata } from '@/src/config/v2/seo';
+import { blogPosts } from '@/src/config/v2/publishing';
+import BlogToWritingRedirect from '../redirect';
 
 type PageProps = { params: Promise<{ slug: string }> };
 
@@ -11,18 +9,13 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: PageProps) {
   const { slug } = await params;
-  const post = getBlogPost(slug);
-  if (!post) return { title: { absolute: DESK_TAB_TITLE } };
-  return v2PageMetadata({
-    title: `${post.title}, Vittesh Sinha`,
-    tabTitle: DESK_TAB_TITLE,
-    description: post.description,
-    path: `/blog/${post.slug}/`
-  });
+  return {
+    robots: { index: false, follow: true },
+    alternates: { canonical: `/writing/${slug}/` },
+    title: 'Redirecting'
+  };
 }
 
-export default async function BlogPostPage({ params }: PageProps) {
-  const { slug } = await params;
-  if (!getBlogPost(slug)) notFound();
-  return <DeskBlogPost slug={slug} />;
+export default function BlogPostRedirectPage() {
+  return <BlogToWritingRedirect />;
 }

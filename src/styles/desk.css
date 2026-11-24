@@ -2008,3 +2008,224 @@
     backdrop-filter: none;
   }
 }
+
+/* ---------- Writing & Speaking: talks ---------- */
+
+.desk-tool-play {
+  align-items: center;
+  border: 1px solid var(--desk-line);
+  border-radius: 999px;
+  display: inline-flex;
+  height: 1.35em;
+  justify-content: center;
+  margin-right: 0.5em;
+  transform: translateY(-0.08em);
+  vertical-align: middle;
+  width: 1.35em;
+}
+
+.desk-tool-play svg {
+  margin-left: 0.1em;
+}
+
+.desk-talk-eyebrow {
+  font-size: 11px;
+  margin: 0 0 0.35rem;
+}
+
+.desk-video {
+  margin-top: 1.75rem;
+  max-width: 40rem;
+}
+
+.desk-video-parts {
+  display: inline-flex;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+  padding: 0.25rem;
+  background: var(--desk-pill-current);
+  border-radius: 999px;
+}
+
+.desk-video-part {
+  align-items: baseline;
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  color: var(--desk-muted);
+  cursor: pointer;
+  display: inline-flex;
+  font: inherit;
+  font-size: 13px;
+  gap: 0.4rem;
+  padding: 0.4rem 0.9rem;
+  transition:
+    background-color 0.2s ease,
+    color 0.2s ease,
+    box-shadow 0.2s ease;
+}
+
+.desk-video-part:hover {
+  color: var(--desk-ink);
+}
+
+.desk-video-part[aria-selected='true'] {
+  background: var(--desk-bg);
+  box-shadow: 0 1px 2px rgba(19, 21, 26, 0.08);
+  color: var(--desk-ink);
+}
+
+.desk-video-part-time {
+  font-size: 11px;
+  opacity: 0.65;
+}
+
+.desk-video-frame {
+  aspect-ratio: 16 / 9;
+  background: var(--desk-stage);
+  border-radius: clamp(0.85rem, 2vw, 1.25rem);
+  overflow: hidden;
+  position: relative;
+  /* Clip the iframe's corners in Safari too. */
+  isolation: isolate;
+}
+
+.desk-video-frame iframe {
+  border: 0;
+  height: 100%;
+  inset: 0;
+  position: absolute;
+  width: 100%;
+}
+
+.desk-video-poster {
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  inset: 0;
+  padding: 0;
+  position: absolute;
+}
+
+.desk-video-cover {
+  inset: 0;
+  opacity: 0;
+  position: absolute;
+  transition: opacity 1.1s ease;
+}
+
+.desk-video-cover[data-on='true'] {
+  opacity: 1;
+}
+
+.desk-video-cover-img {
+  object-fit: cover;
+  transform: scale(1.06);
+  transition: transform 4.6s cubic-bezier(0.25, 0.6, 0.3, 1);
+}
+
+/* Slow drift while each image is up. */
+.desk-video-cover[data-on='true'] .desk-video-cover-img {
+  transform: scale(1);
+}
+
+.desk-video-cover[data-fit='contain'] {
+  background: #0a0a1c;
+}
+
+.desk-video-cover[data-fit='contain'] .desk-video-cover-img {
+  object-fit: contain;
+}
+
+.desk-video-cover-fill {
+  filter: blur(28px) saturate(1.2);
+  object-fit: cover;
+  opacity: 0.55;
+  transform: scale(1.2);
+}
+
+.desk-video-dots {
+  bottom: 1rem;
+  display: flex;
+  gap: 0.3rem;
+  position: absolute;
+  right: 1rem;
+  z-index: 1;
+}
+
+.desk-video-dots span {
+  background: rgba(255, 255, 255, 0.45);
+  border-radius: 999px;
+  height: 4px;
+  transition: width 0.4s ease, background-color 0.4s ease;
+  width: 4px;
+}
+
+.desk-video-dots span[data-on='true'] {
+  background: #fff;
+  width: 14px;
+}
+
+.desk-video-poster::after {
+  background: linear-gradient(180deg, transparent 55%, rgba(0, 0, 0, 0.45));
+  content: '';
+  inset: 0;
+  position: absolute;
+}
+
+.desk-video-play {
+  align-items: center;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  background: rgba(255, 255, 255, 0.82);
+  border-radius: 999px;
+  color: #13151a;
+  display: flex;
+  height: 3.5rem;
+  justify-content: center;
+  left: 50%;
+  position: absolute;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  transition: transform 0.3s cubic-bezier(0.2, 0.7, 0.2, 1), background-color 0.3s ease;
+  width: 3.5rem;
+  z-index: 1;
+}
+
+.desk-video-play svg {
+  margin-left: 0.15rem;
+}
+
+.desk-video-badge {
+  bottom: 0.85rem;
+  color: #fff;
+  font-size: 12px;
+  left: 1rem;
+  letter-spacing: 0.01em;
+  position: absolute;
+  z-index: 1;
+}
+
+.desk-video-poster:hover .desk-video-play,
+.desk-video-poster:focus-visible .desk-video-play {
+  background: #fff;
+  transform: translate(-50%, -50%) scale(1.08);
+}
+
+.desk-video-links {
+  font-size: 12px;
+  margin: 0.75rem 0 0;
+}
+
+.desk-talk-body {
+  margin-top: 1.5rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .desk-video-cover,
+  .desk-video-cover-img,
+  .desk-video-dots span,
+  .desk-video-play {
+    transition: none;
+  }
+}

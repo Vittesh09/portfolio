@@ -1,15 +1,11 @@
-import { DeskBlogIndex } from '@/src/components/v2/desk/DeskBlog';
-import { DESK_TAB_TITLE, v2PageMetadata } from '@/src/config/v2/seo';
+import BlogToWritingRedirect from './redirect';
 
 export const metadata = {
-  ...v2PageMetadata({
-    title: 'Blog, Vittesh Sinha',
-    tabTitle: DESK_TAB_TITLE,
-    description: 'Writing by Vittesh Sinha.',
-    path: '/blog/'
-  })
+  robots: { index: false, follow: true },
+  alternates: { canonical: '/writing/' },
+  title: 'Redirecting'
 };
 
 export default function BlogPage() {
-  return <DeskBlogIndex />;
+  return <BlogToWritingRedirect />;
 }

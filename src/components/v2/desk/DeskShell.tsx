@@ -52,7 +52,7 @@ export function DeskShell({ children }: { children: ReactNode }) {
   const mounted = useRef(false);
   const fallbackTimer = useRef<number | undefined>(undefined);
   const { setThemePreference } = useV2Theme();
-  const hideNav = pathname.startsWith('/blog');
+  const hideNav = pathname.startsWith('/writing') || pathname.startsWith('/blog');
   const [navTucked, setNavTucked] = useState(false);
   const navTuckedRef = useRef(false);
 

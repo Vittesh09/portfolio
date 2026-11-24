@@ -109,3 +109,84 @@ export const blogPosts: BlogPost[] = [
 export function getBlogPost(slug: string) {
   return blogPosts.find((post) => post.slug === slug);
 }
+
+export type Talk = {
+  slug: string;
+  title: string;
+  /** Up to two short topic tags shown as an eyebrow. */
+  tags: [string] | [string, string];
+  published: string;
+  publishedLabel: string;
+  /** Who hosted the session. */
+  host?: string;
+  /** Thumbnail images, shown in turn until play is pressed. First one leads. */
+  covers: { src: string; alt: string; fit?: 'contain' }[];
+  description: string;
+  /** One or more recordings, in order (a long session split into parts). */
+  videos: { label: string; url: string; duration: string }[];
+};
+
+export const talks: Talk[] = [
+  {
+    slug: 'navigating-the-ai-shift-in-product-design',
+    title: 'Navigating the AI Shift in Product Design',
+    tags: ['Talk', 'AI'],
+    published: '2026-11-01',
+    publishedLabel: '1 November 2026',
+    host: 'orbis.community',
+    covers: [
+      { src: '/assets/talks/ai-shift-poster.jpg', alt: 'Workshop poster: Meet our speaker, Vittesh', fit: 'contain' },
+      { src: '/assets/talks/ai-shift-thumbs-up.jpg', alt: 'Attendees giving a thumbs up at the end of the session' },
+      { src: '/assets/talks/ai-shift-grid.jpg', alt: 'Attendees on the video call during the session' }
+    ],
+    description:
+      'A session for junior product designers exploring the future of the craft in the age of AI. We tackled critical industry challenges, specifically identifying and eliminating ‘AI slop’ to build meaningful products. The session featured a live demonstration of building an app with Cursor and concluded with insights into evolving hiring standards for 2026.',
+    videos: [
+      { label: 'Part 1', url: 'https://www.youtube.com/watch?v=1SuhJfzhLEc', duration: '44 min' },
+      { label: 'Part 2', url: 'https://www.youtube.com/watch?v=DnRioXPYlyc', duration: '43 min' }
+    ]
+  }
+];
+
+export function getTalk(slug: string) {
+  return talks.find((talk) => talk.slug === slug);
+}
+
+/** YouTube video id from a watch, share, shorts or embed URL. */
+export function youtubeId(url: string) {
+  const match = url.match(/(?:youtu\.be\/|[?&]v=|\/(?:embed|shorts|live)\/)([\w-]{11})/);
+  return match?.[1] ?? null;
+}
+
+/** One entry in the combined Writing & Speaking list. */
+export type PublishedEntry = {
+  slug: string;
+  kind: 'writing' | 'speaking';
+  title: string;
+  tags: string[];
+  published: string;
+  publishedLabel: string;
+  href: string;
+};
+
+/** Posts and talks together, newest first (undated entries lead). */
+export const publishedEntries: PublishedEntry[] = [
+  ...blogPosts.map((post) => ({
+    slug: post.slug,
+    kind: 'writing' as const,
+    title: post.title,
+    tags: [...post.tags],
+    published: post.published,
+    publishedLabel: post.publishedLabel,
+    href: `/writing/${post.slug}/`
+  })),
+  ...talks.map((talk) => ({
+    slug: talk.slug,
+    kind: 'speaking' as const,
+    title: talk.title,
+    tags: [...talk.tags],
+    published: talk.published,
+    publishedLabel: talk.publishedLabel,
+    href: `/writing/${talk.slug}/`
+  }))
+].sort((a, b) => (b.published || '9999').localeCompare(a.published || '9999'));

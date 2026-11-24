@@ -1,6 +1,6 @@
 /**
  * Route map:
- * - Live site (desk): `/`, `/about/`, `/work/[slug]/`, `/blog/`
+ * - Live site (desk): `/`, `/about/`, `/work/[slug]/`, `/writing/` (old `/blog/` redirects)
  * - Previous version (archive): `/v2/`, `/v2/about/`, `/v2/work/[slug]/`, `/v2/blog/`
  * - Labs: `/classic`, `/singularity`, `/tldr`, `/machine`
  */
@@ -10,7 +10,7 @@ export function normalizePath(path: string) {
 }
 
 /**
- * True on the live desk site (home, about, case studies, blog), and on the old
+ * True on the live desk site (home, about, case studies, writing), and on the old
  * `/desk/*` URLs, which only redirect there (so they never flash archive chrome).
  */
 export function isDeskPath(path: string) {
@@ -20,6 +20,7 @@ export function isDeskPath(path: string) {
     p.startsWith('/about/') ||
     p.startsWith('/work/') ||
     p.startsWith('/blog/') ||
+    p.startsWith('/writing/') ||
     p.startsWith('/desk/')
   );
 }

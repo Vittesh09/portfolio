@@ -1,9 +1,11 @@
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { ContinueWithAI } from '@/src/components/v2/blog/ContinueWithAI';
+import { DeskPublishedList as PublishedList } from '@/src/components/v2/desk/DeskPublishedList';
+import { DeskVideo } from '@/src/components/v2/desk/DeskVideo';
 import {
-  blogPosts,
   getBlogPost,
+  getTalk,
   type BlogPost,
   type PostSection
 } from '@/src/config/v2/publishing';
@@ -22,32 +24,45 @@ function splitCore(post: BlogPost): { core: string | null; sections: PostSection
   return { core, sections };
 }
 
-export function DeskBlogIndex() {
+export function DeskWritingIndex() {
   return (
     <div className="desk-frame desk-home-copy desk-publish desk-publish-index">
       <p className="desk-contacts desk-publish-back">
         <Link href="/">Back</Link>
       </p>
-      <h1 className="desk-title">Blogs</h1>
+      <h1 className="desk-title">Writing &amp; Speaking</h1>
       <p className="desk-lede desk-publish-note">
-        These are personal notes and wandering thoughts, written in my own voice. They are
-        reflections, questions, and perspectives that may sometimes be speculative or differ from
-        established research and facts. Take them as thoughts to explore, not absolute truths.
+        Notes, essays and talks. The writing is personal and in my own voice: reflections,
+        questions and perspectives that may sometimes be speculative or differ from established
+        research. Take them as thoughts to explore, not absolute truths.
       </p>
       <div className="desk-tool-list desk-publish-list">
-        {blogPosts.map((post) => (
-          <Link key={post.slug} className="desk-tool" href={`/blog/${post.slug}/`}>
-            <p className="desk-lede desk-tool-tags">{post.tags.join(' · ')}</p>
-            <div className="desk-tool-row">
-              <p className="desk-tool-title">{post.title}</p>
-              <time className="desk-lede desk-tool-date" dateTime={post.published}>
-                {post.publishedLabel}
-              </time>
-            </div>
-          </Link>
-        ))}
+        <PublishedList />
       </div>
     </div>
+  );
+}
+
+export function DeskTalk({ slug }: { slug: string }) {
+  const talk = getTalk(slug);
+  if (!talk) notFound();
+
+  return (
+    <article className="desk-frame desk-home-copy desk-publish">
+      <p className="desk-contacts desk-publish-back">
+        <Link href="/writing/">Back</Link>
+      </p>
+      <p className="desk-lede desk-tool-tags desk-talk-eyebrow">{talk.tags.join(' · ')}</p>
+      <h1 className="desk-title">{talk.title}</h1>
+      <p className="desk-lede">
+        <time dateTime={talk.published}>{talk.publishedLabel}</time>
+        {talk.host ? <> · Hosted by {talk.host}</> : null}
+      </p>
+      <DeskVideo title={talk.title} videos={talk.videos} covers={talk.covers} />
+      <div className="desk-essay desk-talk-body">
+        <p className="desk-desc">{talk.description}</p>
+      </div>
+    </article>
   );
 }
 
@@ -60,7 +75,7 @@ export function DeskBlogPost({ slug }: { slug: string }) {
   return (
     <article className="desk-frame desk-home-copy desk-publish">
       <p className="desk-contacts desk-publish-back">
-        <Link href="/blog/">Back</Link>
+        <Link href="/writing/">Back</Link>
       </p>
       <h1 className="desk-title">{post.title}</h1>
       <time className="desk-lede" dateTime={post.published}>

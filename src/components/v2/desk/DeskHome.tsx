@@ -5,7 +5,8 @@ import { DeskCopyEmail } from '@/src/components/v2/desk/DeskCopyEmail';
 import { DeskSingularityStage } from '@/src/components/v2/desk/DeskSingularityStage';
 import { DeskWorkRail } from '@/src/components/v2/desk/DeskWorkRail';
 import type { ProjectCardData } from '@/src/config/v2/caseStudies';
-import { blogPosts, publishedTools } from '@/src/config/v2/publishing';
+import { DeskPublishedList } from '@/src/components/v2/desk/DeskPublishedList';
+import { publishedTools } from '@/src/config/v2/publishing';
 import { profile } from '@/src/config/v2/profile';
 
 export function DeskHome({ cards }: { cards: ProjectCardData[] }) {
@@ -61,25 +62,15 @@ export function DeskHome({ cards }: { cards: ProjectCardData[] }) {
           ))}
         </div>
         <h2 className="desk-title">
-          <Link className="desk-section-link" href="/blog/">
-            Blogs
+          <Link className="desk-section-link" href="/writing/">
+            Writing &amp; Speaking
             <span className="desk-section-link-arrow" aria-hidden="true">
               →
             </span>
           </Link>
         </h2>
         <div className="desk-tool-list">
-          {blogPosts.map((post) => (
-            <Link key={post.slug} className="desk-tool" href={`/blog/${post.slug}/`}>
-              <p className="desk-lede desk-tool-tags">{post.tags.join(' · ')}</p>
-              <div className="desk-tool-row">
-                <p className="desk-tool-title">{post.title}</p>
-                <time className="desk-lede desk-tool-date" dateTime={post.published}>
-                  {post.publishedLabel}
-                </time>
-              </div>
-            </Link>
-          ))}
+          <DeskPublishedList />
         </div>
       </section>
     </>
