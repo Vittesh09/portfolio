@@ -121,16 +121,6 @@ export function DeskVideo({
           </button>
         )}
       </div>
-      <p className="desk-lede desk-video-links">
-        {videos.map((video, i) => (
-          <span key={video.url}>
-            {i > 0 ? <span aria-hidden="true"> · </span> : null}
-            <a href={video.url} target="_blank" rel="noopener noreferrer">
-              {videos.length > 1 ? `${video.label} on YouTube` : 'Watch on YouTube'}
-            </a>
-          </span>
-        ))}
-      </p>
     </div>
   );
 }

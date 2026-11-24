@@ -2195,13 +2195,8 @@
   transform: translate(-50%, -50%) scale(1.08);
 }
 
-.desk-video-links {
-  font-size: 12px;
-  margin: 0.75rem 0 0;
-}
-
 .desk-talk-body {
-  margin-top: 1.5rem;
+  margin-top: 1.75rem;
 }
 
 @media (prefers-reduced-motion: reduce) {
