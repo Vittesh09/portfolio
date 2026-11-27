@@ -4,6 +4,7 @@ import { motion, useAnimate, useReducedMotion, type Transition } from 'motion/re
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useEffect, useLayoutEffect, useRef, useState, type ReactNode } from 'react';
+import { DeskBackToTop } from '@/src/components/v2/desk/DeskBackToTop';
 import { DeskFooterMeta } from '@/src/components/v2/desk/DeskFooterMeta';
 import { DeskSmoothScroll } from '@/src/components/v2/desk/DeskSmoothScroll';
 import { useV2Theme } from '@/src/components/v2/layout/ThemeProvider';
@@ -53,6 +54,8 @@ export function DeskShell({ children }: { children: ReactNode }) {
   const fallbackTimer = useRef<number | undefined>(undefined);
   const { setThemePreference } = useV2Theme();
   const hideNav = pathname.startsWith('/writing') || pathname.startsWith('/blog');
+  // Long reads: a case study or a single post/talk.
+  const showToTop = /^\/(work|writing)\/[^/]+\/?$/.test(pathname);
   const [navTucked, setNavTucked] = useState(false);
   const navTuckedRef = useRef(false);
 
@@ -272,6 +275,7 @@ export function DeskShell({ children }: { children: ReactNode }) {
         <footer className="desk-foot desk-enter desk-enter--foot">
           <DeskFooterMeta />
         </footer>
+        {showToTop ? <DeskBackToTop key={pathname} /> : null}
       </DeskSmoothScroll>
     </div>
   );

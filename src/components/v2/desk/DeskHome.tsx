@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { DeskNamePeek } from '@/src/components/v2/desk/DeskNamePeek';
 import { DeskCopyEmail } from '@/src/components/v2/desk/DeskCopyEmail';
 import { DeskSingularityStage } from '@/src/components/v2/desk/DeskSingularityStage';
 import { DeskWorkRail } from '@/src/components/v2/desk/DeskWorkRail';
@@ -17,7 +18,7 @@ export function DeskHome({ cards }: { cards: ProjectCardData[] }) {
         {/* Lines blur in and lift, staggered: CSS (`.desk-enter-lines`), so they paint at once. */}
         <div className="desk-frame desk-home-copy desk-enter-lines">
           <h1 className="desk-title">
-            Hey, I am Vittesh
+            Hey, I am <DeskNamePeek name="Vittesh" />
           </h1>
           <p className="desk-lede">
             Product Designer{' '}
