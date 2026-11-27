@@ -2311,8 +2311,9 @@
   opacity: 0;
   padding: 0;
   pointer-events: none;
+  left: var(--to-top-left, auto);
   position: fixed;
-  right: calc(1.25rem + env(safe-area-inset-right, 0px));
+  right: auto;
   transform: translateY(0.75rem) scale(0.92);
   transition:
     opacity 0.3s ease,
@@ -2345,10 +2346,15 @@
   outline-offset: 3px;
 }
 
+/* Before it has measured the column, fall back to the corner. */
+.desk-to-top:not([style*='--to-top-left']) {
+  left: auto;
+  right: calc(1.25rem + env(safe-area-inset-right, 0px));
+}
+
 @media (min-width: 1024px) {
   .desk-to-top {
     bottom: 2rem;
-    right: 2rem;
   }
 }
 
